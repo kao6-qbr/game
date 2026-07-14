@@ -42,7 +42,7 @@ html, body {
 #muteBtn:hover { background: rgba(0,0,0,0.7); }
 /* 手机端按钮 */
 #mobileButtons {
-  position: absolute; bottom: 10px; left: 10px; z-index: 40;
+  position: absolute; bottom: 10px; right: 10px; z-index: 40;
   display: none; flex-direction: column; gap: 10px;
 }
 .mobileBtn {
@@ -57,6 +57,7 @@ html, body {
 }
 #dashBtn { background: rgba(255,215,0,0.6); }
 #slideBtn { background: rgba(200,200,200,0.6); }
+#jumpBtn { background: rgba(76,175,80,0.6); }
 .mobileBtn.cooldown { opacity: 0.35 !important; background: rgba(100,100,100,0.5) !important; }
 </style>
 </head>
@@ -70,6 +71,7 @@ html, body {
   <div id="mobileButtons">
     <div class="mobileBtn" id="dashBtn">⚡</div>
     <div class="mobileBtn" id="slideBtn">⬇</div>
+    <div class="mobileBtn" id="jumpBtn">⬆</div>
   </div>
 </div>
 <div id="muteBtn" title="静音/有声">🔊</div>
@@ -424,7 +426,7 @@ html, body {
     frameCount++; gameTime += 1/60;
     baseSpeed = 3 + gameTime * 0.08;
     if (baseSpeed > 10) baseSpeed = 10;
-    let currentSpeed = player.dashing ? baseSpeed * DASH_SPEED_MULT : baseSpeed;
+    let currentSpeed = isMobile ? baseSpeed * 1.35 : (player.dashing ? baseSpeed * DASH_SPEED_MULT : baseSpeed);
     bgOffset += currentSpeed * 0.5;
 
     for (const c of clouds) { c.x -= c.speed + currentSpeed*0.1; if (c.x+c.w < 0) { c.x = GAME_W+Math.random()*100; c.y = 30+Math.random()*100; } }
@@ -772,6 +774,16 @@ html, body {
   slideBtnEl.addEventListener('mousedown', function(e) {
     e.preventDefault(); e.stopPropagation();
     handleSlide(e);
+  });
+
+  // 手机端跳跃按钮
+  jumpBtnEl.addEventListener('touchstart', function(e) {
+    e.preventDefault(); e.stopPropagation();
+    handleJump(e);
+  }, { passive: false });
+  jumpBtnEl.addEventListener('mousedown', function(e) {
+    e.preventDefault(); e.stopPropagation();
+    handleJump(e);
   });
 
   document.addEventListener('dblclick', function(e) { e.preventDefault(); });
