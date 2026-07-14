@@ -790,11 +790,6 @@ html, body {
   });
 
   // 手机端跳跃按钮
-  jumpBtnEl.addEventListener('touchstart', function(e) {
-    e.preventDefault(); e.stopPropagation();
-    handleJump(e);
-  }, { passive: false });
-  jumpBtnEl.addEventListener('mousedown', function(e) {
     e.preventDefault(); e.stopPropagation();
     handleJump(e);
   });
