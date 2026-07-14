@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -42,8 +42,8 @@ html, body {
 #muteBtn:hover { background: rgba(0,0,0,0.7); }
 /* 手机端按钮 */
 #mobileButtons {
-  position: absolute; bottom: 10px; left: 0; right: 0; z-index: 40;
-  display: none; justify-content: space-between; padding: 0 10px;
+  position: absolute; bottom: 10px; left: 10px; z-index: 40;
+  display: none; flex-direction: column; gap: 10px;
 }
 .mobileBtn {
   width: 60px; height: 60px; border-radius: 50%;
@@ -55,9 +55,9 @@ html, body {
   cursor: pointer;
   transition: opacity 0.15s;
 }
-
+#dashBtn { background: rgba(255,215,0,0.6); }
 #slideBtn { background: rgba(200,200,200,0.6); }
-
+.mobileBtn.cooldown { opacity: 0.35 !important; background: rgba(100,100,100,0.5) !important; }
 </style>
 </head>
 <body>
@@ -67,7 +67,9 @@ html, body {
 </div>
 <div id="gameWrapper">
   <canvas id="gameCanvas"></canvas>
-  <div id="mobileButtons"><div class="mobileBtn" id="slideBtn">⬇</div><div class="mobileBtn" id="jumpBtn">⬆</div>
+  <div id="mobileButtons">
+    <div class="mobileBtn" id="dashBtn">⚡</div>
+    <div class="mobileBtn" id="slideBtn">⬇</div>
   </div>
 </div>
 <div id="muteBtn" title="静音/有声">🔊</div>
@@ -83,8 +85,11 @@ html, body {
   const PLAYER_X = 100;
   const PLAYER_SIZE = 60;
   const COIN_SCORE = 5;
-  const SLIDE_DURATION = 48;
+  const SLIDE_DURATION = 24;
   const SLIDE_COOLDOWN = 48;
+  const DASH_DURATION = 30;
+  const DASH_COOLDOWN = 180;
+  const DASH_SPEED_MULT = 2;
 
   // ===================== Canvas =====================
   const canvas = document.getElementById('gameCanvas');
@@ -92,8 +97,8 @@ html, body {
   const portraitHint = document.getElementById('portraitHint');
   const muteBtn = document.getElementById('muteBtn');
   const mobileButtons = document.getElementById('mobileButtons');
+  const dashBtnEl = document.getElementById('dashBtn');
   const slideBtnEl = document.getElementById('slideBtn');
-  const jumpBtnEl = document.getElementById('jumpBtn');
   let scale = 1;
   let isMobile = false;
 
@@ -156,6 +161,8 @@ html, body {
   function playJumpSound() { playTone(0, 0.15, 'sine', 0.25, 300, 900); }
   function playDoubleJumpSound() { playTone(0, 0.12, 'sine', 0.25, 600, 1600); }
   function playDeathSound() { playTone(120, 0.5, 'sawtooth', 0.3, 200, 60); }
+  function playDashSound() { playTone(0, 0.25, 'sawtooth', 0.2, 150, 400); }
+  function playDashHitSound() { playTone(0, 0.15, 'square', 0.25, 200, 800); }
   function playSlideSound() {
     if (muted || !audioCtx) return;
     const bufferSize = audioCtx.sampleRate * 0.15;
@@ -200,7 +207,7 @@ html, body {
   let lastStageChecked = 0;
   let player = {};
   function initPlayer() {
-    player = { x: PLAYER_X, y: GROUND_Y - PLAYER_SIZE, w: PLAYER_SIZE, h: PLAYER_SIZE, vy: 0, grounded: true, jumpsLeft: 2, sliding: false, slideTimer: 0, slideCooldown: 0, legAnim: 0 };
+    player = { x: PLAYER_X, y: GROUND_Y - PLAYER_SIZE, w: PLAYER_SIZE, h: PLAYER_SIZE, vy: 0, grounded: true, jumpsLeft: 2, sliding: false, slideTimer: 0, slideCooldown: 0, dashing: false, dashTimer: 0, dashCooldown: 0, dashRingTimer: 0, legAnim: 0 };
   }
   initPlayer();
   let obstacles = [], coins = [], particles = [];
@@ -238,7 +245,7 @@ html, body {
   function jump() {
     if (!player.grounded && player.jumpsLeft > 0) {
       player.vy = DOUBLE_JUMP_VEL; player.jumpsLeft--; player.grounded = false;
-       playDoubleJumpSound();
+      player.dashRingTimer = 18; playDoubleJumpSound();
       for (let i = 0; i < 6; i++) particles.push({ x: player.x+player.w/2, y: player.y+player.h/2, vx: (Math.random()-0.5)*4, vy: (Math.random()-0.5)*4, life: 15+Math.random()*10, color: '#87CEFA', size: 2+Math.random()*2 });
     } else if (player.grounded) {
       player.vy = JUMP_VEL; player.grounded = false; player.jumpsLeft = 1;
@@ -253,7 +260,12 @@ html, body {
     playSlideSound();
   }
   function stopSlide() { player.sliding = false; player.h = PLAYER_SIZE; player.y = GROUND_Y - player.h; }
-
+  function startDash() {
+    if (player.dashing || player.dashCooldown > 0) return;
+    player.dashing = true; player.dashTimer = DASH_DURATION; player.dashCooldown = DASH_COOLDOWN;
+    playDashSound();
+    for (let i = 0; i < 3; i++) particles.push({ x: player.x-10, y: player.y+10+i*15, vx: -3-Math.random()*2, vy: 0, life: 20, color: '#ffffff', size: 2, type: 'speedLine' });
+  }
 
   // ===================== 障碍物生成（严格按分数阶段） =====================
   function spawnObstacle() {
@@ -263,10 +275,12 @@ html, body {
     } else if (type === 'ground_rock') {
       obstacles.push({ x: GAME_W+10, y: GROUND_Y-35, w: 35, h: 35, type: 'rock', hp: 1 });
     } else if (type === 'flying') {
-      obstacles.push({ x: GAME_W+10, y: GROUND_Y - 30 - 140, w: 35, h: 122, type: 'flying', hp: 1 });
+      obstacles.push({ x: GAME_W+10, y: GROUND_Y - 30 - 120, w: 35, h: 120, type: 'flying', hp: 1 });
     } else if (type === 'double') {
       obstacles.push({ x: GAME_W+10, y: GROUND_Y-30, w: 30, h: 30, type: 'spike', hp: 1 });
-      obstacles.push({ x: GAME_W+10, y: GROUND_Y - 30 - 140, w: 35, h: 122, type: 'flying', hp: 1 });
+      obstacles.push({ x: GAME_W+10, y: GROUND_Y - 30 - 120, w: 35, h: 120, type: 'flying', hp: 1 });
+    } else if (type === 'wall') {
+      obstacles.push({ x: GAME_W+10, y: GROUND_Y-80, w: 30, h: 80, type: 'wall', hp: 1 });
     }
   }
 
@@ -292,14 +306,21 @@ html, body {
       if (r < 0.35) return 'ground_rock';
       if (r < 0.55) return 'flying';
       if (r < 0.75) return 'double';
+      return 'wall';
     } else if (score <= 50) {
       // 40-50分：加速+四种混合
       if (r < 0.15) return 'ground_spike';
       if (r < 0.3) return 'ground_rock';
       if (r < 0.5) return 'flying';
       if (r < 0.7) return 'double';
+      return 'wall';
     } else {
       // 50分以上：全力冲刺，五种混合
+      if (r < 0.12) return 'ground_spike';
+      if (r < 0.25) return 'ground_rock';
+      if (r < 0.45) return 'flying';
+      if (r < 0.65) return 'double';
+      return 'wall';
     }
   }
 
@@ -310,7 +331,23 @@ html, body {
 
   // ===================== 碰撞检测 =====================
   function checkCollisions() {
-
+    // 冲刺状态：无敌，撞碎障碍物
+    if (player.dashing) {
+      for (let i = obstacles.length-1; i >= 0; i--) {
+        const ob = obstacles[i];
+        const obBox = { x: ob.x, y: ob.y, w: ob.w, h: ob.h };
+        const pb = { x: player.x, y: player.y, w: player.w, h: player.h };
+        if (rectsOverlap(pb, obBox)) {
+          playDashHitSound();
+          score += COIN_SCORE;
+          for (let j = 0; j < 10; j++) {
+            particles.push({ x: ob.x+ob.w/2, y: ob.y+ob.h/2, vx: (Math.random()-0.5)*6, vy: (Math.random()-0.5)*6, life: 20+Math.random()*15, color: ob.type==='wall'?'#888':'#8B4513', size: 3+Math.random()*3, type: 'debris' });
+          }
+          obstacles.splice(i, 1);
+        }
+      }
+      return;
+    }
 
     // 非冲刺状态：正常碰撞检测
     for (let i = obstacles.length-1; i >= 0; i--) {
@@ -387,7 +424,7 @@ html, body {
     frameCount++; gameTime += 1/60;
     baseSpeed = 3 + gameTime * 0.08;
     if (baseSpeed > 10) baseSpeed = 10;
-    let currentSpeed = baseSpeed;
+    let currentSpeed = player.dashing ? baseSpeed * DASH_SPEED_MULT : baseSpeed;
     bgOffset += currentSpeed * 0.5;
 
     for (const c of clouds) { c.x -= c.speed + currentSpeed*0.1; if (c.x+c.w < 0) { c.x = GAME_W+Math.random()*100; c.y = 30+Math.random()*100; } }
@@ -405,9 +442,13 @@ html, body {
     }
     if (player.slideCooldown > 0) player.slideCooldown--;
 
-
-
-
+    if (player.dashing) {
+      player.dashTimer--;
+      if (frameCount % 5 === 0) { for (let i = 0; i < 2; i++) particles.push({ x: player.x-5, y: player.y+5+i*20, vx: -5-Math.random()*3, vy: 0, life: 15, color: '#ffffff', size: 2, type: 'speedLine' }); }
+      if (player.dashTimer <= 0) player.dashing = false;
+    }
+    if (player.dashCooldown > 0) player.dashCooldown--;
+    if (player.dashRingTimer > 0) player.dashRingTimer--;
     player.legAnim = player.grounded ? Math.sin(frameCount*0.3)*6 : -3;
 
     // 障碍生成间隔随阶段变化
@@ -467,8 +508,15 @@ html, body {
   }
   function drawPlayer() {
     const px = player.x, py = player.y;
-
-
+    if (player.dashing) {
+      ctx.strokeStyle = 'rgba(100,180,255,0.6)'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.ellipse(px+player.w/2, py+player.h/2, player.w/2+8, player.h/2+8, 0, 0, Math.PI*2); ctx.stroke();
+    }
+    if (player.dashRingTimer > 0) {
+      const prog = 1 - player.dashRingTimer/18, radius = 20 + prog * 30, alpha = 1 - prog;
+      ctx.strokeStyle = 'rgba(135,206,250,' + alpha + ')'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(px+player.w/2, py+player.h/2, radius, 0, Math.PI*2); ctx.stroke();
+    }
     if (playerImg && playerImg.complete && playerImg.naturalWidth > 0) {
       ctx.save();
       if (player.sliding) { ctx.translate(px+player.w/2, py+player.h/2); ctx.rotate(Math.PI/2); ctx.drawImage(playerImg, -player.h/2, -player.w/2, player.h, player.w); }
@@ -534,7 +582,7 @@ html, body {
     // 地面尖刺
     drawSpike({ x: o.x, y: o.y, w: o.w, h: o.h });
     // 飞行障碍
-    const flyY = o.y - 160 - o.h;
+    const flyY = o.y - 100 - o.h;
     ctx.fillStyle = '#8B5CF6';
     ctx.beginPath(); ctx.arc(o.x+o.w/2, flyY+12, 17, 0, Math.PI*2); ctx.fill();
     // 中间虚线提示
@@ -568,6 +616,7 @@ html, body {
     ctx.fillText('波照仙途', GAME_W/2, 30); ctx.shadowBlur = 0;
     ctx.textAlign = 'right'; ctx.font = 'bold 22px "Microsoft YaHei",sans-serif';
     ctx.fillStyle = '#FFD700'; ctx.fillText('分数: ' + score, GAME_W-20, 30);
+    drawDashCooldownIcon();
     if (stageTextTimer > 0) {
       const alpha = stageTextTimer > 60 ? (90-stageTextTimer)/30 : stageTextTimer/60;
       ctx.globalAlpha = alpha; ctx.textAlign = 'center'; ctx.font = 'bold 28px "Microsoft YaHei",sans-serif';
@@ -575,7 +624,21 @@ html, body {
       ctx.fillText(stageText, GAME_W/2, GAME_H/2 - 40); ctx.shadowBlur = 0; ctx.globalAlpha = 1;
     }
   }
-
+  function drawDashCooldownIcon() {
+    const iconX = 30, iconY = GAME_H - 35, iconR = 16;
+    ctx.save(); ctx.beginPath(); ctx.arc(iconX, iconY, iconR, 0, Math.PI*2); ctx.closePath();
+    if (player.dashCooldown > 0) {
+      ctx.fillStyle = 'rgba(100,100,100,0.7)'; ctx.fill();
+      const progress = 1 - player.dashCooldown / DASH_COOLDOWN;
+      ctx.strokeStyle = '#88BBFF'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(iconX, iconY, iconR, -Math.PI/2, -Math.PI/2 + Math.PI*2*progress); ctx.stroke();
+    } else if (player.dashing) { ctx.fillStyle = 'rgba(100,180,255,0.7)'; ctx.fill(); }
+    else { ctx.fillStyle = 'rgba(30,144,255,0.8)'; ctx.fill(); }
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.fillStyle = '#fff'; ctx.font = '10px "Microsoft YaHei",sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('冲刺', iconX, iconY + iconR + 12);
+    ctx.restore();
+  }
 
   // ===================== 绘制：菜单/结束 =====================
   function drawMenu() {
@@ -623,6 +686,7 @@ html, body {
         if (o.type==='spike') drawSpike(o);
         else if (o.type==='rock') drawRock(o);
         else if (o.type==='flying') drawFlying(o);
+        else if (o.type==='wall') drawWall(o);
         else if (o.type==='double') drawDouble(o);
       }
       for (const c of coins) drawCoin(c);
@@ -648,13 +712,17 @@ html, body {
     if (e) e.preventDefault(); ensureAudio();
     if (gameState === 'playing') startSlide();
   }
-
+  function handleDash(e) {
+    if (e) e.preventDefault(); ensureAudio();
+    if (gameState === 'playing') startDash();
+  }
 
   // 键盘
   document.addEventListener('keydown', function(e) {
     ensureAudio();
     if (e.code === 'Space' || e.key === ' ') { e.preventDefault(); handleJump(e); }
     else if (e.code === 'ArrowDown' || e.key === 'ArrowDown') { e.preventDefault(); handleSlide(e); }
+    else if (e.code === 'ShiftLeft' || e.code === 'ShiftRight' || e.key === 'Shift') { e.preventDefault(); handleDash(e); }
   });
 
   // 触摸：右侧跳跃，左下按钮冲刺/滑铲
@@ -663,6 +731,7 @@ html, body {
     const touches = e.touches;
     touchStartTouches = touches.length;
     touchStartY = touches[0] ? touches[0].clientY : 0;
+    if (touches.length >= 2) { handleDash(e); return; }
   }, { passive: false });
 
   canvas.addEventListener('touchmove', function(e) { e.preventDefault(); }, { passive: false });
@@ -674,8 +743,8 @@ html, body {
     if (touches.length === 0) return;
     const touch = touches[0];
     const rect = canvas.getBoundingClientRect();
-    const relX = (touch.clientX - rect.left) / scale;
-    if (touchStartTouches === 1 && relX < GAME_W / 2) { handleSlide(e); }
+    const relY = (touch.clientY - rect.top) / scale;
+    if (touchStartTouches === 1 && relY > GAME_H / 2) { handleSlide(e); }
     else { handleJump(e); }
   }, { passive: false });
 
@@ -687,6 +756,14 @@ html, body {
   });
 
   // 手机端按钮
+  dashBtnEl.addEventListener('touchstart', function(e) {
+    e.preventDefault(); e.stopPropagation();
+    handleDash(e);
+  }, { passive: false });
+  dashBtnEl.addEventListener('mousedown', function(e) {
+    e.preventDefault(); e.stopPropagation();
+    handleDash(e);
+  });
 
   slideBtnEl.addEventListener('touchstart', function(e) {
     e.preventDefault(); e.stopPropagation();
@@ -696,16 +773,6 @@ html, body {
     e.preventDefault(); e.stopPropagation();
     handleSlide(e);
   });
-  // ???????
-  jumpBtnEl.addEventListener('touchstart', function(e) {
-    e.preventDefault(); e.stopPropagation();
-    handleJump(e);
-  }, { passive: false });
-  jumpBtnEl.addEventListener('mousedown', function(e) {
-    e.preventDefault(); e.stopPropagation();
-    handleJump(e);
-  });
-
 
   document.addEventListener('dblclick', function(e) { e.preventDefault(); });
 
@@ -714,11 +781,3 @@ html, body {
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
