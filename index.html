@@ -62,6 +62,7 @@ html, body {
 #dashBtn { background: rgba(255,215,0,0.6); }
 #slideBtn { background: rgba(200,200,200,0.6); }
 #jumpBtn { background: rgba(76,175,80,0.6); }
+#jumpBtn { background: rgba(76,175,80,0.6); }
 .mobileBtn.cooldown { opacity: 0.35 !important; background: rgba(100,100,100,0.5) !important; }
 </style>
 </head>
@@ -77,6 +78,7 @@ html, body {
       <div class="mobileBtn" id="dashBtn">⚡</div>
 
       <div class="mobileBtn" id="slideBtn">⬇</div>
+    <div class="mobileBtn" id="jumpBtn">⬆</div>
 
     </div>
 
@@ -118,6 +120,7 @@ html, body {
   const rightButtons = document.getElementById('rightButtons');
   const dashBtnEl = document.getElementById('dashBtn');
   const slideBtnEl = document.getElementById('slideBtn');
+  const jumpBtnEl = document.getElementById('jumpBtn');
   let scale = 1;
   let isMobile = false;
 
@@ -794,6 +797,16 @@ html, body {
   slideBtnEl.addEventListener('mousedown', function(e) {
     e.preventDefault(); e.stopPropagation();
     handleSlide(e);
+  });
+
+  // 手机端跳跃按钮
+  jumpBtnEl.addEventListener('touchstart', function(e) {
+    e.preventDefault(); e.stopPropagation();
+    handleJump(e);
+  }, { passive: false });
+  jumpBtnEl.addEventListener('mousedown', function(e) {
+    e.preventDefault(); e.stopPropagation();
+    handleJump(e);
   });
 
   // 手机端跳跃按钮
