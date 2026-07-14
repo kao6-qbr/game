@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
 <title>波照仙途</title>
-  <!-- v20250715 -->
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body {
@@ -42,13 +41,9 @@ html, body {
 }
 #muteBtn:hover { background: rgba(0,0,0,0.7); }
 /* 手机端按钮 */
-#leftButtons {
+#mobileButtons {
   position: absolute; bottom: 10px; left: 10px; z-index: 40;
   display: none; flex-direction: column; gap: 10px;
-}
-#rightButtons {
-  position: absolute; bottom: 10px; right: 10px; z-index: 40;
-  display: none;
 }
 .mobileBtn {
   width: 60px; height: 60px; border-radius: 50%;
@@ -63,7 +58,6 @@ html, body {
 #dashBtn { background: rgba(255,215,0,0.6); }
 #slideBtn { background: rgba(200,200,200,0.6); }
 #jumpBtn { background: rgba(76,175,80,0.6); }
-#jumpBtn { background: rgba(76,175,80,0.6); }
 .mobileBtn.cooldown { opacity: 0.35 !important; background: rgba(100,100,100,0.5) !important; }
 </style>
 </head>
@@ -74,14 +68,11 @@ html, body {
 </div>
 <div id="gameWrapper">
   <canvas id="gameCanvas"></canvas>
-  <div id="leftButtons">
+  <div id="mobileButtons">
     <div class="mobileBtn" id="dashBtn">⚡</div>
     <div class="mobileBtn" id="slideBtn">⬇</div>
-  </div>
-  <div id="rightButtons">
     <div class="mobileBtn" id="jumpBtn">⬆</div>
   </div>
-</div>
 </div>
 <div id="muteBtn" title="静音/有声">🔊</div>
 <script>
@@ -107,8 +98,7 @@ html, body {
   const ctx = canvas.getContext('2d');
   const portraitHint = document.getElementById('portraitHint');
   const muteBtn = document.getElementById('muteBtn');
-  const leftButtons = document.getElementById('leftButtons');
-  const rightButtons = document.getElementById('rightButtons');
+  const mobileButtons = document.getElementById('mobileButtons');
   const dashBtnEl = document.getElementById('dashBtn');
   const slideBtnEl = document.getElementById('slideBtn');
   const jumpBtnEl = document.getElementById('jumpBtn');
@@ -126,21 +116,18 @@ html, body {
       portraitHint.style.display = 'flex';
       canvas.style.display = 'none';
       muteBtn.style.display = 'none';
-      leftButtons.style.display = 'none';
-      rightButtons.style.display = 'none';
+      mobileButtons.style.display = 'none';
       return;
     }
     portraitHint.style.display = 'none';
     canvas.style.display = 'block';
     muteBtn.style.display = 'flex';
     if (isMobile) {
-      leftButtons.style.display = 'flex';
-      rightButtons.style.display = 'flex';
+      mobileButtons.style.display = 'flex';
     } else {
-      leftButtons.style.display = 'none';
-      rightButtons.style.display = 'none';
+      mobileButtons.style.display = 'none';
     }
-    scale = Math.max(1, Math.min(sw / GAME_W, sh / GAME_H));
+    scale = Math.min(sw / GAME_W, sh / GAME_H);
     canvas.width = GAME_W;
     canvas.height = GAME_H;
     canvas.style.width = (GAME_W * scale) + 'px';
@@ -791,20 +778,14 @@ html, body {
   });
 
   // 手机端跳跃按钮
-    e.preventDefault(); e.stopPropagation();
-    handleJump(e);
-  });
-
-  // 手机端跳跃按钮
-  // 手机端跳跃按钮
-  let jumpBtnLocked = false;
   jumpBtnEl.addEventListener('touchstart', function(e) {
     e.stopPropagation();
-    if (jumpBtnLocked) return;
-    jumpBtnLocked = true;
-    setTimeout(function() { jumpBtnLocked = false; }, 50);
     handleJump();
   }, { passive: false });
+  jumpBtnEl.addEventListener('mousedown', function(e) {
+    e.stopPropagation();
+    handleJump();
+  });
 
   document.addEventListener('dblclick', function(e) { e.preventDefault(); });
 
