@@ -795,14 +795,15 @@ html, body {
   });
 
   // 手机端跳跃按钮
+  // 手机端跳跃按钮
+  let jumpBtnLocked = false;
   jumpBtnEl.addEventListener('touchstart', function(e) {
-    e.preventDefault(); e.stopPropagation();
-    handleJump(e);
+    e.stopPropagation();
+    if (jumpBtnLocked) return;
+    jumpBtnLocked = true;
+    setTimeout(function() { jumpBtnLocked = false; }, 50);
+    handleJump();
   }, { passive: false });
-  jumpBtnEl.addEventListener('mousedown', function(e) {
-    e.preventDefault(); e.stopPropagation();
-    handleJump(e);
-  });
 
   document.addEventListener('dblclick', function(e) { e.preventDefault(); });
 
