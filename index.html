@@ -73886,19 +73886,7 @@ let finishReached = false;  // 是否已到达终点
 
     ctx.fillStyle = 'rgba(0,0,0,0.5)'; ctx.fillRect(0,0,GAME_W,GAME_H);
 
-    // 撒花粒子特效
-    if (frameCount % 3 === 0) {
-      const colors = ['#FFD700','#FF6B6B','#4CAF50','#2196F3','#FF9800','#E91E63'];
-      for (let k = 0; k < 3; k++) {
-        particles.push({
-          x: Math.random()*GAME_W, y: -10,
-          vx: (Math.random()-0.5)*2, vy: 1+Math.random()*2,
-          life: 60+Math.random()*40, color: colors[Math.floor(Math.random()*colors.length)],
-          size: 2+Math.random()*3, type: 'confetti'
-        });
-      }
-    }
-    drawParticles();
+    
 
 
 
