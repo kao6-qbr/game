@@ -41,7 +41,7 @@ html, body {
 }
 #muteBtn:hover { background: rgba(0,0,0,0.7); }
 /* 手机端按钮 */
-#mobileButtons {
+#leftButtons {
   position: absolute; bottom: 10px; left: 10px; z-index: 40;
   display: none; flex-direction: column; gap: 10px;
 }
@@ -68,9 +68,11 @@ html, body {
 </div>
 <div id="gameWrapper">
   <canvas id="gameCanvas"></canvas>
-  <div id="mobileButtons">
+  <div id="leftButtons">
     <div class="mobileBtn" id="dashBtn">⚡</div>
     <div class="mobileBtn" id="slideBtn">⬇</div>
+  </div>
+  <div id="rightButtons">
     <div class="mobileBtn" id="jumpBtn">⬆</div>
   </div>
 </div>
@@ -98,7 +100,8 @@ html, body {
   const ctx = canvas.getContext('2d');
   const portraitHint = document.getElementById('portraitHint');
   const muteBtn = document.getElementById('muteBtn');
-  const mobileButtons = document.getElementById('mobileButtons');
+  const mobileButtons = document.getElementById('leftButtons');
+  const rightButtons = document.getElementById('rightButtons');
   const dashBtnEl = document.getElementById('dashBtn');
   const slideBtnEl = document.getElementById('slideBtn');
   const jumpBtnEl = document.getElementById('jumpBtn');
@@ -116,16 +119,19 @@ html, body {
       portraitHint.style.display = 'flex';
       canvas.style.display = 'none';
       muteBtn.style.display = 'none';
-      mobileButtons.style.display = 'none';
+      leftButtons.style.display = 'none';
+      rightButtons.style.display = 'none';
       return;
     }
     portraitHint.style.display = 'none';
     canvas.style.display = 'block';
     muteBtn.style.display = 'flex';
     if (isMobile) {
-      mobileButtons.style.display = 'flex';
+      leftButtons.style.display = 'flex';
+      rightButtons.style.display = 'flex';
     } else {
-      mobileButtons.style.display = 'none';
+      leftButtons.style.display = 'none';
+      rightButtons.style.display = 'none';
     }
     scale = Math.min(sw / GAME_W, sh / GAME_H);
     canvas.width = GAME_W;
