@@ -115,7 +115,7 @@ html, body {
 
   function resize() {
     const sw = window.innerWidth, sh = window.innerHeight;
-    if (sw < sh && window.orientation !== 180 && window.orientation !== 0) {
+    if (sw < sh ) {
       portraitHint.style.display = 'flex';
       canvas.style.display = 'none';
       muteBtn.style.display = 'none';
