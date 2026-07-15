@@ -557,7 +557,7 @@ fpImg.onerror = function() { console.error('Failed to load flying-person.jpg'); 
 
       // 双障碍: 地面尖刺 + 正上方飞行障碍, 作为一个整体对象
       // 飞行障碍降低到二段跳不可达 (底部200px), 与地面障碍间距120px(两个主角身位)
-      const flyGap = 120;
+      const flyGap = 200;
       const flyBottomPos = GROUND_Y - 30 - flyGap;
       const flyHeight = 35;
       obstacles.push({
