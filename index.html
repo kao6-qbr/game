@@ -284,7 +284,7 @@ function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
 function drawProb(items){let r=Math.random(),c=0;for(let it of items){c+=it.prob;if(r<c)return it;}return items[items.length-1];}
 
 // ================================================================
-//  故事库（精简但完整）
+//  故事库（含战斗显示战力对比的模板）
 // ================================================================
 const STORIES = {
     '鸡追': {
@@ -398,9 +398,9 @@ const STORIES = {
         normal: `波照在修炼中忽然被一股无形的力量拖入心魔幻境，无数妖魔鬼怪轮番冲击他的道心。波照闭目盘坐，以“不动明王”心法抵御了七天七夜，最终将心魔缓缓驱散，但修为也折损了一成半。`
     },
     '波刚': {
-        lose: `波照在荒山夜行时忽然被一道黑影拦住去路——正是恶名昭彰的“采阳大盗”波刚！波刚狞笑着扑了上来，波照奋力反抗却因修为差距太大被制住，被波刚强行拖入草丛。一夜过后，波照衣衫不整地瘫倒在地，修为暴跌两成，寿命折去5年，连身上都添了数道淤青。`,
-        win: (p) => `波照在归途中又遇到了波刚！那恶贼以为波照还是当日的软柿子，淫笑着扑了上来。谁料波照这一个多月勤修苦练，修为早已今非昔比！一记鞭腿将波刚抽飞三丈远，反手又是一掌震碎了他的护体邪气。波刚仓皇逃走，波照冷笑一声，修为增长了${p}点，战力也涨了10。`,
-        kill: (p, l) => `波照在断魂崖再次遭遇波刚，这一次波刚身边还带着两个帮手。波照冷笑一声，一柄长剑横在身前：“今日便是你的死期！”三招之内，波照斩杀了波刚的两名帮凶，最后一剑从波刚头顶劈落，将其劈为两半！波刚的邪气化作一道黑烟消散，波照修为暴涨${p}点，同时领悟了${l}法则！`
+        lose: (pwr, opp) => `波照在荒山夜行时忽然被一道黑影拦住去路——正是恶名昭彰的“采阳大盗”波刚！波刚狞笑着扑了上来（波刚战力 ${opp}），波照奋力反抗（波照战力 ${pwr}）却因修为差距太大被制住，被波刚强行拖入草丛。一夜过后，波照衣衫不整地瘫倒在地，修为暴跌两成，寿命折去5年，连身上都添了数道淤青。`,
+        win: (pwr, opp, g) => `波照在归途中又遇到了波刚！那恶贼（战力 ${opp}）以为波照还是当日的软柿子，淫笑着扑了上来。谁料波照（战力 ${pwr}）这一个多月勤修苦练，修为早已今非昔比！一记鞭腿将波刚抽飞三丈远，反手又是一掌震碎了他的护体邪气。波刚仓皇逃走，波照冷笑一声，修为增长了${g}点，战力也涨了10。`,
+        kill: (pwr, opp, g, l) => `波照在断魂崖再次遭遇波刚（战力 ${opp}），这一次波刚身边还带着两个帮手。波照（战力 ${pwr}）冷笑一声，一柄长剑横在身前：“今日便是你的死期！”三招之内，波照斩杀了波刚的两名帮凶，最后一剑从波刚头顶劈落，将其劈为两半！波刚的邪气化作一道黑烟消散，波照修为暴涨${g}点，同时领悟了${l}法则！`
     },
     '入门试炼': {
         win: (p) => `波照站在山门前的试炼台上，台下是数百名冷眼旁观的弟子。试炼长老一声令下，波照面前浮现出三道关卡——第一关是阵法迷宫，第二关是灵力测试，第三关是与一名筑基期弟子实战。波照以精妙的身法和扎实的修为连过三关，全场哗然！长老赞许地点了点头，赐予波照入门令牌和御风术功法，修为暴涨${p}点。`,
@@ -428,24 +428,25 @@ const STORIES = {
         win: (p) => `魔道大军围攻山门！护山大阵摇摇欲坠，弟子们面露惧色。波照一马当先冲上城楼，一柄长剑所向披靡，连斩七名魔道修士！他在城楼上站了三天三夜，杀得浑身浴血、力竭倒下之前，终于等来了援军。魔道退兵后，波照被全宗弟子抬起来抛向天空，修为暴涨${p}点，同时领悟了一道法则！`,
         lose: `魔道大军来袭时，波照挺身而出，却在战场上遭遇了魔道的一位长老级人物。对方一招“万魔噬心”将波照打入地下三丈深，波照浑身骨骼碎裂、经脉寸断，被同门从废墟中扒出来时只剩了一口气，虽侥幸保住性命，但修为暴跌两成。`
     },
+    // 战斗事件（含战力对比）
     '被抢劫': {
-        win: (g, opp) => `波照在荒郊野外被三个蒙面劫匪拦住去路（对手战力 ${opp}），劫匪叫嚣着要波照交出所有财物。波照冷笑一声，拔剑而上，剑光闪烁间三名劫匪已倒地不起。波照搜刮了他们的储物袋，获得修为+${g}。`,
-        mid: (opp) => `波照遭遇劫匪（对手战力 ${opp}），一番缠斗后虽击退了对方，但自己也挂了彩，修为折损一成。`,
-        lose: (opp) => `波照不敌劫匪（对手战力 ${opp}），被洗劫一空，身受重伤，修为暴跌三成，寿命折去3年。`
+        win: (pwr, opp, g) => `波照在荒郊野外被三个蒙面劫匪拦住去路（对手战力 ${opp}），波照（战力 ${pwr}）冷笑一声，拔剑而上，剑光闪烁间三名劫匪已倒地不起。波照搜刮了他们的储物袋，获得修为+${g}。`,
+        mid: (pwr, opp) => `波照遭遇劫匪（对手战力 ${opp}），波照（战力 ${pwr}）一番缠斗后虽击退了对方，但自己也挂了彩，修为折损一成。`,
+        lose: (pwr, opp) => `波照不敌劫匪（对手战力 ${opp}），波照（战力 ${pwr}）被洗劫一空，身受重伤，修为暴跌三成，寿命折去3年。`
     },
     '路见不平': {
-        win: (g, opp) => `波照途经一座小镇，看到几个恶霸正在欺凌百姓（对手战力 ${opp}）。波照路见不平拔刀相助，三拳两脚将恶霸打得落荒而逃。百姓们感激涕零，纷纷献上灵物，波照修为+${g}，宗门贡献+2。`,
-        mid: (opp) => `波照插手纠纷（对手战力 ${opp}），虽然平息了事端，但自己也受了些伤，修为略有损耗。`,
-        lose: (opp) => `波照路见不平（对手战力 ${opp}），却惹上了硬茬子，被人打得狼狈不堪，重伤而逃。`
+        win: (pwr, opp, g) => `波照途经一座小镇，看到几个恶霸正在欺凌百姓（对手战力 ${opp}），波照（战力 ${pwr}）路见不平拔刀相助，三拳两脚将恶霸打得落荒而逃。百姓们感激涕零，纷纷献上灵物，波照修为+${g}，宗门贡献+2。`,
+        mid: (pwr, opp) => `波照插手纠纷（对手战力 ${opp}），波照（战力 ${pwr}）虽然平息了事端，但自己也受了些伤，修为略有损耗。`,
+        lose: (pwr, opp) => `波照路见不平（对手战力 ${opp}），波照（战力 ${pwr}）却惹上了硬茬子，被人打得狼狈不堪，重伤而逃。`
     },
     '被挑衅': {
-        win: (g, opp) => `波照在酒馆中遇到一个狂妄的修士（对手战力 ${opp}），对方言语挑衅，污蔑波照是废物。波照拍桌而起，两人当场动手。波照只用了三招便将对方打趴在地，全场叫好，修为+${g}。`,
-        mid: (opp) => `波照与挑衅者（对手战力 ${opp}）交手，险胜一招，但自己也挂了彩，修为略有折损。`,
-        lose: (opp) => `波照被挑衅者（对手战力 ${opp}）击败，当着众人的面被打倒在地，修为大损，重伤。`
+        win: (pwr, opp, g) => `波照在酒馆中遇到一个狂妄的修士（对手战力 ${opp}），对方言语挑衅，污蔑波照是废物。波照（战力 ${pwr}）拍桌而起，两人当场动手。波照只用了三招便将对方打趴在地，全场叫好，修为+${g}。`,
+        mid: (pwr, opp) => `波照与挑衅者（对手战力 ${opp}）交手，波照（战力 ${pwr}）险胜一招，但自己也挂了彩，修为略有折损。`,
+        lose: (pwr, opp) => `波照被挑衅者（对手战力 ${opp}）击败，波照（战力 ${pwr}）当着众人的面被打倒在地，修为大损，重伤。`
     },
     '隐世高手': {
-        mild: (opp) => `波照误闯一处禁地，惊动了一位正在闭关的隐世高手（对手战力 ${opp}）。高手随手一挥，波照便飞出去数十丈，撞断了三棵大树。高手念其年幼无知，未下杀手，但波照已身负重伤，修为折损15%，寿命-5。`,
-        severe: (opp) => `波照无意中打扰了一位隐世高人（对手战力 ${opp}）的清修，高人随手一击，波照便如断线风筝般飞出，几乎丧命。高人留了一线生机，波照侥幸活命，但修为暴跌五成，寿命-10，濒死。`
+        mild: (pwr, opp) => `波照误闯一处禁地，惊动了一位正在闭关的隐世高手（对手战力 ${opp}），波照（战力 ${pwr}）毫无还手之力。高手随手一挥，波照便飞出去数十丈，撞断了三棵大树。高手念其年幼无知，未下杀手，但波照已身负重伤，修为折损15%，寿命-5。`,
+        severe: (pwr, opp) => `波照无意中打扰了一位隐世高人（对手战力 ${opp}）的清修，波照（战力 ${pwr}）连反应都来不及。高人随手一击，波照便如断线风筝般飞出，几乎丧命。高人留了一线生机，波照侥幸活命，但修为暴跌五成，寿命-10，濒死。`
     }
 };
 
@@ -784,7 +785,7 @@ async function attemptTribulation() {
 }
 
 // ================================================================
-//  事件处理（完整版，包含合欢宗、魔道特殊机制）
+//  事件处理（所有战斗事件显示战力对比）
 // ================================================================
 function handleEvent(eventName) {
     const power = calcPower();
@@ -850,7 +851,6 @@ function handleEvent(eventName) {
             addLog(story); checkRealmDrop(); break;
         }
         case '采补': {
-            // 合欢宗：采补概率提高
             let isCaibupSect = (G._sectSpecial === 'caibup');
             if (isCaibupSect && Math.random() < 0.6) {
                 let extraGain = applyCultGain(20 + Math.floor(Math.random() * 30));
@@ -938,9 +938,20 @@ function handleEvent(eventName) {
                 addLog(`合欢宗秘术：与波刚纠缠，采补得手，修为+${caibupGain}`);
                 setSubtitle(`合欢宗采补波刚！修为+${caibupGain}`, 'special');
             }
-            if(power<gangPower){ G.cult*=0.8; G.age+=5; if(G.status==='轻伤') G.status='重伤'; else if(G.status==='健康') G.status='轻伤'; story=STORIES['波刚'].lose; setSubtitle('不敌波刚','bad'); }
-            else if(power>=gangPower && power<gangPower*2){ gain=applyCultGain(50); G.cult+=gain; G._powerBuff=(G._powerBuff||0)+10; story=STORIES['波刚'].win(gain); setSubtitle('击退波刚','good'); }
-            else { gain=applyCultGain(300); G.cult+=gain; let keys=Object.keys(G.laws); lawKey=pick(keys); G.laws[lawKey]=(G.laws[lawKey]||0)+1; G._gangKill=(G._gangKill||0)+1; G._powerBuff=(G._powerBuff||0)+30; story=STORIES['波刚'].kill(gain,lawKey); setSubtitle('斩杀波刚','special'); checkAchievements(); }
+            if(power<gangPower){ 
+                G.cult*=0.8; G.age+=5; if(G.status==='轻伤') G.status='重伤'; else if(G.status==='健康') G.status='轻伤'; 
+                story=STORIES['波刚'].lose(power, gangPower); 
+                setSubtitle(`不敌波刚（波照${power} VS 波刚${gangPower}）`, 'bad'); 
+            } else if(power>=gangPower && power<gangPower*2){ 
+                gain=applyCultGain(50); G.cult+=gain; G._powerBuff=(G._powerBuff||0)+10; 
+                story=STORIES['波刚'].win(power, gangPower, gain); 
+                setSubtitle(`击退波刚（波照${power} VS 波刚${gangPower}）`, 'good'); 
+            } else { 
+                gain=applyCultGain(300); G.cult+=gain; let keys=Object.keys(G.laws); lawKey=pick(keys); G.laws[lawKey]=(G.laws[lawKey]||0)+1; G._gangKill=(G._gangKill||0)+1; G._powerBuff=(G._powerBuff||0)+30; 
+                story=STORIES['波刚'].kill(power, gangPower, gain, lawKey); 
+                setSubtitle(`斩杀波刚！（波照${power} VS 波刚${gangPower}）`, 'special'); 
+                checkAchievements(); 
+            }
             addLog(story); checkRealmDrop(); break;
         }
         case '被抢劫': {
@@ -954,19 +965,19 @@ function handleEvent(eventName) {
                     G.cult += extra;
                     addLog(`合欢宗采补劫匪，额外修为+${extra}`);
                 }
-                story = STORIES['被抢劫'].win(gain, opp);
-                setSubtitle(`反杀劫匪！修为+${gain}`, 'good');
+                story = STORIES['被抢劫'].win(power, opp, gain);
+                setSubtitle(`反杀劫匪！（波照${power} VS 劫匪${opp}）修为+${gain}`, 'good');
             } else if (power >= opp * 0.7) {
                 G.cult *= 0.9;
                 G.status = '轻伤';
-                story = STORIES['被抢劫'].mid(opp);
-                setSubtitle('击退劫匪，轻伤', 'bad');
+                story = STORIES['被抢劫'].mid(power, opp);
+                setSubtitle(`击退劫匪（波照${power} VS 劫匪${opp}），轻伤`, 'bad');
             } else {
                 G.cult *= 0.7;
                 G.age += 3;
                 G.status = '重伤';
-                story = STORIES['被抢劫'].lose(opp);
-                setSubtitle('被劫匪重创！', 'bad');
+                story = STORIES['被抢劫'].lose(power, opp);
+                setSubtitle(`被劫匪重创！（波照${power} VS 劫匪${opp}）`, 'bad');
             }
             addLog(story); checkRealmDrop(); break;
         }
@@ -982,20 +993,20 @@ function handleEvent(eventName) {
                     G.cult += extra;
                     addLog(`合欢宗采补恶霸，额外修为+${extra}`);
                 }
-                story = STORIES['路见不平'].win(gain, opp);
-                setSubtitle(`行侠仗义！修为+${gain}，贡献+2`, 'good');
+                story = STORIES['路见不平'].win(power, opp, gain);
+                setSubtitle(`行侠仗义！（波照${power} VS 恶霸${opp}）修为+${gain}，贡献+2`, 'good');
             } else if (power >= opp * 0.8) {
                 gain = applyCultGain(20);
                 G.cult += gain;
                 G.status = '轻伤';
-                story = STORIES['路见不平'].mid(opp);
-                setSubtitle(`平息事端，修为+${gain}，轻伤`, 'bad');
+                story = STORIES['路见不平'].mid(power, opp);
+                setSubtitle(`平息事端（波照${power} VS 恶霸${opp}），修为+${gain}，轻伤`, 'bad');
             } else {
                 G.cult *= 0.8;
                 G.age += 2;
                 G.status = '重伤';
-                story = STORIES['路见不平'].lose(opp);
-                setSubtitle('多管闲事惹上强敌，重伤！', 'bad');
+                story = STORIES['路见不平'].lose(power, opp);
+                setSubtitle(`多管闲事惹上强敌（波照${power} VS 恶霸${opp}），重伤！`, 'bad');
             }
             addLog(story); checkRealmDrop(); break;
         }
@@ -1010,19 +1021,19 @@ function handleEvent(eventName) {
                     G.cult += extra;
                     addLog(`合欢宗采补挑衅者，额外修为+${extra}`);
                 }
-                story = STORIES['被挑衅'].win(gain, opp);
-                setSubtitle(`碾压挑衅者！修为+${gain}`, 'good');
+                story = STORIES['被挑衅'].win(power, opp, gain);
+                setSubtitle(`碾压挑衅者！（波照${power} VS 挑衅者${opp}）修为+${gain}`, 'good');
             } else if (power >= opp * 0.8) {
                 G.cult *= 0.9;
                 G.status = '轻伤';
-                story = STORIES['被挑衅'].mid(opp);
-                setSubtitle('险胜，轻伤', 'bad');
+                story = STORIES['被挑衅'].mid(power, opp);
+                setSubtitle(`险胜（波照${power} VS 挑衅者${opp}），轻伤`, 'bad');
             } else {
                 G.cult *= 0.7;
                 G.age += 3;
                 G.status = '重伤';
-                story = STORIES['被挑衅'].lose(opp);
-                setSubtitle('被挑衅者击败，重伤！', 'bad');
+                story = STORIES['被挑衅'].lose(power, opp);
+                setSubtitle(`被挑衅者击败！（波照${power} VS 挑衅者${opp}）`, 'bad');
             }
             addLog(story); checkRealmDrop(); break;
         }
@@ -1032,14 +1043,14 @@ function handleEvent(eventName) {
                 G.cult *= 0.85;
                 G.age += 5;
                 G.status = '重伤';
-                story = STORIES['隐世高手'].mild(opp);
-                setSubtitle('冒犯隐世高手，被教训！', 'bad');
+                story = STORIES['隐世高手'].mild(power, opp);
+                setSubtitle(`冒犯隐世高手（波照${power} VS 高手${opp}），被教训！`, 'bad');
             } else {
                 G.cult *= 0.5;
                 G.age += 10;
                 G.status = '濒死';
-                story = STORIES['隐世高手'].severe(opp);
-                setSubtitle('隐世高手随手一击，濒死！', 'bad');
+                story = STORIES['隐世高手'].severe(power, opp);
+                setSubtitle(`隐世高手随手一击（波照${power} VS 高手${opp}），濒死！`, 'bad');
                 if (Math.random() < 0.5) {
                     G.status = '重伤';
                     addLog('隐世高手手下留情，留你一命');
@@ -1047,9 +1058,8 @@ function handleEvent(eventName) {
             }
             addLog(story); checkRealmDrop(); break;
         }
-        // 宗门事件（不重复列出，但实际已包含）
         default: {
-            // 其他事件已包含，此处为占位
+            // 宗门事件等已包含，这里仅作占位
         }
     }
     updatePanel();
@@ -1370,7 +1380,6 @@ document.getElementById('drawSectBtn').addEventListener('click', function() {
                 } else if (G._sectSpecial === 'modao') {
                     addLog('⚔️ 魔道宗：杀伐果断，以战养战');
                 }
-                // 显示主界面
                 document.getElementById('mainMenu').style.display = 'block';
                 setSubtitle('波照已拜入宗门，点击转盘开始修仙！', 'special');
                 drawWheel(0);
@@ -1507,7 +1516,6 @@ document.getElementById('testSpiritBtn').addEventListener('click', function() {
 
             setTimeout(() => {
                 document.getElementById('spiritOverlay').classList.remove('show');
-                // 出生地和灵根完成后，进入宗门抽取
                 initSectOverlay();
                 document.getElementById('sectOverlay').classList.add('show');
                 pendingBirth2 = null;
@@ -1542,7 +1550,7 @@ document.getElementById('spinBtn').addEventListener('click', function() {
 initState();
 document.getElementById('mainMenu').style.display = 'none';
 document.getElementById('startOverlay').classList.add('show');
-console.log('🧘 修仙转盘 · 波途 — 完整版已加载（宗门系统+掉境界+合欢宗采补+魔道战斗+渡劫转盘）');
+console.log('🧘 修仙转盘 · 波途 — 完整版已加载（战力对比显示+年龄一致+宗门特殊机制）');
 </script>
 </body>
 </html>
