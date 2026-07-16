@@ -359,47 +359,6 @@
             border-radius: 8px;
         }
 
-        /* ===== 出生地 ===== */
-        .birth-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin: 20px 0;
-        }
-        .birth-item {
-            padding: 12px 8px;
-            background: rgba(30, 24, 20, 0.6);
-            border: 2px solid #3d3228;
-            border-radius: 12px;
-            font-size: 0.9rem;
-            color: #a09080;
-            transition: all 0.15s;
-            text-align: center;
-        }
-        .birth-item.active {
-            border-color: #f5d080;
-            background: rgba(245, 208, 128, 0.15);
-            color: #f5d080;
-            box-shadow: 0 0 20px rgba(245, 208, 128, 0.3);
-            transform: scale(1.05);
-        }
-        .birth-item .prob {
-            display: block;
-            font-size: 0.7rem;
-            color: #6a5a4a;
-            margin-top: 4px;
-        }
-        .birth-result {
-            font-size: 1.8rem;
-            color: #f5d080;
-            padding: 12px;
-            min-height: 60px;
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 12px;
-            border: 1px solid #6a5a4a;
-            margin: 10px 0;
-        }
-
         /* ===== 头像 ===== */
         .avatar-container {
             display: flex;
@@ -426,7 +385,12 @@
             transition: all 0.6s ease;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
             border: 2px solid #6a5a4a;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-color: #3a3a3a;
         }
+        /* 回退文字样式 */
         .avatar.realm-0 {
             background-color: #6a7a7a;
         }
@@ -554,6 +518,47 @@
             color: #f88;
         }
 
+        /* ===== 出生地 ===== */
+        .birth-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin: 20px 0;
+        }
+        .birth-item {
+            padding: 12px 8px;
+            background: rgba(30, 24, 20, 0.6);
+            border: 2px solid #3d3228;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            color: #a09080;
+            transition: all 0.15s;
+            text-align: center;
+        }
+        .birth-item.active {
+            border-color: #f5d080;
+            background: rgba(245, 208, 128, 0.15);
+            color: #f5d080;
+            box-shadow: 0 0 20px rgba(245, 208, 128, 0.3);
+            transform: scale(1.05);
+        }
+        .birth-item .prob {
+            display: block;
+            font-size: 0.7rem;
+            color: #6a5a4a;
+            margin-top: 4px;
+        }
+        .birth-result {
+            font-size: 1.8rem;
+            color: #f5d080;
+            padding: 12px;
+            min-height: 60px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 12px;
+            border: 1px solid #6a5a4a;
+            margin: 10px 0;
+        }
+
         /* ===== 宗门 ===== */
         .sect-grid {
             display: grid;
@@ -617,6 +622,10 @@
                 font-size: 1rem;
                 padding: 8px 12px;
                 min-width: 50px;
+            }
+            .avatar {
+                width: 48px;
+                height: 48px;
             }
         }
     </style>
@@ -858,6 +867,8 @@
         //  游戏状态
         // ================================================================
         let G = {};
+        // 头像图片缓存：记录每个图片URL是否已成功加载
+        const avatarImageCache = {};
 
         function initState() {
             G = {
@@ -901,6 +912,7 @@
                 _extraAbilities: []
             };
             CONFIG.achievements.forEach(a => G.achievements[a.id] = false);
+            // 头像缓存保留（图片文件不变，无需重置）
         }
 
         function rand(min, max) { return Math.random() * (max - min) + min; }
@@ -974,13 +986,61 @@
                 el.className = 'subtitle ' + (cls || ''); }
         }
 
+        // ================================================================
+        //  头像更新（根据境界切换图片）
+        // ================================================================
         function updateAvatar() {
             const avatarEl = document.getElementById('avatar');
             if (!avatarEl) return;
-            const chars = ['炼', '筑', '金', '婴', '化', '合', '渡', '仙'];
+
             const idx = G.realmIndex || 0;
-            avatarEl.className = `avatar realm-${idx}`;
-            avatarEl.innerHTML = `<span class="realm-char">${chars[idx]}</span>`;
+            const chars = ['炼', '筑', '金', '婴', '化', '合', '渡', '仙'];
+
+            // 金丹前（index 0,1）使用 obstacle-sprite.png，金丹后（index >=2）使用 zhujue.jpg
+            let imgSrc;
+            if (idx < 2) {
+                imgSrc = 'obstacle-sprite.png';
+            } else {
+                imgSrc = 'zhujue.jpg';
+            }
+
+            // 检查缓存：已成功加载 -> 直接显示图片
+            if (avatarImageCache[imgSrc] === true) {
+                avatarEl.style.backgroundImage = `url(${imgSrc})`;
+                avatarEl.style.backgroundSize = 'cover';
+                avatarEl.style.backgroundPosition = 'center';
+                avatarEl.innerHTML = '';
+                avatarEl.className = 'avatar';
+                applyAvatarAnimations(avatarEl, idx);
+                return;
+            }
+
+            // 缓存中明确加载失败 -> 回退到文字
+            if (avatarImageCache[imgSrc] === false) {
+                showTextAvatar(avatarEl, idx, chars);
+                return;
+            }
+
+            // 未缓存，尝试加载图片
+            const img = new Image();
+            img.onload = function() {
+                avatarImageCache[imgSrc] = true;
+                avatarEl.style.backgroundImage = `url(${imgSrc})`;
+                avatarEl.style.backgroundSize = 'cover';
+                avatarEl.style.backgroundPosition = 'center';
+                avatarEl.innerHTML = '';
+                avatarEl.className = 'avatar';
+                applyAvatarAnimations(avatarEl, idx);
+            };
+            img.onerror = function() {
+                avatarImageCache[imgSrc] = false;
+                showTextAvatar(avatarEl, idx, chars);
+            };
+            img.src = imgSrc;
+        }
+
+        // 应用头像动画（突破、脉动）
+        function applyAvatarAnimations(avatarEl, idx) {
             if (G._avatarBreakthrough) {
                 avatarEl.classList.add('breakthrough');
                 setTimeout(() => {
@@ -988,10 +1048,35 @@
                     G._avatarBreakthrough = false;
                 }, 800);
             }
-            if (idx === 7) avatarEl.classList.add('pulse');
-            else avatarEl.classList.remove('pulse');
+            if (idx === 7) {
+                avatarEl.classList.add('pulse');
+            } else {
+                avatarEl.classList.remove('pulse');
+            }
         }
 
+        // 回退到文字头像
+        function showTextAvatar(avatarEl, idx, chars) {
+            avatarEl.className = `avatar realm-${idx}`;
+            avatarEl.innerHTML = `<span class="realm-char">${chars[idx]}</span>`;
+            avatarEl.style.backgroundImage = '';
+            if (G._avatarBreakthrough) {
+                avatarEl.classList.add('breakthrough');
+                setTimeout(() => {
+                    avatarEl.classList.remove('breakthrough');
+                    G._avatarBreakthrough = false;
+                }, 800);
+            }
+            if (idx === 7) {
+                avatarEl.classList.add('pulse');
+            } else {
+                avatarEl.classList.remove('pulse');
+            }
+        }
+
+        // ================================================================
+        //  更新面板
+        // ================================================================
         function updatePanel() {
             const p = document.getElementById('panelContent');
             if (!p) return;
@@ -1005,9 +1090,7 @@
             const smap = { '健康': '❤️', '轻伤': '🟡', '重伤': '🔴', '濒死': '💀', '中毒': '☠️' };
             const avatarHTML = `
                 <div class="avatar-container">
-                    <div class="avatar realm-${G.realmIndex || 0}" id="avatar">
-                        <span class="realm-char">${['炼','筑','金','婴','化','合','渡','仙'][G.realmIndex || 0]}</span>
-                    </div>
+                    <div class="avatar" id="avatar"></div>
                     <div>
                         <div style="font-size:1.2rem; font-weight:bold; color:#f5d080;">波照</div>
                         <div style="font-size:0.8rem; color:#a09080;">${G.birthland || ''} · ${G.sect || ''}</div>
@@ -2044,7 +2127,7 @@
         initState();
         document.getElementById('mainMenu').style.display = 'none';
         document.getElementById('startOverlay').classList.add('show');
-        console.log('🧘 修仙转盘 · 波途 — 已修复“隐世高手”战力判定，现在胜利/平局/失败均有合理结果。');
+        console.log('🧘 修仙转盘 · 波途 — 金丹前 obstacle-sprite.png，金丹后 zhujue.jpg');
     </script>
 
 </body>
