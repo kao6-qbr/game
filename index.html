@@ -1282,7 +1282,7 @@
         }
 
         // ================================================================
-        //  事件处理（包含抽象事件）
+        //  事件处理（包含抽象事件 + 修复隐世高手）
         // ================================================================
         function handleEvent(eventName) {
             const power = calcPower();
@@ -1380,7 +1380,7 @@
                 return;
             }
 
-            // 原有战斗事件（精简）
+            // ---- 战斗事件（含修复后的隐世高手） ----
             switch (eventName) {
                 case '波刚': {
                     let gangPower = G.cult < 300 ? 280 : (G.cult < 2000 ? 680 : 1600);
@@ -1484,24 +1484,60 @@
                     checkRealmDrop();
                     break;
                 }
+                // ★★★ 修复隐世高手事件：加入胜利分支，显示战力对比 ★★★
                 case '隐世高手': {
-                    opp = 800 + Math.floor(Math.random() * 1200);
-                    if (power >= opp * 0.5) {
+                    opp = 800 + Math.floor(Math.random() * 1200); // 对手战力 800~2000
+                    const storyTpl = {
+                        win: (pwr, opp) =>
+                            `波照与隐世高手对决（波照${pwr} VS 高手${opp}），波照以惊人实力反败为胜！高手惊叹不已，赠予波照一本上古秘籍，修为大增！`,
+                        mid: (pwr, opp) =>
+                            `波照冒犯隐世高手（波照${pwr} VS 高手${opp}），被教训一顿，身负重伤，但高手留了一线。`,
+                        lose: (pwr, opp) =>
+                            `波照触怒隐世高手（波照${pwr} VS 高手${opp}），几乎丧命，修为大损。`
+                    };
+                    if (power >= opp * 1.2) {
+                        // 胜利
+                        gain = applyCultGain(200 + Math.floor(Math.random() * 200));
+                        G.cult += gain;
+                        G._powerBuff = (G._powerBuff || 0) + 30;
+                        // 概率获得能力或法则
+                        if (Math.random() < 0.3) {
+                            let ab = pick(CONFIG.allAbilities.filter(a => !G.abilities.includes(a)));
+                            if (ab) {
+                                G.abilities.push(ab);
+                                story = `波照击败隐世高手（波照${power} VS 高手${opp}），高手赠予秘籍，领悟「${ab}」！修为+${gain}`;
+                                setSubtitle(`击败高手，领悟${ab}！`, 'special');
+                            } else {
+                                story = storyTpl.win(power, opp) + ` 修为+${gain}`;
+                                setSubtitle(`击败隐世高手！`, 'good');
+                            }
+                        } else {
+                            story = storyTpl.win(power, opp) + ` 修为+${gain}`;
+                            setSubtitle(`击败隐世高手！`, 'good');
+                        }
+                        addLog(story);
+                    } else if (power >= opp * 0.7) {
+                        // 平局/受伤
                         G.cult *= 0.85;
                         G.age += 5;
-                        G.status = '重伤';
-                        story = `波照冒犯隐世高手（波照${power} VS 高手${opp}），被教训！`;
-                        setSubtitle(`被高手教训`, 'bad');
+                        if (G.status === '健康') G.status = '轻伤';
+                        else if (G.status === '轻伤') G.status = '重伤';
+                        story = storyTpl.mid(power, opp);
+                        setSubtitle(`被高手教训，重伤`, 'bad');
+                        addLog(story);
                     } else {
+                        // 失败
                         G.cult *= 0.5;
                         G.age += 10;
                         G.status = '濒死';
-                        story = `波照被隐世高手随手一击（波照${power} VS 高手${opp}），濒死！`;
-                        setSubtitle(`濒死`, 'bad');
-                        if (Math.random() < 0.5) { G.status = '重伤';
-                            addLog('隐世高手手下留情，留你一命'); }
+                        story = storyTpl.lose(power, opp);
+                        setSubtitle(`濒死！`, 'bad');
+                        addLog(story);
+                        if (Math.random() < 0.3) {
+                            G.status = '重伤';
+                            addLog('隐世高手手下留情，留你一命');
+                        }
                     }
-                    addLog(story);
                     checkRealmDrop();
                     break;
                 }
@@ -1803,7 +1839,6 @@
                     pendingSect = sect;
                     btn.disabled = false;
                     setSubtitle(`📜 ${sect.story}`, 'special');
-                    // ★ 添加宗门故事到日志
                     addLog(`📜 ${sect.story}`);
                     setTimeout(() => {
                         document.getElementById('sectOverlay').classList.remove('show');
@@ -1873,7 +1908,6 @@
                     resultEl.textContent = `✨ 波照生于「${birth.name}」— ${birth.desc} ✨`;
                     pendingBirth2 = birth;
                     btn.disabled = false;
-                    // ★ 添加出生地日志
                     addLog(`🌍 波照生于「${birth.name}」，${birth.desc}`);
                     setTimeout(() => {
                         document.getElementById('birthOverlay').classList.remove('show');
@@ -1964,7 +1998,6 @@
                     if (q.name === '极品') resultEl.style.color = '#ffd700';
                     else resultEl.style.color = '#f5d080';
 
-                    // ★ 添加灵根故事到日志
                     let spiritStory = '';
                     if (q.name === '极品') spiritStory = '天资卓越，修行之路一片坦途。';
                     else if (q.name === '上品') spiritStory = '资质上佳，勤修苦练可成大器。';
@@ -2011,7 +2044,7 @@
         initState();
         document.getElementById('mainMenu').style.display = 'none';
         document.getElementById('startOverlay').classList.add('show');
-        console.log('🧘 修仙转盘 · 波途 — 天衍版：抽象事件、多能力、战力完善、日志回顾，且记录出生、灵根、宗门故事');
+        console.log('🧘 修仙转盘 · 波途 — 已修复“隐世高手”战力判定，现在胜利/平局/失败均有合理结果。');
     </script>
 
 </body>
