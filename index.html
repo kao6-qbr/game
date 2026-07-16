@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>修仙转盘 · 波途</title>
+    <title>修仙转盘 · 波途 · 天衍版</title>
     <style>
         /* ===== 全局 ===== */
         * {
@@ -272,17 +272,6 @@
             background: #3d3228;
         }
 
-        .world-buff {
-            display: inline-block;
-            background: #2a1a0a;
-            border: 1px solid #6a5a3a;
-            border-radius: 20px;
-            padding: 1px 12px;
-            margin: 2px 3px;
-            font-size: 0.7rem;
-            color: #d4b080;
-        }
-
         /* ===== 覆盖层 ===== */
         .overlay {
             position: fixed;
@@ -303,9 +292,12 @@
             border: 2px solid #6a5a4a;
             border-radius: 28px;
             padding: 35px 45px;
-            max-width: 620px;
+            max-width: 700px;
+            width: 90%;
             text-align: center;
             box-shadow: 0 0 80px rgba(0, 0, 0, 0.95);
+            max-height: 90vh;
+            overflow-y: auto;
         }
         .overlay-box h1 {
             font-size: 2.4rem;
@@ -333,8 +325,7 @@
         .overlay-box .btn-restart:hover {
             background: #5a4a3a;
         }
-
-        .spirit-result {
+        .overlay-box .spirit-result {
             font-size: 2rem;
             color: #f5d080;
             margin: 15px 0;
@@ -342,6 +333,30 @@
             background: rgba(0, 0, 0, 0.5);
             border-radius: 12px;
             border: 1px solid #6a5a4a;
+        }
+        .log-review {
+            text-align: left;
+            max-height: 300px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 12px;
+            padding: 10px 14px;
+            margin: 12px 0;
+            border: 1px solid #4a3f34;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+        .log-review p {
+            margin: 4px 0;
+            padding: 2px 0;
+            border-bottom: 1px dashed #2a221a;
+        }
+        .log-review::-webkit-scrollbar {
+            width: 4px;
+        }
+        .log-review::-webkit-scrollbar-thumb {
+            background: #6a5a4a;
+            border-radius: 8px;
         }
 
         /* ===== 出生地 ===== */
@@ -411,9 +426,6 @@
             transition: all 0.6s ease;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.6);
             border: 2px solid #6a5a4a;
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
         }
         .avatar.realm-0 {
             background-color: #6a7a7a;
@@ -529,7 +541,6 @@
             background: #3a1a1a;
             box-shadow: 0 0 30px rgba(255, 100, 100, 0.2);
         }
-
         .trib-result {
             font-size: 2rem;
             color: #f5d080;
@@ -685,7 +696,8 @@
         <div class="overlay-box">
             <h1 id="endTitle">道陨</h1>
             <p id="endDesc"></p>
-            <p id="endSummary" style="font-size:0.9rem; color:#a09080; margin-top:12px;"></p>
+            <p id="endSummary" style="font-size:0.9rem; color:#a09080; margin-top:8px;"></p>
+            <div class="log-review" id="endLogReview"></div>
             <button class="btn-restart" id="restartBtn">轮回重修</button>
         </div>
     </div>
@@ -730,7 +742,7 @@
             ],
             sects: [
                 { name: '青云宗', prob: 0.35, bonusCult: 0.05, desc: '正道魁首，修仙正统',
-                story: '波照在游历时偶遇青云宗长老，长老见他根骨清奇，便引他拜入山门。青云宗乃正道第一大宗，门规森严，功法中正平和，虽无捷径但胜在稳妥。',
+                    story: '波照在游历时偶遇青云宗长老，长老见他根骨清奇，便引他拜入山门。青云宗乃正道第一大宗，门规森严，功法中正平和，虽无捷径但胜在稳妥。',
                     special: '' },
                 { name: '合欢宗', prob: 0.20, bonusCult: 0.08, desc: '阴阳双修，采补之道',
                     story: '波照在一处秘境中被合欢宗女修所救，对方见他元阳未泄，便邀请他加入合欢宗。此宗以双修采补为功法核心，虽可速成但易招非议。',
@@ -748,14 +760,55 @@
                     story: '波照在山中偶遇一只受伤的灵兽，救治之后竟引来万兽山之主，对方见波照与灵兽有缘，便引他入山修行。万兽山以御兽闻名，灵兽辅佐修炼事半功倍。',
                     special: '' }
             ],
-            worldEvents: [
-                { name: '灵气潮汐', desc: '修获+20%', buff: { cultGain: 0.20 }, duration: 5 },
-                { name: '乱世将至', desc: '对手×1.2', buff: { opponentMult: 1.2 }, duration: 5 },
-                { name: '仙门开启', desc: '突破额外法则', buff: { extraLaw: 1 }, duration: 5 },
-                { name: '魔劫降临', desc: '每回合扣2%修', buff: { drainCult: 0.02 }, duration: 5 },
-                { name: '天道赐福', desc: '渡劫概率+15%', buff: { tribBuff: 0.15 }, duration: 5 },
-                { name: '业火焚心', desc: '30%状态降级', buff: { degrade: 0.30 }, duration: 5 },
-                { name: '灵脉复苏', desc: '修获+30%年龄+1', buff: { cultGain: 0.30, extraAge: 1 }, duration: 5 }
+            // 抽象事件
+            abstractEvents: [
+                { id: '天降流星', label: '天降流星', desc: '一颗流星坠落在波照面前，其中蕴含一块天外陨铁，蕴含着浓郁的星辰之力。', type: 'cult',
+                    value: 80, story: (g) => `波照在夜观星象时，忽见一颗流星划破天际，落在不远处。他寻到陨石坑，从中挖出一块拳头大的星辰陨铁，其上星光流转，波照吸收其中精华，修为暴涨80点！` },
+                { id: '古树悟道', label: '古树悟道', desc: '波照在一棵万年古树下打坐，忽听树心传来大道之音。', type: 'cult', value: 60,
+                    story: (g) => `波照在深山中发现一棵遮天蔽日的古榕树，树干上隐隐有符文浮现。他盘坐树下，入定后听到树心传来阵阵道音，仿佛天地初开时的韵律。醒来后修为大增60点。` },
+                { id: '镜花水月', label: '镜花水月', desc: '波照在湖边看到自己的倒影，却从中看到了另一条人生轨迹。', type: 'law', value: '命运',
+                    story: (g) => `波照在月下湖畔静立，水中倒影突然扭曲，映出他从未经历过的命运——或为帝王、或为妖魔。波照心有所感，悟出命运的虚幻与真实，命运法则+1。` },
+                { id: '焚香祈愿', label: '焚香祈愿', desc: '波照在道观中点燃三炷香，虔诚祈愿，香火竟化作一道金光没入眉心。', type: 'cult',
+                    value: 50, story: (g) => `波照路遇一座破败道观，观中香火已绝。他心生怜悯，点燃三炷香，祈愿众生平安。香火缭绕间，竟化作一道金光涌入他的识海，修为增长50点。` },
+                { id: '石壁留影', label: '石壁留影', desc: '波照在山壁上看到一幅古仙人留下的剑痕，其中蕴含着无上剑意。', type: 'ability',
+                    name: '剑心通明', story: (g) => `波照在绝壁前看到一道数丈长的剑痕，深可见骨，剑意凛然。他凝神参悟三日，竟从剑痕中领悟了「剑心通明」的能力，从此剑法精进如神。` },
+                { id: '灵蝶引路', label: '灵蝶引路', desc: '一只通体散发荧光的灵蝶飞来，在波照面前盘旋，似要引他去某处。', type: 'event',
+                    event: '灵蝶奇遇', story: (g) => `波照在林中遇到一只灵蝶，它翩翩飞舞，似乎在指引方向。波照跟随灵蝶来到一处隐蔽的山谷，谷中灵气浓郁，他趁机修炼，修为大增。` },
+                { id: '血月当空', label: '血月当空', desc: '天现血月，波照体内气血翻涌，心魔蠢蠢欲动。', type: 'event', event: '血月心魔',
+                    story: (g) => `血月之夜，波照感到一股无名邪火在体内燃烧，心魔趁机入侵。他奋力抵抗，最终击退心魔，却损耗了不少修为。` },
+                { id: '幽泉洗髓', label: '幽泉洗髓', desc: '波照寻得一眼幽泉，泉水冰冷刺骨，却能洗涤肉身杂质。', type: 'cult', value: 100,
+                    story: (g) => `波照在深山中找到一眼幽泉，泉水漆黑如墨，寒气逼人。他咬牙浸入泉中，一股冰寒之力渗入骨髓，将肉身中的杂质一一逼出。出泉后，修为暴涨100点，肉身强度大增。` },
+                { id: '藏经阁偶遇', label: '藏经阁偶遇', desc: '波照在宗门藏经阁中翻到一本残卷，记录着失传的秘术。', type: 'ability',
+                    name: '缩地成寸', story: (g) => `波照在藏经阁的角落发现一本蒙尘的残卷，封面写着「缩地成寸」。他研读之后，竟真的掌握了这门上古遁术，从此日行千里。` },
+                { id: '雷雨淬体', label: '雷雨淬体', desc: '波照在暴雨中修炼，引天雷之力淬炼肉身。', type: 'cult', value: 90,
+                    story: (g) => `波照立于山巅，迎着雷雨修炼。一道闪电劈下，他不闪不避，以肉身硬接，雷光在体表游走，淬炼筋骨。雷雨过后，修为增长90点。` },
+                { id: '仙鹤赠药', label: '仙鹤赠药', desc: '一只仙鹤叼着一株灵芝飞到波照面前，放下灵芝后便飞走了。', type: 'item',
+                    item: '疗伤药', story: (g) => `一只仙鹤从云中落下，将一株紫芝放在波照面前，长鸣一声后飞走。波照认出这是疗伤圣药，可治重伤，获得疗伤药一枚。` },
+                { id: '道侣赠剑', label: '道侣赠剑', desc: '一位神秘女子赠予波照一柄古朴长剑，剑身刻有「断念」二字。', type: 'ability',
+                    name: '断念剑意', story: (g) => `波照在渡口遇见一位白衣女子，她将一柄古剑交给波照，说此剑名为「断念」，可斩断执念。波照接过古剑，领悟了断念剑意，剑法再上一层。` },
+                { id: '炼丹顿悟', label: '炼丹顿悟', desc: '波照在炼丹时无意间看到炉火中浮现大道符文，心有所悟。', type: 'law', value: '毁灭',
+                    story: (g) => `波照在炼丹时，炉火突然跳动，火苗中竟浮现出一个个毁灭符文。他凝视良久，忽有所悟——炼丹之理与毁灭之道相通，毁灭法则+1。` },
+                { id: '古墓惊魂', label: '古墓惊魂', desc: '波照误入一座古墓，墓中机关重重，他历经生死考验。', type: 'event', event: '古墓探险',
+                    story: (g) => `波照在一处荒山发现古墓入口，好奇心驱使下进入。墓中暗箭、毒雾、傀儡轮番来袭，他拼尽全力才逃出生天，虽身受轻伤，但捡到了一些陪葬的灵玉，修为增加50点。` },
+                { id: '云海日出', label: '云海日出', desc: '波照在云海上静候日出，第一缕阳光照在脸上时，他豁然开朗。', type: 'cult', value: 70,
+                    story: (g) => `波照在高峰之巅守候一夜，当第一缕阳光刺破云海，万丈金光洒落，波照心中多年的困惑突然解开，修为大增70点。` },
+                { id: '琴音洗心', label: '琴音洗心', desc: '波照听到山间传来的空灵琴声，心神为之宁澈。', type: 'cult', value: 40,
+                    story: (g) => `波照在山中漫步时，忽闻悠扬琴声，如泉水叮咚，洗涤心灵。他循声而去，只见一位白须老者抚琴，却转瞬不见。波照只觉心神清明，修为增长40点。` },
+                { id: '神通觉醒', label: '神通觉醒', desc: '波照在战斗中偶然激发体内潜藏的神通之力。', type: 'ability', name: '金刚不坏',
+                    story: (g) => `波照在与妖兽搏斗时，危急关头体内突然涌出一股金光，皮肤变得坚如金石，硬抗了妖兽一击。他后知后觉，原来自己觉醒了「金刚不坏」的神通。` },
+                { id: '梦回前世', label: '梦回前世', desc: '波照在梦中看到自己前世作为大能的记忆碎片。', type: 'law', value: '生命',
+                    story: (g) => `波照在睡梦中走入一片迷雾，看到自己前世是一位寿元悠长的仙人，领悟了生命的真谛。醒来后，生命法则+1。` },
+                { id: '奇遇·丹炉', label: '奇遇·丹炉', desc: '波照在一处废墟中发现一座完好的炼丹炉，炉中尚有余温。', type: 'ability',
+                    name: '炼丹术', story: (g) => `波照在废墟中发现一座古朴丹炉，炉上刻有「九转还魂」四字。他尝试生火，竟成功炼出一枚丹药，从此掌握了炼丹术。` },
+                { id: '险境·断崖', label: '险境·断崖', desc: '波照在断崖边行走，不慎失足，险些丧命。', type: 'event', event: '断崖惊魂',
+                    story: (g) => `波照在悬崖边采摘草药，脚下岩石松动，整个人跌落下去。他拼命抓住崖壁上的藤蔓，这才保住了性命，但手臂被藤蔓割伤，轻伤。` },
+                { id: '感悟·生死', label: '感悟·生死', desc: '波照目睹一只小兽死去，又见新芽破土，忽悟生死轮回。', type: 'law', value: '生命',
+                    story: (g) => `波照在林中看到一只幼鹿被猛兽咬死，心中悲悯。却又见旁边一株枯木上冒出绿芽，他顿悟生死相依，生命法则+1。` },
+                { id: '奇遇·灵泉', label: '奇遇·灵泉', desc: '波照寻到一眼灵泉，泉水含有浓郁的生命力。', type: 'cult', value: 120,
+                    story: (g) => `波照在石缝中发现一眼灵泉，泉水呈乳白色，散发出草木清香。他饮下几口，只觉生机勃勃，修为暴涨120点。` }
+            ],
+            allAbilities: ['飞剑', '御风术', '不死之身', '炼丹术', '法天象地', '剑心通明', '缩地成寸', '金刚不坏', '断念剑意', '天眼通', '元神出窍',
+                '撒豆成兵', '呼风唤雨', '点石成金', '隐身术', '定身术'
             ],
             deathEndings: [
                 '「天雷诛邪」：九霄神雷劈碎元神，形神俱灭。',
@@ -768,7 +821,10 @@
                 '「天人五衰」：肉身腐朽，神魂消散。',
                 '「万蛊噬心」：剧毒攻心，五脏被蛊虫啃噬殆尽。',
                 '「道侣背叛」：渡劫时被至亲从背后刺穿丹田。',
-                '「采补反噬」：元阳尽失，精气枯竭而亡。'
+                '「采补反噬」：元阳尽失，精气枯竭而亡。',
+                '「石壁压顶」：被坍塌的山洞活埋。',
+                '「瘴气侵体」：中毒太深，无药可救。',
+                '「寒毒入骨」：修炼冰系功法走火入魔。'
             ],
             achievements: [
                 { id: 'fate_reversal', name: '逆天改命', check: g => g.birthland === '紫府圣地' && g.spiritQ.name ===
@@ -785,7 +841,6 @@
                 { id: 'immortal_legend', name: '不死传说', check: g => g.abilities.includes('不死之身') && g
                     ._flagTribPass },
                 { id: 'poison_proof', name: '万毒不侵', check: g => g._poisonAge >= 20 },
-                { id: 'heaven_blessed', name: '天道眷顾', check: g => g._flagBreakInBuff },
                 { id: 'chaos_body', name: '混沌之体', check: g => g.spiritCount === 5 },
                 { id: 'five_elements', name: '五行俱全', check: g => ['飞剑', '御风术', '不死之身', '炼丹术', '法天象地']
                         .every(a => g.abilities.includes(a)) },
@@ -821,7 +876,6 @@
                 items: { '渡劫丹': 0, '疗伤药': 0, '解毒丹': 0 },
                 laws: { '时间': 0, '空间': 0, '命运': 0, '毁灭': 0, '生命': 0 },
                 status: '健康',
-                worldBuffs: [],
                 logs: [],
                 achievements: {},
                 _flagNearDeath: false,
@@ -833,7 +887,6 @@
                 _winArena: false,
                 _winTourney: false,
                 _poisonAge: 0,
-                _flagBreakInBuff: false,
                 _gangKill: 0,
                 _sectContribution: 0,
                 _sectHero: false,
@@ -844,7 +897,8 @@
                 _spinLock: false,
                 _avatarBreakthrough: false,
                 _pendingTrib: false,
-                _sectSpecial: ''
+                _sectSpecial: '',
+                _extraAbilities: []
             };
             CONFIG.achievements.forEach(a => G.achievements[a.id] = false);
         }
@@ -855,212 +909,6 @@
 
         function drawProb(items) { let r = Math.random(),
                 c = 0; for (let it of items) { c += it.prob; if (r < c) return it; } return items[items.length - 1]; }
-
-        // ================================================================
-        //  故事库（部分，保持原有）
-        // ================================================================
-        const STORIES = {
-            '鸡追': {
-                win: (p) =>
-                    `波照在荒野中撞见一只通体金羽的三足灵鸡，那畜生竟口吐人言，嘲弄波照修为低微。波照勃然大怒，拔剑追杀了三里地，最终一剑刺穿灵鸡心脉，从鸡腹中剖出一枚温润如玉的灵羽。那灵羽入手生温，灵气汩汩涌入丹田，波照修为凭空暴涨${p}点！`,
-                lose_old: (p) =>
-                    `波照拖着沉重的伤躯在山路上蹒跚而行，忽听身后传来尖锐的鸡鸣——竟是那只前日结仇的三足灵鸡寻仇来了！波照想跑，却牵动旧伤，一个踉跄摔倒在地，被那畜生啄得浑身是血，本就虚弱的修为又散去了${p}点。`,
-                lose: (p) =>
-                    `波照路过一处荒村时，惊动了一只三足金羽灵鸡。那畜生发了疯似的追赶波照，一路追过三个山头、两条河流，波照鞋都跑丢了一只，最后躲进一个猎户废弃的陷阱里才逃过一劫。经此一役，波照元气大伤，修为跌落${p}点。`
-            },
-            '村斗': {
-                win: (p) =>
-                    `波照踏入村口擂台时，围观者皆窃笑——一个瘦削少年也敢挑战村中第一力士？波照却不言语，身形如柳絮般飘忽，避开力士三记重拳后，一指点在对方气海穴上。力士闷哼一声倒地，满场哗然。波照抱拳一笑，赢得${p}点修为的彩头。`,
-                lose_h: `波照在村口擂台遇到了一个横练功夫已臻化境的糙汉，对方一身铜皮铁骨，波照的拳脚打上去如击金石。糙汉一记铁山靠撞来，波照整个人飞出去三丈远，撞碎了擂台边的石碾子，断了两根肋骨，鲜血染红了衣襟。`,
-                lose_l: `波照在村口擂台与一个使双锤的壮汉交手，对方力大势沉，波照以巧劲周旋了十几个回合，终因体力不支被一锤扫中小腿，一个趔趄跌下擂台。虽未伤筋动骨，却也狼狈不堪，被围观者嘘声一片。`
-            },
-            '采灵草': {
-                good: (p) =>
-                    `波照在断崖边发现一株九叶灵芝，那灵草通体泛着淡紫色的光晕，根须深深扎入岩缝之中。波照小心翼翼地用玉铲挖掘了半个时辰，终将整株灵草完整取出，灵草入手的瞬间，一股精纯的灵气顺着手臂涌入丹田，修为暴涨${p}点！`,
-                bad: `波照在瘴气弥漫的谷底发现一株形似灵草的植株，激动之下伸手便摘。不料那竟是“蚀骨毒草”，草叶上的毒刺瞬间刺入皮肉，一股黑气顺着手臂蔓延开来。波照大惊，慌忙斩断草茎，却已是毒气入体，寿命折去5年。`,
-                heal: `波照在山涧边发现一株通体透明的“玉髓草”，此草专治内伤。波照将草叶捣碎敷在伤口上，一股清凉之气渗入骨髓，断裂的筋骨以肉眼可见的速度愈合，痛楚大减，还顺手多采了一株留着备用，获得一枚疗伤药。`
-            },
-            '摔下山崖': {
-                fly: `波照脚下一滑，整个人从百丈悬崖上跌落下去！罡风割面，生死一线之间，他猛地运转御风术，衣袂鼓荡如翼，身形在空中划出一道弧线，稳稳落在崖底一块青石上，除了衣衫被风撕裂了几道口子，竟是毫发无伤。`,
-                tough: `波照从一处陡峭的山崖上失足坠落，他临危不乱，在半空中调整姿态，以千斤坠的功夫硬生生砸进崖底的灌木丛中。灌木被他砸出一个大坑，波照浑身淤青却筋骨无碍，反而在坠落的冲击中打通了一处淤塞的经脉，修为涨了10点。`,
-                hurt: `波照在攀爬一处险峰时不慎踩碎了一块松动的岩石，整个人翻滚着摔下十几丈高的崖壁，在碎石和荆棘中连续撞击了七八次才卡在一棵歪脖子树上停下来。他浑身是血，左腿明显骨折，痛得几乎昏死过去，寿命折去3年。`
-            },
-            '迷路': { lost: `波照在深山老林中迷失了方向，那林子里的树木长得一模一样，连太阳都被浓密的树冠遮得严严实实。他在里面转了整整三天三夜，干粮耗尽，水囊见底，最后不得不以露水和树皮充饥。等他终于找到出路时，修为已不知不觉散逸了15点。` },
-            '老农赠药': { gain: `波照路过一处山间田舍时，一个白发苍苍的老农叫住了他，说昨夜梦见仙人指点，今日会有贵客路过，特赠一枚祖传的“九转还魂丹”以结善缘。波照再三推辞不过，只得收下，老农笑眯眯地挥了挥手，转身隐入竹林深处。` },
-            '灵泉沐浴': { good: (p) =>
-                    `波照在密林深处发现一眼冒着氤氲白气的灵泉，泉水清澈见底，底部铺满了温润的灵玉。他褪去衣衫浸入泉中，只觉一股暖流从百骸渗入，浑身舒泰，体内暗伤尽数愈合，甚至隐隐触摸到了境界的壁障，修为暴涨${p}点！` },
-            '心魔': {
-                immune: (p) =>
-                    `波照闭关修炼时，心魔幻境骤然降临！他看到了自己最恐惧的画面——亲人惨死、修为尽废、孤苦无依。然而波照身具不死之身，心志坚如磐石，竟在幻境中一拳轰碎了心魔化身！反噬之力化作精纯的灵气，修为暴涨${p}点。`,
-                weak: `波照在修炼中触及瓶颈，心魔趁虚而入。幻境中，他看见自己走火入魔、爆体而亡的惨状，恐惧如潮水般将他吞没。他疯狂地试图挣脱幻境，却越陷越深，最终虽勉强醒来，却已心神大损，修为暴跌两成，寿元折去5年。`,
-                normal: `波照在冥想时心魔悄然而至，幻化出无数妖娆身影在他眼前起舞，意图动摇他的道心。波照咬破舌尖，以剧痛唤醒清明，盘坐三天三夜，终于将心魔逼退。虽未伤及根本，修为却也折损了一成。`
-            },
-            '擂台': {
-                win_c: (p) =>
-                    `波照站在坊市擂台之上，台下乌泱泱围了数百人。他连战七场，对手一个比一个强——使刀的、用毒的、驭兽的——全被他以精妙的身法和浑厚的灵力一一击退。最后一场，他一掌震碎对手护体罡气，满场欢呼雷动，赢得了${p}点修为的丰厚奖励！`,
-                win_p: `波照在坊市擂台上遇到了一个手持渡劫丹作为赌注的散修，那人狂妄至极，声称无人能接下他三招。波照微微一笑，闪身避开对方两记杀招后，第三招时一指点在对方手腕上，渡劫丹应声落入波照手中，那散修面如土色。`,
-                win_a: `波照在坊市擂台击败了一位炼丹师出身的修士，那人技不如人却输得心服口服，竟主动将一本泛黄的《炼丹心得》赠予波照。波照翻开一看，里面密密麻麻记载着上百种丹方和火候秘诀，惊喜之下当场学会了炼丹术！`,
-                lose_h: `波照在坊市擂台上遭遇了一位金丹后期的修士，对方灵力浑厚如海，随手一掌便掀起狂风。波照被那股气浪掀飞出去，重重撞在擂台边的石柱上，呕出一口鲜血，胸骨断了三根，奄奄一息地瘫倒在地。`,
-                lose_l: `波照在坊市擂台上与一位剑修交手，对方剑法凌厉如电，波照勉强躲过七剑，第八剑时终于避无可避，被剑脊拍中肩膀，整个人翻下擂台。虽只是皮肉之伤，却在众目睽睽之下丢了颜面。`
-            },
-            '炸炉': {
-                immune: `波照在炼丹时炉火突然失控，丹炉剧烈震颤，发出刺耳的嗡鸣声。换作旁人早已慌乱逃窜，但波照修炼炼丹术多年，临危不乱地打出一道道法诀稳住炉火，最终以精妙的手法将失控的灵气疏导而出，丹炉安然无恙，丹药也完好无损。`,
-                tough: `波照炼丹时一味药材放多了量，丹炉当场炸裂，碎片和火焰四溅！他来不及躲避，只得运转灵力护住周身，硬扛了这场爆炸。虽然衣衫被烧得千疮百孔、头发都焦了一半，但总算保住了性命，只是修为被炸去了20点。`,
-                heavy: `波照在炼制“破障丹”时火候失控，丹炉轰然爆炸！碎片如利刃般四散飞射，波照胸口被一块丹炉残片击中，整个人被冲击波掀飞撞在墙上。他倒在地上咳血不止，脏腑受到重创，寿命折去10年，境界几乎跌落。`
-            },
-            '追杀': {
-                beast: (p) =>
-                    `波照被三名宗门弟子追杀至断魂崖边，前有追兵、后有深渊，眼看走投无路。就在这时，一声震天咆哮从深渊中传出——一头通体漆黑的麒麟神兽冲天而起，一口将三名追杀者吞入腹中！神兽对波照俯首称臣，波照不仅捡回一条命，还得了${p}点修为。`,
-                escape: `波照被仇家率领的十几名修士围追堵截，一路从青石岭杀到断魂谷，血战了三天三夜。他浑身是伤却始终不曾倒下，最终在一处密林的掩护下甩掉了追兵。代价是修为折损了30点，但好歹捡回了一条命。`,
-                caught: `波照在归途中遭遇了宗门执法长老的截杀，那长老根本不给他辩解的机会，一掌拍碎了他的护体灵光。波照倒飞出去撞断了两棵大树，浑身骨骼寸寸作响，修为被震散了80点，身上添了数道深可见骨的伤口。`
-            },
-            '秘境奇遇': {
-                good: (p) =>
-                    `波照在一处废弃的上古洞府中发现了一间尘封已久的藏宝室，里面堆满了灵玉和法器。他还没来得及细看，就触发了禁制，整个洞府开始崩塌！波照在千钧一发之际只来得及抓了一把灵玉和一枚疗伤药就逃了出去，背后洞府轰然坍塌。虽然惊险，但修为暴涨了${p}点！`,
-                bad: `波照在探索一处秘境时误入机关陷阱，无数毒箭从四面八方射来。他左躲右闪却还是中了两箭，箭头上淬了剧毒，伤口迅速发黑。他拼尽全力逃出陷阱区，又吞下随身携带的解毒草才勉强保命，但修为只增长了50点，还落了个轻伤。`
-            },
-            '采补': {
-                win: `波照在客栈打尖时，一个油头粉面的男修凑上前来搭讪，言语间尽是暧昧挑逗。波照冷眼相看，那男修竟趁其不备伸手要按波照的丹田——波照反手一掌拍在那人胸口，将其震飞三尺！那人爬起来捂着胸腹仓皇逃窜，波照顺手拿走了他的储物袋，里面竟有30点修为的灵晶。`,
-                mid: `波照在荒郊野岭被一个修炼采补邪术的男修偷袭得手，那人趁着波照调息疗伤的间隙，从背后封住了他的穴道，强行吸走了他两成修为和三年阳寿。波照恢复行动后恨得咬牙切齿，但那人早已逃之夭夭，只剩波照独自坐在石头上运功调息，面色苍白如纸。`,
-                low: `波照在夜深人静时被一个潜伏已久的采补修士拖入暗巷，那人力气大得出奇，一把攥住波照的脉门让他动弹不得。波照挣扎了一炷香的时间仍无法脱身，最终被强行采补，三成修为和八年阳寿如决堤之水般流失殆尽。波照瘫倒在地，眼里满是屈辱与不甘。`
-            },
-            '高人传功': {
-                low: (p) =>
-                    `波照在山路上遇见一个衣衫褴褛的乞丐老头，那老头坐在路边啃着半个馒头，见波照经过，笑嘻嘻地招手。波照上前一问，那老头竟是个云游散仙，看波照根骨清奇，当场传了他半部功法。波照只觉一股热流在经脉中奔涌，修为涨了${p}点。`,
-                mid: (p) =>
-                    `波照在一处坍塌的山洞深处发现了一具端坐的枯骨，枯骨膝上放着一卷竹简和一封遗书。原来这是三千年前一位合体期大能的坐化之所，遗书将毕生所学托付于有缘人。波照跪拜三拜，竹简化作一道金光没入眉心，修为暴涨${p}点，连体内的毒素也被冲散化解。`,
-                high: (p) =>
-                    `波照在渡劫的雷光之中，忽然看见一道仙光从天而降，一位白衣仙人踏云而来，竟是仙界使者！使者伸手一点，一道法则真意灌入波照天灵，波照顿时明悟了天地运行之理，修为暴涨${p}点，同时领悟了一道法则碎片！`
-            },
-            '魔道偷袭': {
-                high: `波照途径黑风岭时，遭遇了一个魔道高手的埋伏。那魔修身穿黑袍、面容狰狞，手中一柄血红色的长刀散发着森森煞气。波照与他对了三招便知不敌，被一刀劈中胸口，血光迸溅、骨裂声清晰可闻，整个人倒飞出去砸进山壁里，身负重伤。`,
-                low: `波照在夜行途中被三个魔道弟子拦截，这些家伙修为不高但手段阴毒，洒出一把淬毒的暗器封锁了波照的退路。波照虽奋力杀退了两人，却被第三人的毒刺划中了后背，伤势虽不致命，但修为折损了一成。`
-            },
-            '丹会交流': {
-                win: `波照参加了一场地下丹会，会上各路炼丹高手汇聚一堂比拼丹术。波照以一手“九转回火”的绝技技惊四座，炼出的丹药品质远超同侪，被公推为丹会魁首。不仅赢得了150点修为的奖励，还从一个落败的炼丹师手中得到了一本炼丹术秘籍！`,
-                lose: `波照在丹会上与一位老炼丹师比试控火之术，结果对方的修为高出波照两个境界，轻而易举地压制了他的炉火。波照的丹药炼到一半便焦糊了，场面颇为尴尬，不过老炼丹师念在他年幼，还是分给他30点修为作为安慰。`
-            },
-            '反噬': {
-                law: `天道反噬化作一道赤红色的雷劫劈向波照！波照面不改色，体内积蓄的法则之力骤然爆发，在头顶凝聚成一面法则之盾。雷劫劈在盾上激起漫天火花，波照虽被震退三步，却安然无恙，只是损失了100点修为作为代价。`,
-                tough: `天道反噬降临时，波照来不及躲避，只得将全身灵力凝聚于头顶硬扛这一击。雷劫劈落，波照脚下的大地裂开了一道丈许深的裂缝，他口中喷出一口鲜血，寿命折去15年，连修为都散逸了50点战力。`,
-                heavy: `天道反噬如灭世之雷般轰然降临，波照被劈得浑身焦黑、皮开肉绽，整个人陷入了地下三尺深的坑洞中。等他挣扎着爬出来时，已是重伤濒死，寿命折去25年，整个人像被天火灼烧过一般惨不忍睹。`
-            },
-            '渡劫模拟': {
-                immune: (p) =>
-                    `波照在闭关中引动了九重天雷模拟渡劫，一重比一重凶悍的雷劫劈在波照身上，换作旁人早已灰飞烟灭。但波照身具不死之身，每一道雷劫劈下都被他以肉身硬扛，反而将雷霆之力炼化为己用，修为暴涨${p}点！`,
-                fail: `波照强行引动渡劫模拟，结果修为根基不稳，天雷失控反噬自身！他整个人被雷光笼罩，惨叫一声倒在洞府中，浑身抽搐，经脉寸断。勉强保住性命后，境界濒临跌落，伤势沉重到几乎无法站立。`,
-                normal: (p) =>
-                    `波照在洞府中闭关模拟渡劫，一重又一重的雷霆呼啸而至，他在雷光中咬牙坚持了整整三天三夜。最终成功扛过九重天雷，修为暴涨${p}点，但连续三天的雷劫淬炼也让他的寿命折去了5年。`
-            },
-            '顿悟': {
-                super: (l) =>
-                    `波照在月下独自静坐时，忽见漫天星斗闪烁如棋盘，万道流光在夜空中交织成一座巨大的法阵。他心头一震，忽然明悟了天地运行的至理——万法归一！修为当场翻倍，同时顿悟了${l}法则的雏形！整片星空都为之颤抖了一瞬。`,
-                poison: `波照在顿悟的关键时刻，体内的毒素突然爆发！灵气在经脉中狂暴奔涌，竟将毒素推向了全身各处。波照咬紧牙关强行收束灵力，最终虽修为增长了五成，却被毒素侵蚀了五脏六腑，寿命折去10年。`,
-                normal: `波照在观山望水时忽然心有所感，看着流水东去、云卷云舒，竟悟出了“顺势而为”的天道至理。心中的桎梏豁然开朗，积蓄已久的修为在这一刻轰然爆发，直接翻了一倍！`
-            },
-            '仙道大会': {
-                win_c: (p) =>
-                    `波照踏入仙道大会的战场时，台下坐着数十位化神以上的老怪。他一路过关斩将，剑斩七位对手，最后一位更是达到了合体期的老怪！波照以精妙的身法避开对方杀招，一剑刺破其护体灵光，全场震动！波照夺得魁首，修为暴涨${p}点！`,
-                win_l: (p, l) =>
-                    `波照在仙道大会的决赛中遭遇了一位渡劫期的大能，对方随手一挥便是滔天灵压。波照在绝境中忽然触碰到了一道法则的边缘，一剑劈出竟带动了天地规则之力！对方被震退三步，波照趁势追击，赢得魁首之位，修为暴涨${p}点，同时领悟了${l}法则！`,
-                lose_d: `波照在仙道大会上遇到了一个合体巅峰的老怪，对方一出手便是毁天灭地的威压，波照连反应的时间都没有就被一掌拍在心口上，整个人像断了线的风筝一样飞出擂台，血洒长空，落地时已是濒死之躯。`,
-                lose_h: `波照在仙道大会上被一名合体初期的修士击败，对方手中的法器威力惊人，一击便将波照震得五内俱焚、吐血不止，身负重伤，被抬下了擂台。`,
-                lose_l: `波照在仙道大会上与一位化神期的剑修缠斗了数十个回合，最终因灵力不支被对方一剑挑飞了法器，手臂上留下一道长长的伤口，含恨落败。`
-            },
-            '神兽': {
-                win: (p) =>
-                    `波照在深山中遇到了一只正在蜕变的幼年神兽——浑身覆盖着碧绿色鳞片的“苍梧龙蜥”。那神兽对波照充满敌意，波照与它周旋了整整一天一夜，最终以诚意和灵力喂养它，竟赢得了它的认主！苍梧龙蜥化作一道青光融入波照体内，修为暴涨${p}点！`,
-                lose: (p) =>
-                    `波照在一片毒雾弥漫的沼泽中遇到了一只“血瞳蟾蜍”，他以为那是传说中的神兽，兴奋之下冲上去试图收服。结果那蟾蜍喷出一口紫色毒雾，波照躲闪不及被喷了个正着，虽拼死逃了出来，但修为只增长了${p}点，还身中剧毒。`
-            },
-            '领悟法则': (l, c) =>
-                `波照盘坐在静室中已有七日七夜，脑海中各种道法真意翻涌不息。第八日清晨，第一缕阳光透过窗棂照在他的眉心上，波照忽然睁开双眼，眸中闪过一丝法则的光芒——他领悟了${l}法则的碎片！当前进度：${c}/3。`,
-            '天道赐福': (l) =>
-                `天空忽然裂开一道缝隙，一道纯金色的圣光从天而降笼罩了波照！一种明悟涌上心头，那是天地规则对他的认可与馈赠。波照看到一道法则在圣光中凝聚成形，伸手一握——${l}法则碎片+1！`,
-            '远古传承': {
-                good: (p) =>
-                    `波照在探索一处史前遗迹时，触发了地底深处的远古法阵。一道金光从法阵中冲天而起，将波照笼罩其中！他看到了上古时期一位大能的一生，对方的经验和感悟如洪流般涌入波照的脑海，修为暴涨${p}点，同时获得了古神血脉之力！`,
-                bad: (p) =>
-                    `波照在遗迹中误触了一个残破的传承法阵，法阵因为年代太久而运行不稳，磅礴的灵力冲击波照的经脉，他只吸收了两成便被迫中断，还被法阵反震之力所伤，只得了${p}点修为，却落了个轻伤。`
-            },
-            '心魔劫': {
-                immune: (p) =>
-                    `波照在突破境界的关键时刻遭遇了“心魔劫”——比寻常心魔凶残百倍的幻境降临！他看到了自己最深的执念和最黑暗的欲望，但身具不死之身的波照以钢铁般的意志将心魔化身撕成碎片！劫难化作灵气涌入体内，修为暴涨${p}点！`,
-                weak: `“心魔劫”降临！波照看到了自己最恐惧的画面——道侣背叛、修为被废、众叛亲离。他的道心在这一刻产生了裂痕，心魔趁虚而入，疯狂吞噬他的灵力和寿元。等他勉强挣脱幻境时，修为已暴跌三成，寿命折去10年。`,
-                normal: `波照在修炼中忽然被一股无形的力量拖入心魔幻境，无数妖魔鬼怪轮番冲击他的道心。波照闭目盘坐，以“不动明王”心法抵御了七天七夜，最终将心魔缓缓驱散，但修为也折损了一成半。`
-            },
-            '波刚': {
-                lose: (pwr, opp) =>
-                    `波照在荒山夜行时忽然被一道黑影拦住去路——正是恶名昭彰的“采阳大盗”波刚！波刚狞笑着扑了上来（波刚战力 ${opp}），波照奋力反抗（波照战力 ${pwr}）却因修为差距太大被制住，被波刚强行拖入草丛。一夜过后，波照衣衫不整地瘫倒在地，修为暴跌两成，寿命折去5年，连身上都添了数道淤青。`,
-                win: (pwr, opp, g) =>
-                    `波照在归途中又遇到了波刚！那恶贼（战力 ${opp}）以为波照还是当日的软柿子，淫笑着扑了上来。谁料波照（战力 ${pwr}）这一个多月勤修苦练，修为早已今非昔比！一记鞭腿将波刚抽飞三丈远，反手又是一掌震碎了他的护体邪气。波刚仓皇逃走，波照冷笑一声，修为增长了${g}点，战力也涨了10。`,
-                kill: (pwr, opp, g, l) =>
-                    `波照在断魂崖再次遭遇波刚（战力 ${opp}），这一次波刚身边还带着两个帮手。波照（战力 ${pwr}）冷笑一声，一柄长剑横在身前：“今日便是你的死期！”三招之内，波照斩杀了波刚的两名帮凶，最后一剑从波刚头顶劈落，将其劈为两半！波刚的邪气化作一道黑烟消散，波照修为暴涨${g}点，同时领悟了${l}法则！`
-            },
-            '入门试炼': {
-                win: (p) =>
-                    `波照站在山门前的试炼台上，台下是数百名冷眼旁观的弟子。试炼长老一声令下，波照面前浮现出三道关卡——第一关是阵法迷宫，第二关是灵力测试，第三关是与一名筑基期弟子实战。波照以精妙的身法和扎实的修为连过三关，全场哗然！长老赞许地点了点头，赐予波照入门令牌和御风术功法，修为暴涨${p}点。`,
-                lose: `波照满怀信心地踏入宗门试炼场，却在第一关的阵法迷宫中就迷失了方向。他在迷宫里转悠了三天三夜也没找到出口，最后还是试炼长老看不过眼将他捞了出来。长老摇了摇头：“心性尚可，悟性不足，回去再练练吧。”波照面红耳赤地被赶出山门，还挨了守卫两棍子，落了个轻伤。`
-            },
-            '师门任务': {
-                win: (p) =>
-                    `波照接了一个宗门任务——前往黑风岭采集十株“幽冥草”。那黑风岭常年笼罩在瘴气中，凶兽横行，但波照凭借过人的机敏和御风术的身法，三天之内便采够了幽冥草返回宗门。任务长老满意地拍了拍他的肩膀，奖励了${p}点修为和一枚疗伤药。`,
-                lose: `波照接了宗门任务去清剿“铁背山猪”，结果那山猪体型如山岳般庞大，一拱之力便能掀翻巨石。波照与那畜生周旋了半日，非但没能完成任务，反而被山猪追得满山跑，还被拱翻在地、灰头土脸地滚下山坡。回到宗门时衣服破了几十个洞，被罚去打扫藏经阁三个月，修为还折了10点。`
-            },
-            '宗门大比': {
-                win: (p) =>
-                    `宗门大比的日子到了，波照代表外门弟子出战。擂台之上，他以一柄长剑连败四名内门弟子，最后一场对战的是金丹期的师兄，波照以“剑走偏锋”的奇招刺破对方防守，赢得满堂喝彩！宗主亲自赐下渡劫丹一枚，修为暴涨${p}点！`,
-                win_ability: `波照在宗门大比中一路高歌猛进，决赛中他以一手出神入化的掌法将对手逼落擂台。满场欢呼声中，一位白发苍苍的炼丹长老突然站起来：“小子，你掌心藏着一股丹火之气，可愿随我学习炼丹术？”波照大喜过望，当即拜师，获得了炼丹术传承！`,
-                lose_h: `波照在宗门大比的半决赛上遭遇了内门第一人，对方已是金丹巅峰，一招“大日焚天掌”带着灼热的灵压扑面而来。波照奋力抵挡了三个回合，终被一掌拍中胸口，整个人倒飞出去撞碎了擂台护栏，肋骨断了数根，口吐鲜血倒地不起。`,
-                lose_l: `波照在宗门大比中与一个使长枪的弟子交手，对方枪法如龙、连绵不绝，波照躲过了前面十五枪，第十六枪时被枪尖扫中肩膀，带出一道血痕，人也被震下了擂台，虽无大碍但也输了比赛。`
-            },
-            '秘境探索': {
-                win: (p) =>
-                    `宗门发现了一处上古秘境，波照作为精英弟子入选探索队。进入秘境后，波照凭借过人的直觉避开了一路上的凶险机关，在最深处找到了一个隐藏的储物室，里面堆满了灵玉和丹药！波照带走了其中一部分，修为暴涨${p}点，还额外带了两枚疗伤药回来。`,
-                lose: `波照在宗门组织的秘境探索中误入了一处困阵，那阵法以幻术迷惑人心，波照在阵中转了整整三个月才被救援队找到。出来时他面容憔悴、修为几乎耗竭，好在阵中的灵气滋养让他修为增长了50点，但落了一身重伤。`
-            },
-            '掌门传功': {
-                high: (p, l) =>
-                    `掌门在宗门大殿上召见了波照，当着所有长老的面将手掌按在波照头顶：“此子天赋异禀，当得我亲传！”一股浩瀚如海的灵力从掌门掌心涌入波照体内，波照只觉浑身经脉都被洗涤了一遍，修为暴涨${p}点，同时一道法则真意烙印在他的灵台之上——${l}法则+1！满殿震动。`,
-                mid: (p) =>
-                    `掌门在讲道结束后单独留下了波照，指点了他功法中的几处疏漏，又以自身灵力为波照疏通了三处淤塞的经脉。波照只觉浑身通透、神清气爽，修为涨了${p}点。`
-            },
-            '宗门之难': {
-                win: (p) =>
-                    `魔道大军围攻山门！护山大阵摇摇欲坠，弟子们面露惧色。波照一马当先冲上城楼，一柄长剑所向披靡，连斩七名魔道修士！他在城楼上站了三天三夜，杀得浑身浴血、力竭倒下之前，终于等来了援军。魔道退兵后，波照被全宗弟子抬起来抛向天空，修为暴涨${p}点，同时领悟了一道法则！`,
-                lose: `魔道大军来袭时，波照挺身而出，却在战场上遭遇了魔道的一位长老级人物。对方一招“万魔噬心”将波照打入地下三丈深，波照浑身骨骼碎裂、经脉寸断，被同门从废墟中扒出来时只剩了一口气，虽侥幸保住性命，但修为暴跌两成。`
-            },
-            '被抢劫': {
-                win: (pwr, opp, g) =>
-                    `波照在荒郊野外被三个蒙面劫匪拦住去路（对手战力 ${opp}），波照（战力 ${pwr}）冷笑一声，拔剑而上，剑光闪烁间三名劫匪已倒地不起。波照搜刮了他们的储物袋，获得修为+${g}。`,
-                mid: (pwr, opp) =>
-                    `波照遭遇劫匪（对手战力 ${opp}），波照（战力 ${pwr}）一番缠斗后虽击退了对方，但自己也挂了彩，修为折损一成。`,
-                lose: (pwr, opp) =>
-                    `波照不敌劫匪（对手战力 ${opp}），波照（战力 ${pwr}）被洗劫一空，身受重伤，修为暴跌三成，寿命折去3年。`
-            },
-            '路见不平': {
-                win: (pwr, opp, g) =>
-                    `波照途经一座小镇，看到几个恶霸正在欺凌百姓（对手战力 ${opp}），波照（战力 ${pwr}）路见不平拔刀相助，三拳两脚将恶霸打得落荒而逃。百姓们感激涕零，纷纷献上灵物，波照修为+${g}，宗门贡献+2。`,
-                mid: (pwr, opp) =>
-                    `波照插手纠纷（对手战力 ${opp}），波照（战力 ${pwr}）虽然平息了事端，但自己也受了些伤，修为略有损耗。`,
-                lose: (pwr, opp) =>
-                    `波照路见不平（对手战力 ${opp}），波照（战力 ${pwr}）却惹上了硬茬子，被人打得狼狈不堪，重伤而逃。`
-            },
-            '被挑衅': {
-                win: (pwr, opp, g) =>
-                    `波照在酒馆中遇到一个狂妄的修士（对手战力 ${opp}），对方言语挑衅，污蔑波照是废物。波照（战力 ${pwr}）拍桌而起，两人当场动手。波照只用了三招便将对方打趴在地，全场叫好，修为+${g}。`,
-                mid: (pwr, opp) =>
-                    `波照与挑衅者（对手战力 ${opp}）交手，波照（战力 ${pwr}）险胜一招，但自己也挂了彩，修为略有折损。`,
-                lose: (pwr, opp) =>
-                    `波照被挑衅者（对手战力 ${opp}）击败，波照（战力 ${pwr}）当着众人的面被打倒在地，修为大损，重伤。`
-            },
-            '隐世高手': {
-                mild: (pwr, opp) =>
-                    `波照误闯一处禁地，惊动了一位正在闭关的隐世高手（对手战力 ${opp}），波照（战力 ${pwr}）毫无还手之力。高手随手一挥，波照便飞出去数十丈，撞断了三棵大树。高手念其年幼无知，未下杀手，但波照已身负重伤，修为折损15%，寿命-5。`,
-                severe: (pwr, opp) =>
-                    `波照无意中打扰了一位隐世高人（对手战力 ${opp}）的清修，波照（战力 ${pwr}）连反应都来不及。高人随手一击，波照便如断线风筝般飞出，几乎丧命。高人留了一线生机，波照侥幸活命，但修为暴跌五成，寿命-10，濒死。`
-            }
-        };
 
         // ================================================================
         //  辅助函数
@@ -1078,7 +926,7 @@
             const base = G.birthlandData ? G.birthlandData.power : 80;
             const realmAdd = CONFIG.realmCoeff[G.realmIndex] * 50;
             const abilityAdd = (G.abilities || []).length * 30;
-            const specials = ['不死之身', '法天象地', '古神血脉', '神兽伙伴'];
+            const specials = ['不死之身', '法天象地', '古神血脉', '神兽伙伴', '金刚不坏', '剑心通明', '断念剑意', '天眼通', '元神出窍'];
             const specialAdd = (G.abilities || []).filter(a => specials.includes(a)).length * 100;
             const lawAdd = G.laws ? Object.values(G.laws).reduce((a, b) => a + b, 0) * 20 : 0;
             const extra = G.birthlandData ? G.birthlandData.extraPower : 0;
@@ -1104,22 +952,14 @@
             mult += match * 0.30;
             const cb = CONFIG.spiritCount.find(s => s.count === G.spiritCount)?.bonus || 0;
             mult += cb;
-            if (G.worldBuffs) {
-                for (let b of G.worldBuffs)
-                    if (b.buff.cultGain) mult += b.buff.cultGain;
-            }
             let gain = Math.floor(base * mult);
-            if (G.worldBuffs) {
-                for (let b of G.worldBuffs)
-                    if (b.buff.extraAge) G.age += b.buff.extraAge;
-            }
             return gain;
         }
 
         function addLog(msg) {
             if (!G.logs) G.logs = [];
             G.logs.push(`【${G.age}岁】波照 ${msg}`);
-            if (G.logs.length > 60) G.logs.shift();
+            if (G.logs.length > 80) G.logs.shift();
             updateLogUI();
         }
 
@@ -1174,6 +1014,9 @@
                     </div>
                 </div>
             `;
+            let allAbilities = G.abilities || [];
+            let abTags = allAbilities.map(a => `<span class="ability-tag ${CONFIG.elementAbility.includes? '':'gold'}">${a}</span>`)
+                .join('');
             let html = avatarHTML + `
                 <div class="panel-item"><span class="label">🌱 灵根</span><span class="value gold">${getSpiritDisplay()}</span></div>
                 <div class="panel-item"><span class="label">⚔️ 境界</span><span class="value">${realm}</span></div>
@@ -1184,12 +1027,11 @@
                 <div class="panel-item"><span class="label">⚡ 战力</span><span class="value gold">${Math.floor(power)}</span></div>
                 <div class="panel-item"><span class="label">🧬 状态</span><span class="value">${G.status} ${smap[G.status]||'❤️'}</span></div>
                 <div class="panel-item"><span class="label">🏯 宗门</span><span class="value gold">${G.sect || '无'}</span></div>
-                <div class="panel-item"><span class="label">🏯 宗门贡献</span><span class="value gold">${G._sectContribution||0}</span></div>
-                <div class="panel-item" style="flex-wrap:wrap;"><span class="label">📜 能力</span><span>${(G.abilities||[]).map(a=>`<span class="ability-tag">${a}</span>`).join('')||'无'}</span></div>
+                <div class="panel-item"><span class="label">🏯 贡献</span><span class="value gold">${G._sectContribution||0}</span></div>
+                <div class="panel-item" style="flex-wrap:wrap;"><span class="label">📜 能力</span><span>${abTags || '无'}</span></div>
                 <div class="panel-item" style="flex-wrap:wrap;"><span class="label">⚖️ 法则</span><span>${Object.entries(G.laws||{}).map(([k,v])=>`<span class="law-tag ${v>=3?'complete':''}">${k} ${v}/3</span>`).join('')}</span></div>
                 <div class="panel-item" style="flex-wrap:wrap;"><span class="label">🏆 成就</span><span>${CONFIG.achievements.map(a=>`<span class="achieve-tag ${G.achievements && G.achievements[a.id]?'unlocked':'locked'}">${a.name}</span>`).join('')}</span></div>
                 <div class="panel-item" style="flex-wrap:wrap;"><span class="label">🎒 道具</span><span>${Object.entries(G.items||{}).filter(([k,v])=>v>0).map(([k,v])=>`${k}×${v}`).join(' ')||'无'}</span></div>
-                <div class="panel-item" style="flex-wrap:wrap;"><span class="label">🌍 天道</span><span>${(G.worldBuffs||[]).map(b=>`<span class="world-buff">${b.name}</span>`).join('')||'无'}</span></div>
             `;
             p.innerHTML = html;
             updateAvatar();
@@ -1239,7 +1081,9 @@
             document.getElementById('endTitle').textContent = '道陨 · ' + ending.split('：')[0].replace(/[「」]/g, '');
             document.getElementById('endDesc').textContent = ending;
             document.getElementById('endSummary').textContent =
-                `寿元 ${G.age} 岁 · 境界 ${CONFIG.realms[G.realmIndex]||'炼气'} · 战力 ${Math.floor(calcPower())} · 修为 ${Math.floor(G.cult)} · 贡献 ${G._sectContribution||0} · 日志 ${G.logs?G.logs.length:0} 条`;
+                `寿元 ${G.age} 岁 · 境界 ${CONFIG.realms[G.realmIndex]||'炼气'} · 战力 ${Math.floor(calcPower())} · 修为 ${Math.floor(G.cult)} · 贡献 ${G._sectContribution||0}`;
+            const review = document.getElementById('endLogReview');
+            review.innerHTML = G.logs.map(s => `<p>${s}</p>`).join('');
             document.getElementById('endOverlay').classList.add('show');
             document.getElementById('spinBtn').disabled = true;
             addLog(`⚠️ 道陨：${ending}`);
@@ -1257,54 +1101,36 @@
         }
 
         // ================================================================
-        //  渡劫转盘 ———— 修复版：成功率由 baseProb 控制
+        //  渡劫转盘（修复版）
         // ================================================================
         let tribResolve = null;
-        let tribSuccess = false; // 预先计算好的渡劫结果
+        let tribSuccess = false;
 
-        /**
-         * 显示渡劫转盘，由 baseProb 决定成败
-         * @param {number} baseProb  0~100 的成功率
-         * @param {boolean} success  true=成功 false=失败
-         */
         function showTribWheel(baseProb, success) {
             return new Promise((resolve) => {
                 tribResolve = resolve;
                 tribSuccess = success;
-
                 const overlay = document.getElementById('tribOverlay');
                 const wheel = document.getElementById('tribWheel');
                 const resultEl = document.getElementById('tribResult');
                 const probDisplay = document.getElementById('tribProbDisplay');
                 const btn = document.getElementById('tribBtn');
-
-                // 显示成功率信息
                 const pct = Math.round(baseProb);
                 probDisplay.textContent = `⚡ 当前渡劫成功率：${pct}%  · 点击「渡劫」旋转命运之轮`;
-
-                // 动态生成格子：根据 baseProb 决定成功/失败格子的数量
-                // 使用 8 个格子，精度 12.5%
                 const totalSlots = 8;
                 const successSlots = Math.round((baseProb / 100) * totalSlots);
                 const failSlots = totalSlots - successSlots;
-
-                // 构建格子数组：'success' 或 'fail'
                 let slots = [];
                 for (let i = 0; i < successSlots; i++) slots.push('success');
                 for (let i = 0; i < failSlots; i++) slots.push('fail');
-                // 打乱顺序，让成功/失败随机分布
                 for (let i = slots.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
                     [slots[i], slots[j]] = [slots[j], slots[i]];
                 }
-
-                // 如果全成功或全失败，保留一点随机感
                 if (successSlots === 0) slots = ['fail', 'fail', 'fail', 'fail', 'fail', 'fail', 'fail', 'fail'];
                 if (failSlots === 0) slots = ['success', 'success', 'success', 'success', 'success', 'success', 'success',
                     'success'
                 ];
-
-                // 渲染格子
                 wheel.innerHTML = '';
                 slots.forEach((type, idx) => {
                     const div = document.createElement('div');
@@ -1314,7 +1140,6 @@
                     div.textContent = type === 'success' ? '✅ 成功' : '❌ 失败';
                     wheel.appendChild(div);
                 });
-
                 resultEl.textContent = '?';
                 resultEl.className = 'trib-result';
                 btn.disabled = false;
@@ -1322,24 +1147,17 @@
             });
         }
 
-        // 渡劫按钮点击 — 使用预先计算好的结果
         document.getElementById('tribBtn').addEventListener('click', function() {
             const btn = this;
             if (btn.disabled) return;
             btn.disabled = true;
-
             const wheel = document.getElementById('tribWheel');
             const items = wheel.querySelectorAll('.trib-item');
             const resultEl = document.getElementById('tribResult');
-
-            // 根据 tribSuccess 选择要高亮的格子（找第一个匹配类型的格子）
             const targetType = tribSuccess ? 'success' : 'fail';
-
-            // 转盘滚动动画
             let count = 0;
             const maxCount = 20 + Math.floor(Math.random() * 10);
             const interval = 80;
-
             const timer = setInterval(() => {
                 items.forEach(el => el.classList.remove('active'));
                 const showIdx = Math.floor(Math.random() * items.length);
@@ -1347,7 +1165,6 @@
                 count++;
                 if (count >= maxCount) {
                     clearInterval(timer);
-                    // 最终停在目标类型上
                     items.forEach(el => el.classList.remove('active'));
                     let targetEl = null;
                     for (let el of items) {
@@ -1356,20 +1173,11 @@
                             break;
                         }
                     }
-                    if (targetEl) {
-                        targetEl.classList.add('active');
-                        // 如果结果与格子的实际类型匹配，但为了视觉一致性，我们高亮它
-                    } else {
-                        // 保底：高亮第一个
-                        items[0].classList.add('active');
-                    }
-
-                    // 显示结果
+                    if (targetEl) targetEl.classList.add('active');
+                    else items[0].classList.add('active');
                     const label = tribSuccess ? '✅ 渡劫成功！' : '❌ 渡劫失败…';
                     resultEl.textContent = label;
                     resultEl.className = 'trib-result ' + (tribSuccess ? 'success' : 'fail');
-
-                    // 延迟关闭并返回结果
                     setTimeout(() => {
                         document.getElementById('tribOverlay').classList.remove('show');
                         if (tribResolve) {
@@ -1383,7 +1191,7 @@
         });
 
         // ================================================================
-        //  渡劫逻辑（核心修复）
+        //  渡劫逻辑
         // ================================================================
         async function attemptTribulation() {
             if (G.realmIndex >= 7) return;
@@ -1391,8 +1199,6 @@
                 setSubtitle('修为不足，无法渡劫', 'bad');
                 return;
             }
-
-            // ---- 低境界直接突破 ----
             if (G.realmIndex < 2) {
                 G.realmIndex++;
                 G._consecutiveTrib = (G._consecutiveTrib || 0) + 1;
@@ -1409,47 +1215,27 @@
                 }
                 return;
             }
-
-            // ---- 高境界需要法则 ----
             if (G.realmIndex === 5 && !Object.values(G.laws).some(v => v >= 1)) {
                 setSubtitle('法则雏形缺失，瓶颈凝滞！', 'bad');
                 addLog('法则不全，无法渡劫');
                 return;
             }
-
-            // ---- 计算成功率 baseProb ----
             let power = calcPower();
             let baseProb = Math.min(99, 50 + (power - 100) / 20);
-
-            // 渡劫丹：将概率提升到至少 90%
             if (G.items['渡劫丹'] > 0) {
                 G.items['渡劫丹']--;
                 baseProb = Math.max(baseProb, 90);
                 addLog('消耗渡劫丹');
             }
-
-            // 世界buff
-            for (let b of G.worldBuffs) {
-                if (b.buff.tribBuff) baseProb += b.buff.tribBuff;
-            }
             baseProb = Math.min(99, Math.max(0, baseProb));
-
-            // ---- 用 baseProb 决定成败 ----
             const success = Math.random() * 100 < baseProb;
-
-            // ---- 显示渡劫转盘（视觉展示，结果已定） ----
             await showTribWheel(baseProb, success);
-
-            // ---- 处理结果 ----
             if (success) {
-                // 渡劫成功
                 G.realmIndex++;
                 G._consecutiveTrib = (G._consecutiveTrib || 0) + 1;
                 G._flagTribPass = true;
                 G.status = '健康';
                 G._avatarBreakthrough = true;
-
-                // 40% 概率领悟法则
                 if (Math.random() * 100 < 40) {
                     let keys = Object.keys(G.laws);
                     let l = pick(keys);
@@ -1462,21 +1248,7 @@
                     addLog(`未能领悟法则，但获得 ${consolation} 修为补偿`);
                     setSubtitle('未能领悟法则，略有遗憾', 'bad');
                 }
-
-                // 仙门开启 buff
-                for (let b of G.worldBuffs) {
-                    if (b.buff.extraLaw) {
-                        let e = pick(Object.keys(G.laws));
-                        G.laws[e] = (G.laws[e] || 0) + 1;
-                        addLog(`仙门开启，额外获得${e}法则`);
-                        b.used = true;
-                    }
-                }
-                G.worldBuffs = G.worldBuffs.filter(b => !b.used);
-
                 setSubtitle(`渡劫成功！突破至 ${CONFIG.realms[G.realmIndex]}`, 'good');
-
-                // 飞升检测
                 if (G.realmIndex === 7 && Object.values(G.laws).some(v => v >= 3)) {
                     setSubtitle('🎉 飞升成仙！', 'special');
                     addLog('🎉 飞升成仙！通关！');
@@ -1484,17 +1256,15 @@
                     document.getElementById('endDesc').textContent = '波照历经万劫，终证大道，逍遥长生！';
                     document.getElementById('endSummary').textContent =
                         `寿元 ${G.age} 岁 · 境界 大乘 · 战力 ${Math.floor(calcPower())} · 贡献 ${G._sectContribution||0}`;
+                    document.getElementById('endLogReview').innerHTML = G.logs.map(s => `<p>${s}</p>`).join('');
                     document.getElementById('endOverlay').classList.add('show');
                     document.getElementById('spinBtn').disabled = true;
                     return;
                 }
-
                 updatePanel();
                 checkAchievements();
                 checkRealmDrop();
-
             } else {
-                // 渡劫失败
                 if (Math.random() < 0.70) {
                     G.cult *= 0.6;
                     G.age += 15;
@@ -1512,376 +1282,121 @@
         }
 
         // ================================================================
-        //  事件处理（保持原有，不展开）
+        //  事件处理（包含抽象事件）
         // ================================================================
         function handleEvent(eventName) {
             const power = calcPower();
             let story, gain, opp;
 
-            switch (eventName) {
-                case '鸡追': {
-                    if (power > 300) { gain = applyCultGain(20);
+            const abstract = CONFIG.abstractEvents.find(e => e.id === eventName || e.event === eventName);
+            if (abstract) {
+                switch (abstract.type) {
+                    case 'cult': {
+                        gain = applyCultGain(abstract.value || 50);
                         G.cult += gain;
-                        story = STORIES['鸡追'].win(gain);
-                        setSubtitle('反杀灵鸡！', 'good'); } else if (G.status !== '健康' && power <= 300) { G.cult -=
-                            15; if (G.status === '健康') G.status = '轻伤';
-                        else if (G.status === '轻伤') G.status = '重伤';
-                        story = STORIES['鸡追'].lose_old(15);
-                        setSubtitle('旧伤复发', 'bad'); } else { G.cult -= 10;
-                        story = STORIES['鸡追'].lose(10);
-                        setSubtitle('被灵鸡追赶', 'bad'); }
-                    addLog(story);
-                    checkRealmDrop();
-                    break;
-                }
-                case '村斗': {
-                    let opp2 = power * (0.8 + Math.random() * 0.4);
-                    if (power >= opp2) { gain = applyCultGain(30);
-                        G.cult += gain;
-                        G._winVillage = true; if (Math.random() < 0.2) G.items['疗伤药'] = (G.items['疗伤药'] || 0) +
-                            1;
-                        story = STORIES['村斗'].win(gain);
-                        setSubtitle('村斗获胜', 'good'); } else { let h = power < 150;
-                        G.status = h ? '重伤' : '轻伤';
-                        G.cult -= 10;
-                        story = h ? STORIES['村斗'].lose_h : STORIES['村斗'].lose_l;
-                        setSubtitle(`村斗落败，${h?'重伤':'轻伤'}`, 'bad'); }
-                    addLog(story);
-                    checkRealmDrop();
-                    break;
-                }
-                case '采灵草': {
-                    if (G.status.includes('中毒')) { G.age += 5;
-                        story = STORIES['采灵草'].bad;
-                        setSubtitle('毒草相冲', 'bad'); } else { gain = applyCultGain(30);
-                        G.cult += gain; if (G.status === '重伤' && Math.random() < 0.5) { G.items['疗伤药'] = (G
-                                .items['疗伤药'] || 0) + 1;
-                            story = STORIES['采灵草'].heal; } else story = STORIES['采灵草'].good(gain);
-                        setSubtitle('采到灵草', 'good'); }
-                    addLog(story);
-                    checkRealmDrop();
-                    break;
-                }
-                case '摔下山崖': {
-                    if (G.abilities.includes('御风术')) { story = STORIES['摔下山崖'].fly;
-                        setSubtitle('御风飞行', 'good'); } else if (power > 500) { G.cult += 10;
-                        story = STORIES['摔下山崖'].tough;
-                        setSubtitle('肉身硬扛', 'good'); } else { G.age += 3;
-                        G.status = '轻伤';
-                        story = STORIES['摔下山崖'].hurt;
-                        setSubtitle('摔伤', 'bad'); }
-                    addLog(story);
-                    checkRealmDrop();
-                    break;
-                }
-                case '迷路': { G.cult -= 15;
-                    story = STORIES['迷路'].lost;
-                    setSubtitle('误入迷阵', 'bad');
-                    addLog(story);
-                    checkRealmDrop(); break; }
-                case '老农赠药': { G.items['疗伤药'] = (G.items['疗伤药'] || 0) + 1;
-                    story = STORIES['老农赠药'].gain;
-                    setSubtitle('获疗伤药', 'good');
-                    addLog(story); break; }
-                case '灵泉沐浴': { gain = applyCultGain(40);
-                    G.cult += gain;
-                    G.status = '健康';
-                    story = STORIES['灵泉沐浴'].good(gain);
-                    setSubtitle('灵泉洗髓', 'good');
-                    addLog(story);
-                    checkRealmDrop(); break; }
-                case '心魔': {
-                    if (G.abilities.includes('不死之身')) { gain = applyCultGain(50);
-                        G.cult += gain;
-                        story = STORIES['心魔'].immune(gain);
-                        setSubtitle('心魔溃散', 'good'); } else if (power < 200) { G.cult *= 0.8;
-                        G.age += 5;
-                        story = STORIES['心魔'].weak;
-                        setSubtitle('道心失守', 'bad'); } else { G.cult *= 0.9;
-                        story = STORIES['心魔'].normal;
-                        setSubtitle('艰难抵御', 'bad'); }
-                    addLog(story);
-                    checkRealmDrop();
-                    break;
-                }
-                case '擂台': {
-                    let opp2 = power * (0.7 + Math.random() * 0.6);
-                    if (power >= opp2) { gain = applyCultGain(120);
-                        G.cult += gain;
-                        G._winArena = true; if (Math.random() < 0.3 && !G.abilities.includes('炼丹术')) { G
-                                .abilities.push('炼丹术');
-                            story = STORIES['擂台'].win_a;
-                            setSubtitle('获炼丹术', 'good'); } else if (Math.random() < 0.1) { G.items['渡劫丹'] =
-                                (G.items['渡劫丹'] || 0) + 1;
-                            story = STORIES['擂台'].win_p;
-                            setSubtitle('获渡劫丹', 'good'); } else { story = STORIES['擂台'].win_c(gain);
-                            setSubtitle(`擂台获胜，修为+${gain}`, 'good'); } } else { let h = power < 350;
-                        G.status = h ? '重伤' : '轻伤';
-                        G.cult *= 0.8;
-                        story = h ? STORIES['擂台'].lose_h : STORIES['擂台'].lose_l;
-                        setSubtitle(`擂台落败，${h?'重伤':'轻伤'}`, 'bad'); }
-                    addLog(story);
-                    checkRealmDrop();
-                    break;
-                }
-                case '炸炉': {
-                    if (G.abilities.includes('炼丹术')) { story = STORIES['炸炉'].immune;
-                        setSubtitle('炸炉化解', 'good'); } else if (power > 400) { G.cult -= 20;
-                        story = STORIES['炸炉'].tough;
-                        setSubtitle('硬抗炸炉', 'bad'); } else { G.age += 10;
-                        G.status = '重伤';
-                        story = STORIES['炸炉'].heavy;
-                        setSubtitle('炸炉重伤', 'bad'); }
-                    addLog(story);
-                    checkRealmDrop();
-                    break;
-                }
-                case '追杀': {
-                    if (G.abilities.includes('神兽伙伴')) { gain = applyCultGain(100);
-                        G.cult += gain;
-                        story = STORIES['追杀'].beast(gain);
-                        setSubtitle('神兽护主', 'good'); } else if (power > 500) { G.cult -= 30;
-                        story = STORIES['追杀'].escape;
-                        setSubtitle('杀出重围', 'bad'); } else { G.cult -= 80;
-                        G.status = '轻伤';
-                        story = STORIES['追杀'].caught;
-                        setSubtitle('被重创', 'bad'); }
-                    addLog(story);
-                    checkRealmDrop();
-                    break;
-                }
-                case '秘境奇遇': {
-                    if (power > 400) { gain = applyCultGain(200);
-                        G.cult += gain;
-                        G.items['疗伤药'] = (G.items['疗伤药'] || 0) + 1;
-                        story = STORIES['秘境奇遇'].good(gain);
-                        setSubtitle('秘境得宝', 'good'); } else { gain = applyCultGain(50);
-                        G.cult += gain;
-                        G.status = '轻伤';
-                        story = STORIES['秘境奇遇'].bad;
-                        setSubtitle('机关所伤', 'bad'); }
-                    addLog(story);
-                    checkRealmDrop();
-                    break;
-                }
-                case '采补': {
-                    let isCaibupSect = (G._sectSpecial === 'caibup');
-                    if (isCaibupSect && Math.random() < 0.6) {
-                        let extraGain = applyCultGain(20 + Math.floor(Math.random() * 30));
-                        G.cult += extraGain;
-                        addLog(`合欢宗秘术：采补得手，修为+${extraGain}`);
-                        setSubtitle(`合欢宗采补成功！修为+${extraGain}`, 'special');
+                        story = abstract.story ? abstract.story(G) : `波照 ${abstract.desc}，修为+${gain}`;
+                        setSubtitle(`修为 +${gain}`, 'good');
+                        addLog(story);
+                        break;
                     }
-                    if (power >= 500) { G.cult += 30;
-                        story = STORIES['采补'].win;
-                        setSubtitle('击退采补者', 'good'); } else if (power >= 200) { G.cult *= 0.85;
-                        G.age += 3;
-                        G._flagCaibup = true;
-                        story = STORIES['采补'].mid;
-                        setSubtitle('元阳流失', 'bad'); } else { G.cult *= 0.70;
-                        G.age += 8;
-                        G.status = '轻伤';
-                        G._flagCaibup = true;
-                        story = STORIES['采补'].low;
-                        setSubtitle('被采补重创', 'bad'); }
-                    addLog(story);
-                    checkRealmDrop();
-                    break;
+                    case 'ability': {
+                        const abName = abstract.name;
+                        if (!G.abilities.includes(abName)) {
+                            G.abilities.push(abName);
+                            story = abstract.story ? abstract.story(G) : `波照获得能力：${abName}`;
+                            setSubtitle(`获得能力：${abName}`, 'good');
+                            addLog(story);
+                        } else {
+                            story = `波照再次遇到${abstract.label}，但已掌握${abName}，获得少许感悟，修为+20`;
+                            gain = applyCultGain(20);
+                            G.cult += gain;
+                            setSubtitle(`重复能力，修为+20`, 'good');
+                            addLog(story);
+                        }
+                        break;
+                    }
+                    case 'law': {
+                        const lawName = abstract.value;
+                        G.laws[lawName] = (G.laws[lawName] || 0) + 1;
+                        story = abstract.story ? abstract.story(G) : `波照感悟${lawName}法则，法则+1`;
+                        setSubtitle(`${lawName}法则+1（${G.laws[lawName]}/3）`, 'special');
+                        addLog(story);
+                        break;
+                    }
+                    case 'item': {
+                        const itemName = abstract.item;
+                        G.items[itemName] = (G.items[itemName] || 0) + 1;
+                        story = abstract.story ? abstract.story(G) : `波照获得${itemName}×1`;
+                        setSubtitle(`获得${itemName}`, 'good');
+                        addLog(story);
+                        break;
+                    }
+                    case 'event': {
+                        if (abstract.id === '灵蝶奇遇') {
+                            gain = applyCultGain(80);
+                            G.cult += gain;
+                            story = abstract.story(G);
+                            setSubtitle(`灵蝶引路，修为+${gain}`, 'good');
+                            addLog(story);
+                        } else if (abstract.id === '血月心魔') {
+                            if (G.abilities.includes('不死之身') || G.abilities.includes('金刚不坏')) {
+                                gain = applyCultGain(40);
+                                G.cult += gain;
+                                story = `血月之夜，心魔来袭，但波照凭不死之身硬抗，反获修为+${gain}`;
+                                setSubtitle('心魔不侵，反获修为', 'good');
+                                addLog(story);
+                            } else {
+                                G.cult *= 0.9;
+                                G.status = '轻伤';
+                                story = abstract.story(G);
+                                setSubtitle('心魔侵蚀，修为受损', 'bad');
+                                addLog(story);
+                            }
+                        } else if (abstract.id === '古墓探险') {
+                            gain = applyCultGain(50);
+                            G.cult += gain;
+                            G.status = '轻伤';
+                            story = abstract.story(G);
+                            setSubtitle('古墓脱险，修为+50', 'bad');
+                            addLog(story);
+                        } else if (abstract.id === '断崖惊魂') {
+                            G.status = '轻伤';
+                            story = abstract.story(G);
+                            setSubtitle('断崖惊魂，轻伤', 'bad');
+                            addLog(story);
+                        } else {
+                            gain = applyCultGain(30);
+                            G.cult += gain;
+                            story = abstract.story ? abstract.story(G) : `波照经历奇遇，修为+${gain}`;
+                            setSubtitle(`修为+${gain}`, 'good');
+                            addLog(story);
+                        }
+                        break;
+                    }
                 }
-                case '高人传功': {
-                    if (G.realmIndex <= 1) { gain = applyCultGain(30);
-                        G.cult += gain;
-                        story = STORIES['高人传功'].low(gain);
-                        setSubtitle('散仙传功', 'good'); } else if (G.realmIndex <= 3) { gain = applyCultGain(150);
-                        G.cult += gain; if (G.status.includes('中毒')) { G.status = G.status.replace('中毒', '')
-                                .trim() || '健康'; }
-                        story = STORIES['高人传功'].mid(gain);
-                        setSubtitle('大能传功', 'good'); } else { gain = applyCultGain(400);
-                        G.cult += gain;
-                        let keys = Object.keys(G.laws);
-                        let lawKey = pick(keys);
-                        G.laws[lawKey] = (G.laws[lawKey] || 0) + 1;
-                        story = STORIES['高人传功'].high(gain);
-                        setSubtitle('仙界使者醍醐灌顶', 'special'); }
-                    addLog(story);
-                    checkRealmDrop();
-                    break;
-                }
-                case '魔道偷袭': {
-                    if (power > 500) { G.status = '重伤';
-                        story = STORIES['魔道偷袭'].high;
-                        setSubtitle('魔道高手偷袭', 'bad'); } else { G.status = '轻伤';
-                        G.cult *= 0.9;
-                        story = STORIES['魔道偷袭'].low;
-                        setSubtitle('魔道弟子偷袭', 'bad'); }
-                    addLog(story);
-                    checkRealmDrop();
-                    break;
-                }
-                case '丹会交流': {
-                    if (power > 400) { gain = applyCultGain(150);
-                        G.cult += gain; if (!G.abilities.includes('炼丹术')) { G.abilities.push('炼丹术'); }
-                        story = STORIES['丹会交流'].win;
-                        setSubtitle('丹会夺魁', 'good'); } else { gain = applyCultGain(30);
-                        G.cult += gain;
-                        story = STORIES['丹会交流'].lose;
-                        setSubtitle('丹会落败', 'bad'); }
-                    addLog(story);
-                    checkRealmDrop();
-                    break;
-                }
-                case '反噬': {
-                    let total = Object.values(G.laws).reduce((a, b) => a + b, 0);
-                    if (total >= 5) { G.cult -= 100;
-                        story = STORIES['反噬'].law;
-                        setSubtitle('法则化解反噬', 'bad'); } else if (power > 800) { G.age += 15;
-                        G._powerBuff = (G._powerBuff || 0) - 50;
-                        story = STORIES['反噬'].tough;
-                        setSubtitle('硬扛反噬', 'bad'); } else { G.age += 25;
-                        G.status = '重伤';
-                        story = STORIES['反噬'].heavy;
-                        setSubtitle('反噬重创', 'bad'); }
-                    addLog(story);
-                    checkRealmDrop();
-                    break;
-                }
-                case '渡劫模拟': {
-                    if (G.abilities.includes('不死之身')) { gain = Math.floor(G.cult * 0.2);
-                        G.cult += gain;
-                        story = STORIES['渡劫模拟'].immune(gain);
-                        setSubtitle('模拟成功', 'good'); } else if (G.status === '重伤' || G.status === '濒死') { G
-                            .age += 10; if (G.status === '重伤') G.status = '濒死';
-                        else if (G.status === '濒死') { triggerDeath('渡劫模拟失败'); return; }
-                        story = STORIES['渡劫模拟'].fail;
-                        setSubtitle('模拟失败', 'bad'); } else { gain = Math.floor(G.cult * 0.2);
-                        G.cult += gain;
-                        G.age += 5;
-                        story = STORIES['渡劫模拟'].normal(gain);
-                        setSubtitle('模拟成功', 'good'); }
-                    addLog(story);
-                    checkRealmDrop();
-                    break;
-                }
-                case '顿悟': {
-                    if (power > 1000) { let keys = Object.keys(G.laws);
-                        let lawKey = pick(keys);
-                        G.cult *= 2;
-                        G.laws[lawKey] = (G.laws[lawKey] || 0) + 1;
-                        story = STORIES['顿悟'].super(lawKey);
-                        setSubtitle('顿悟！法则+1', 'special'); } else if (G.status.includes('中毒')) { G.age += 10;
-                        G.cult = Math.floor(G.cult * 1.5);
-                        story = STORIES['顿悟'].poison;
-                        setSubtitle('毒气扩散', 'bad'); } else { G.cult *= 2;
-                        story = STORIES['顿悟'].normal;
-                        setSubtitle('顿悟！修为翻倍', 'special'); }
-                    addLog(story);
-                    checkRealmDrop();
-                    break;
-                }
-                case '仙道大会': {
-                    let opp2 = power * (0.6 + Math.random() * 0.8);
-                    if (power >= opp2) { gain = applyCultGain(400);
-                        G.cult += gain;
-                        G._winTourney = true; if (Math.random() < 0.4) { let keys = Object.keys(G.laws);
-                            let lawKey = pick(keys);
-                            G.laws[lawKey] = (G.laws[lawKey] || 0) + 1;
-                            story = STORIES['仙道大会'].win_l(gain, lawKey);
-                            setSubtitle(`大会夺魁，${lawKey}法则+1`, 'good'); } else { story = STORIES['仙道大会']
-                                .win_c(gain);
-                            setSubtitle(`大会夺魁，修为+${gain}`, 'good'); } if (Math.random() < 0.2) G.items[
-                                '渡劫丹'] = (G.items['渡劫丹'] || 0) + 1; } else { let loss = power < 500 ?
-                            '濒死' : (power < 800 ? '重伤' : '轻伤');
-                        G.status = loss;
-                        G.cult *= 0.85;
-                        story = STORIES['仙道大会'][`lose_${loss==='濒死'?'d':loss}`] || `仙道大会落败，${loss}`;
-                        setSubtitle(`仙道大会落败，${loss}`, 'bad'); if (loss === '濒死' && Math.random() < 0.2) { triggerDeath(
-                                '大会重伤'); return; } }
-                    addLog(story);
-                    checkRealmDrop();
-                    break;
-                }
-                case '神兽': {
-                    if (power > 800) { gain = applyCultGain(300);
-                        G.cult += gain; if (!G.abilities.includes('神兽伙伴')) G.abilities.push('神兽伙伴');
-                        story = STORIES['神兽'].win(gain);
-                        setSubtitle('神兽认主', 'special'); } else { gain = applyCultGain(100);
-                        G.cult += gain;
-                        G.status = G.status.includes('中毒') ? '中毒' : '中毒';
-                        story = STORIES['神兽'].lose(gain);
-                        setSubtitle('毒雾侵蚀', 'bad'); }
-                    addLog(story);
-                    checkRealmDrop();
-                    break;
-                }
-                case '领悟法则': {
-                    let keys = Object.keys(G.laws);
-                    let lawKey = keys.reduce((a, b) => G.laws[a] < G.laws[b] ? a : b);
-                    G.laws[lawKey] = (G.laws[lawKey] || 0) + 1;
-                    story = STORIES['领悟法则'](lawKey, G.laws[lawKey]);
-                    setSubtitle(`领悟${lawKey}法则（${G.laws[lawKey]}/3）`, 'special');
-                    addLog(story);
-                    checkAchievements();
-                    break;
-                }
-                case '远古传承': {
-                    if (power > 600) { gain = applyCultGain(500);
-                        G.cult += gain; if (!G.abilities.includes('古神血脉')) G.abilities.push('古神血脉');
-                        story = STORIES['远古传承'].good(gain);
-                        setSubtitle('远古传承，获古神血脉', 'special'); } else { gain = applyCultGain(200);
-                        G.cult += gain;
-                        G.status = '轻伤';
-                        story = STORIES['远古传承'].bad(gain);
-                        setSubtitle('传承失败，轻伤', 'bad'); }
-                    addLog(story);
-                    checkRealmDrop();
-                    break;
-                }
-                case '天道赐福': {
-                    let keys = Object.keys(G.laws);
-                    let lawKey = pick(keys);
-                    G.laws[lawKey] = (G.laws[lawKey] || 0) + 1;
-                    story = STORIES['天道赐福'](lawKey);
-                    setSubtitle(`天道赐福，${lawKey}法则+1`, 'special');
-                    addLog(story);
-                    checkAchievements();
-                    break;
-                }
-                case '心魔劫': {
-                    if (G.abilities.includes('不死之身')) { gain = applyCultGain(80);
-                        G.cult += gain;
-                        story = STORIES['心魔劫'].immune(gain);
-                        setSubtitle('不死意志破心魔劫', 'good'); } else if (power < 300) { G.cult *= 0.7;
-                        G.age += 10;
-                        story = STORIES['心魔劫'].weak;
-                        setSubtitle('心魔劫吞噬', 'bad'); } else { G.cult *= 0.85;
-                        story = STORIES['心魔劫'].normal;
-                        setSubtitle('艰难渡心魔劫', 'bad'); }
-                    addLog(story);
-                    checkRealmDrop();
-                    break;
-                }
+                checkAchievements();
+                checkRealmDrop();
+                updatePanel();
+                return;
+            }
+
+            // 原有战斗事件（精简）
+            switch (eventName) {
                 case '波刚': {
                     let gangPower = G.cult < 300 ? 280 : (G.cult < 2000 ? 680 : 1600);
-                    let isCaibupSect = (G._sectSpecial === 'caibup');
-                    if (isCaibupSect) {
-                        let caibupGain = applyCultGain(10 + Math.floor(Math.random() * 20));
-                        G.cult += caibupGain;
-                        addLog(`合欢宗秘术：与波刚纠缠，采补得手，修为+${caibupGain}`);
-                        setSubtitle(`合欢宗采补波刚！修为+${caibupGain}`, 'special');
-                    }
                     if (power < gangPower) {
                         G.cult *= 0.8;
                         G.age += 5;
                         if (G.status === '轻伤') G.status = '重伤';
                         else if (G.status === '健康') G.status = '轻伤';
-                        story = STORIES['波刚'].lose(power, gangPower);
-                        setSubtitle(`不敌波刚（波照${power} VS 波刚${gangPower}）`, 'bad');
+                        story = `波照不敌波刚（波照${power} VS 波刚${gangPower}），修为大损`;
+                        setSubtitle(`不敌波刚`, 'bad');
                     } else if (power >= gangPower && power < gangPower * 2) {
                         gain = applyCultGain(50);
                         G.cult += gain;
                         G._powerBuff = (G._powerBuff || 0) + 10;
-                        story = STORIES['波刚'].win(power, gangPower, gain);
-                        setSubtitle(`击退波刚（波照${power} VS 波刚${gangPower}）`, 'good');
+                        story = `波照击退波刚（波照${power} VS 波刚${gangPower}），修为+${gain}`;
+                        setSubtitle(`击退波刚`, 'good');
                     } else {
                         gain = applyCultGain(300);
                         G.cult += gain;
@@ -1890,8 +1405,8 @@
                         G.laws[lawKey] = (G.laws[lawKey] || 0) + 1;
                         G._gangKill = (G._gangKill || 0) + 1;
                         G._powerBuff = (G._powerBuff || 0) + 30;
-                        story = STORIES['波刚'].kill(power, gangPower, gain, lawKey);
-                        setSubtitle(`斩杀波刚！（波照${power} VS 波刚${gangPower}）`, 'special');
+                        story = `波照斩杀波刚！（波照${power} VS 波刚${gangPower}），修为+${gain}，${lawKey}法则+1`;
+                        setSubtitle(`斩杀波刚！`, 'special');
                         checkAchievements();
                     }
                     addLog(story);
@@ -1900,28 +1415,22 @@
                 }
                 case '被抢劫': {
                     opp = 150 + Math.floor(Math.random() * 300);
-                    let isCaibupSect = (G._sectSpecial === 'caibup');
                     if (power >= opp * 1.3) {
                         gain = applyCultGain(30);
                         G.cult += gain;
-                        if (isCaibupSect) {
-                            let extra = applyCultGain(15 + Math.floor(Math.random() * 15));
-                            G.cult += extra;
-                            addLog(`合欢宗采补劫匪，额外修为+${extra}`);
-                        }
-                        story = STORIES['被抢劫'].win(power, opp, gain);
-                        setSubtitle(`反杀劫匪！（波照${power} VS 劫匪${opp}）修为+${gain}`, 'good');
+                        story = `波照反杀劫匪（波照${power} VS 劫匪${opp}），修为+${gain}`;
+                        setSubtitle(`反杀劫匪`, 'good');
                     } else if (power >= opp * 0.7) {
                         G.cult *= 0.9;
                         G.status = '轻伤';
-                        story = STORIES['被抢劫'].mid(power, opp);
-                        setSubtitle(`击退劫匪（波照${power} VS 劫匪${opp}），轻伤`, 'bad');
+                        story = `波照击退劫匪（波照${power} VS 劫匪${opp}），轻伤`;
+                        setSubtitle(`击退劫匪，轻伤`, 'bad');
                     } else {
                         G.cult *= 0.7;
                         G.age += 3;
                         G.status = '重伤';
-                        story = STORIES['被抢劫'].lose(power, opp);
-                        setSubtitle(`被劫匪重创！（波照${power} VS 劫匪${opp}）`, 'bad');
+                        story = `波照被劫匪重创！（波照${power} VS 劫匪${opp}）`;
+                        setSubtitle(`被劫匪重创`, 'bad');
                     }
                     addLog(story);
                     checkRealmDrop();
@@ -1929,30 +1438,24 @@
                 }
                 case '路见不平': {
                     opp = 200 + Math.floor(Math.random() * 400);
-                    let isCaibupSect = (G._sectSpecial === 'caibup');
                     if (power >= opp * 1.5) {
                         gain = applyCultGain(50);
                         G.cult += gain;
                         G._sectContribution = (G._sectContribution || 0) + 2;
-                        if (isCaibupSect) {
-                            let extra = applyCultGain(10 + Math.floor(Math.random() * 20));
-                            G.cult += extra;
-                            addLog(`合欢宗采补恶霸，额外修为+${extra}`);
-                        }
-                        story = STORIES['路见不平'].win(power, opp, gain);
-                        setSubtitle(`行侠仗义！（波照${power} VS 恶霸${opp}）修为+${gain}，贡献+2`, 'good');
+                        story = `波照行侠仗义（波照${power} VS 恶霸${opp}），修为+${gain}，贡献+2`;
+                        setSubtitle(`行侠仗义`, 'good');
                     } else if (power >= opp * 0.8) {
                         gain = applyCultGain(20);
                         G.cult += gain;
                         G.status = '轻伤';
-                        story = STORIES['路见不平'].mid(power, opp);
-                        setSubtitle(`平息事端（波照${power} VS 恶霸${opp}），修为+${gain}，轻伤`, 'bad');
+                        story = `波照平息事端（波照${power} VS 恶霸${opp}），修为+${gain}，轻伤`;
+                        setSubtitle(`平息事端，轻伤`, 'bad');
                     } else {
                         G.cult *= 0.8;
                         G.age += 2;
                         G.status = '重伤';
-                        story = STORIES['路见不平'].lose(power, opp);
-                        setSubtitle(`多管闲事惹上强敌（波照${power} VS 恶霸${opp}），重伤！`, 'bad');
+                        story = `波照多管闲事惹上强敌（波照${power} VS 恶霸${opp}），重伤！`;
+                        setSubtitle(`重伤`, 'bad');
                     }
                     addLog(story);
                     checkRealmDrop();
@@ -1960,28 +1463,22 @@
                 }
                 case '被挑衅': {
                     opp = 100 + Math.floor(Math.random() * 500);
-                    let isCaibupSect = (G._sectSpecial === 'caibup');
                     if (power >= opp * 1.5) {
                         gain = applyCultGain(60);
                         G.cult += gain;
-                        if (isCaibupSect) {
-                            let extra = applyCultGain(10 + Math.floor(Math.random() * 20));
-                            G.cult += extra;
-                            addLog(`合欢宗采补挑衅者，额外修为+${extra}`);
-                        }
-                        story = STORIES['被挑衅'].win(power, opp, gain);
-                        setSubtitle(`碾压挑衅者！（波照${power} VS 挑衅者${opp}）修为+${gain}`, 'good');
+                        story = `波照碾压挑衅者（波照${power} VS 挑衅者${opp}），修为+${gain}`;
+                        setSubtitle(`碾压挑衅者`, 'good');
                     } else if (power >= opp * 0.8) {
                         G.cult *= 0.9;
                         G.status = '轻伤';
-                        story = STORIES['被挑衅'].mid(power, opp);
-                        setSubtitle(`险胜（波照${power} VS 挑衅者${opp}），轻伤`, 'bad');
+                        story = `波照险胜（波照${power} VS 挑衅者${opp}），轻伤`;
+                        setSubtitle(`险胜，轻伤`, 'bad');
                     } else {
                         G.cult *= 0.7;
                         G.age += 3;
                         G.status = '重伤';
-                        story = STORIES['被挑衅'].lose(power, opp);
-                        setSubtitle(`被挑衅者击败！（波照${power} VS 挑衅者${opp}）`, 'bad');
+                        story = `波照被挑衅者击败！（波照${power} VS 挑衅者${opp}）`;
+                        setSubtitle(`被击败`, 'bad');
                     }
                     addLog(story);
                     checkRealmDrop();
@@ -1993,14 +1490,14 @@
                         G.cult *= 0.85;
                         G.age += 5;
                         G.status = '重伤';
-                        story = STORIES['隐世高手'].mild(power, opp);
-                        setSubtitle(`冒犯隐世高手（波照${power} VS 高手${opp}），被教训！`, 'bad');
+                        story = `波照冒犯隐世高手（波照${power} VS 高手${opp}），被教训！`;
+                        setSubtitle(`被高手教训`, 'bad');
                     } else {
                         G.cult *= 0.5;
                         G.age += 10;
                         G.status = '濒死';
-                        story = STORIES['隐世高手'].severe(power, opp);
-                        setSubtitle(`隐世高手随手一击（波照${power} VS 高手${opp}），濒死！`, 'bad');
+                        story = `波照被隐世高手随手一击（波照${power} VS 高手${opp}），濒死！`;
+                        setSubtitle(`濒死`, 'bad');
                         if (Math.random() < 0.5) { G.status = '重伤';
                             addLog('隐世高手手下留情，留你一命'); }
                     }
@@ -2008,32 +1505,19 @@
                     checkRealmDrop();
                     break;
                 }
-                default: {}
+                default: {
+                    gain = applyCultGain(20);
+                    G.cult += gain;
+                    addLog(`经历未知事件，修为+${gain}`);
+                    setSubtitle(`修为+${gain}`, 'good');
+                    checkRealmDrop();
+                }
             }
             updatePanel();
         }
 
         // ================================================================
-        //  世界动态
-        // ================================================================
-        function updateWorldBuffs() {
-            let toRemove = [];
-            for (let b of G.worldBuffs) { b.remaining = (b.remaining || 0) - 1; if (b.remaining <= 0) toRemove.push(
-                b); }
-            for (let b of toRemove) { G.worldBuffs = G.worldBuffs.filter(w => w !== b);
-                setSubtitle(`「${b.name}」消退`, 'special');
-                addLog(`天道「${b.name}」平息`); }
-            if (G.age % 20 === 0 && G.age >= 20 && !G._dead) {
-                let evt = pick(CONFIG.worldEvents);
-                G.worldBuffs.push({ ...evt, remaining: evt.duration });
-                setSubtitle(`🌍 天道预警：${evt.name} 降临！`, 'special');
-                addLog(`🌍 触发世界动态：${evt.name}`);
-            }
-            updatePanel();
-        }
-
-        // ================================================================
-        //  转盘 Canvas（主转盘，未改动）
+        //  转盘 Canvas（主转盘）
         // ================================================================
         const canvas = document.getElementById('wheelCanvas');
         const ctx = canvas.getContext('2d');
@@ -2047,78 +1531,69 @@
             let isModao = (G._sectSpecial === 'modao');
             let isCaibup = (G._sectSpecial === 'caibup');
 
-            if (G.cult < 300) {
-                segs = [
-                    { label: '+20修', type: 'cult', value: 20, color: '#b89a6a' },
-                    { label: '+50修', type: 'cult', value: 50, color: '#c8aa7a' },
-                    { label: '+10修', type: 'cult', value: 10, color: '#a88a5a' },
-                    { label: '御风术', type: 'ability', name: '御风术', color: '#6aaa8a' },
-                    { label: '火球术', type: 'ability', name: '火球术', color: '#d47a4a' },
-                    { label: '鸡袭', type: 'event', event: '鸡追', color: '#aa6a5a' },
-                    { label: '村斗', type: 'event', event: '村斗', color: '#7a8a6a' },
-                    { label: '采灵草', type: 'event', event: '采灵草', color: '#6a8a5a' },
-                    { label: '摔崖', type: 'event', event: '摔下山崖', color: '#8a6a4a' },
-                    { label: '波刚', type: 'event', event: '波刚', color: '#8a4a3a' },
-                    { label: '波刚', type: 'event', event: '波刚', color: '#8a4a3a' },
-                    { label: '抢劫', type: 'event', event: '被抢劫', color: '#5a4a4a' },
-                    { label: '路见不平', type: 'event', event: '路见不平', color: '#4a6a5a' },
-                    { label: '挑衅', type: 'event', event: '被挑衅', color: '#6a4a5a' }
-                ];
-                if (isModao) { segs.push({ label: '抢劫', type: 'event', event: '被抢劫', color: '#5a4a4a' });
-                    segs.push({ label: '挑衅', type: 'event', event: '被挑衅', color: '#6a4a5a' }); }
-                if (isCaibup) { segs.push({ label: '采补', type: 'event', event: '采补', color: '#8a4a5a' });
-                    segs.push({ label: '采补', type: 'event', event: '采补', color: '#8a4a5a' }); }
-            } else if (G.cult < 2000) {
-                segs = [
-                    { label: '+80修', type: 'cult', value: 80, color: '#b89a6a' },
-                    { label: '+150修', type: 'cult', value: 150, color: '#c8aa7a' },
-                    { label: '+30修', type: 'cult', value: 30, color: '#a88a5a' },
-                    { label: '飞剑', type: 'ability', name: '飞剑', color: '#d4b04a' },
-                    { label: '炼丹术', type: 'ability', name: '炼丹术', color: '#c06a4a' },
-                    { label: '心魔', type: 'event', event: '心魔', color: '#7a4a6a' },
-                    { label: '擂台', type: 'event', event: '擂台', color: '#6a8a7a' },
-                    { label: '炸炉', type: 'event', event: '炸炉', color: '#aa5a3a' },
-                    { label: '追杀', type: 'event', event: '追杀', color: '#5a6a7a' },
-                    { label: '秘境', type: 'event', event: '秘境奇遇', color: '#4a8a5a' },
-                    { label: '波刚', type: 'event', event: '波刚', color: '#8a4a3a' },
-                    { label: '波刚', type: 'event', event: '波刚', color: '#8a4a3a' },
-                    { label: '采补', type: 'event', event: '采补', color: '#8a4a5a' },
-                    { label: '传功', type: 'event', event: '高人传功', color: '#8a7a4a' },
-                    { label: '魔袭', type: 'event', event: '魔道偷袭', color: '#5a3a5a' },
-                    { label: '丹会', type: 'event', event: '丹会交流', color: '#9a7a4a' },
-                    { label: '大比', type: 'event', event: '宗门大比', color: '#7a5a3a' },
-                    { label: '挑衅', type: 'event', event: '被挑衅', color: '#6a4a5a' }
-                ];
-                if (isModao) { segs.push({ label: '魔袭', type: 'event', event: '魔道偷袭', color: '#5a3a5a' });
-                    segs.push({ label: '追杀', type: 'event', event: '追杀', color: '#5a6a7a' }); }
-                if (isCaibup) { segs.push({ label: '采补', type: 'event', event: '采补', color: '#8a4a5a' });
-                    segs.push({ label: '采补', type: 'event', event: '采补', color: '#8a4a5a' }); }
-            } else {
-                segs = [
-                    { label: '+300修', type: 'cult', value: 300, color: '#b89a6a' },
-                    { label: '+500修', type: 'cult', value: 500, color: '#c8aa7a' },
-                    { label: '+100修', type: 'cult', value: 100, color: '#a88a5a' },
-                    { label: '法天象地', type: 'ability', name: '法天象地', color: '#8a8a4a' },
-                    { label: '不死之身', type: 'ability', name: '不死之身', color: '#4a9a8a' },
-                    { label: '反噬', type: 'event', event: '反噬', color: '#6a3a3a' },
-                    { label: '渡劫模拟', type: 'event', event: '渡劫模拟', color: '#7a4a8a' },
-                    { label: '顿悟', type: 'event', event: '顿悟', color: '#d4b04a' },
-                    { label: '仙道大会', type: 'event', event: '仙道大会', color: '#d4a06a' },
-                    { label: '神兽', type: 'event', event: '神兽', color: '#4a8a6a' },
-                    { label: '波刚', type: 'event', event: '波刚', color: '#8a4a3a' },
-                    { label: '波刚', type: 'event', event: '波刚', color: '#8a4a3a' },
-                    { label: '法则', type: 'event', event: '领悟法则', color: '#8a6ad4' },
-                    { label: '远古传承', type: 'event', event: '远古传承', color: '#8a5a3a' },
-                    { label: '天赐', type: 'event', event: '天道赐福', color: '#d4c04a' },
-                    { label: '心魔劫', type: 'event', event: '心魔劫', color: '#6a3a6a' },
-                    { label: '掌门', type: 'event', event: '掌门传功', color: '#8a6a2a' },
-                    { label: '隐世高手', type: 'event', event: '隐世高手', color: '#3a3a5a' }
-                ];
-                if (isModao) { segs.push({ label: '反噬', type: 'event', event: '反噬', color: '#6a3a3a' });
-                    segs.push({ label: '隐世高手', type: 'event', event: '隐世高手', color: '#3a3a5a' }); }
-                if (isCaibup) { segs.push({ label: '采补', type: 'event', event: '采补', color: '#8a4a5a' });
-                    segs.push({ label: '采补', type: 'event', event: '采补', color: '#8a4a5a' }); }
+            let pool = [];
+            let abstracts = CONFIG.abstractEvents.slice();
+            for (let i = abstracts.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [abstracts[i], abstracts[j]] = [abstracts[j], abstracts[i]];
             }
+            let chosenAbstracts = abstracts.slice(0, 10);
+            chosenAbstracts.forEach(ab => {
+                pool.push({ label: ab.label, type: 'abstract', event: ab.id, color: '#8a7a6a' });
+            });
+
+            const normalEvents = [
+                { label: '波刚', type: 'event', event: '波刚', color: '#8a4a3a' },
+                { label: '抢劫', type: 'event', event: '被抢劫', color: '#5a4a4a' },
+                { label: '路见不平', type: 'event', event: '路见不平', color: '#4a6a5a' },
+                { label: '挑衅', type: 'event', event: '被挑衅', color: '#6a4a5a' },
+                { label: '隐世高手', type: 'event', event: '隐世高手', color: '#3a3a5a' }
+            ];
+            const cultItems = [
+                { label: '+30修', type: 'cult', value: 30, color: '#b89a6a' },
+                { label: '+80修', type: 'cult', value: 80, color: '#c8aa7a' },
+                { label: '+150修', type: 'cult', value: 150, color: '#d4b08a' }
+            ];
+            const allAb = CONFIG.allAbilities.slice();
+            let chosenAb = [];
+            for (let i = 0; i < 3 && allAb.length > 0; i++) {
+                let idx = Math.floor(Math.random() * allAb.length);
+                chosenAb.push(allAb.splice(idx, 1)[0]);
+            }
+            chosenAb.forEach(ab => {
+                pool.push({ label: ab, type: 'ability', name: ab, color: '#6a9a7a' });
+            });
+
+            pool.push(...normalEvents);
+            pool.push(...cultItems);
+
+            if (isModao) {
+                pool.push({ label: '魔袭', type: 'event', event: '魔道偷袭', color: '#5a3a5a' });
+                pool.push({ label: '反噬', type: 'event', event: '反噬', color: '#6a3a3a' });
+            }
+            if (isCaibup) {
+                pool.push({ label: '采补', type: 'event', event: '采补', color: '#8a4a5a' });
+                pool.push({ label: '采补', type: 'event', event: '采补', color: '#8a4a5a' });
+            }
+
+            for (let i = pool.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [pool[i], pool[j]] = [pool[j], pool[i]];
+            }
+            if (pool.length > 18) pool = pool.slice(0, 18);
+            else if (pool.length < 14) {
+                while (pool.length < 14) {
+                    pool.push({ label: '+30修', type: 'cult', value: 30, color: '#b89a6a' });
+                }
+            }
+            segs = pool.map(item => ({
+                label: item.label,
+                type: item.type || 'event',
+                value: item.value || 0,
+                name: item.name || '',
+                event: item.event || '',
+                color: item.color || '#6a5a4a'
+            }));
             return segs;
         }
 
@@ -2182,7 +1657,7 @@
         }
 
         // ================================================================
-        //  spinWheel 和 handleSpinResult（主转盘）
+        //  spinWheel 和 handleSpinResult
         // ================================================================
         function spinWheel() {
             if (isSpinning) return;
@@ -2223,28 +1698,43 @@
         function handleSpinResult(seg) {
             if (G._dead) return;
             let ageAdded = true;
-            if (seg.type === 'ability' && G.abilities.includes(seg.name)) {
-                ageAdded = false;
-                setSubtitle(`已拥有${seg.name}，再抽一次！`, 'special');
-                addLog(`重复能力${seg.name}，重转`);
-                setTimeout(() => spinWheel(), 800);
-                return;
-            }
-            if (seg.type === 'cult') {
+            if (seg.type === 'abstract') {
+                const ab = CONFIG.abstractEvents.find(e => e.id === seg.event);
+                if (ab) {
+                    handleEvent(seg.event);
+                    ageAdded = false;
+                } else {
+                    let gain = applyCultGain(30);
+                    G.cult += gain;
+                    setSubtitle(`奇遇，修为+${gain}`, 'good');
+                    addLog(`奇遇，修为+${gain}`);
+                }
+            } else if (seg.type === 'ability') {
+                if (!G.abilities.includes(seg.name)) {
+                    G.abilities.push(seg.name);
+                    setSubtitle(`获得能力：${seg.name}`, 'good');
+                    addLog(`获得能力：${seg.name}`);
+                    checkAchievements();
+                } else {
+                    ageAdded = false;
+                    setSubtitle(`已拥有${seg.name}，再抽一次！`, 'special');
+                    addLog(`重复能力${seg.name}，重转`);
+                    setTimeout(() => spinWheel(), 800);
+                    return;
+                }
+            } else if (seg.type === 'cult') {
                 let gain = applyCultGain(seg.value);
                 G.cult += gain;
                 setSubtitle(`修为 +${gain}`, 'good');
                 addLog(`修为增加 ${gain}`);
-            } else if (seg.type === 'ability') {
-                G.abilities.push(seg.name);
-                setSubtitle(`获得能力：${seg.name}`, 'good');
-                addLog(`获得能力：${seg.name}`);
-                if (seg.name === '渡劫丹') G.items['渡劫丹'] = (G.items['渡劫丹'] || 0) + 1;
-                if (seg.name === '疗伤药') G.items['疗伤药'] = (G.items['疗伤药'] || 0) + 1;
-                if (seg.name === '解毒丹') G.items['解毒丹'] = (G.items['解毒丹'] || 0) + 1;
-                checkAchievements();
             } else if (seg.type === 'event') {
                 handleEvent(seg.event);
+                ageAdded = false;
+            } else {
+                let gain = applyCultGain(20);
+                G.cult += gain;
+                setSubtitle(`机缘，修为+${gain}`, 'good');
+                addLog(`机缘，修为+${gain}`);
             }
 
             if (ageAdded) {
@@ -2259,7 +1749,6 @@
             let maxLife = CONFIG.realmLifespan[G.realmIndex] + (G._bonusLife || 0);
             if (G.age > maxLife) { triggerDeath('寿元耗尽'); return; }
             recoverStatus();
-            updateWorldBuffs();
             checkAchievements();
             checkRealmDrop();
             updatePanel();
@@ -2314,6 +1803,8 @@
                     pendingSect = sect;
                     btn.disabled = false;
                     setSubtitle(`📜 ${sect.story}`, 'special');
+                    // ★ 添加宗门故事到日志
+                    addLog(`📜 ${sect.story}`);
                     setTimeout(() => {
                         document.getElementById('sectOverlay').classList.remove('show');
                         G.sect = sect.name;
@@ -2382,6 +1873,8 @@
                     resultEl.textContent = `✨ 波照生于「${birth.name}」— ${birth.desc} ✨`;
                     pendingBirth2 = birth;
                     btn.disabled = false;
+                    // ★ 添加出生地日志
+                    addLog(`🌍 波照生于「${birth.name}」，${birth.desc}`);
                     setTimeout(() => {
                         document.getElementById('birthOverlay').classList.remove('show');
                         document.getElementById('spiritOverlay').classList.add('show');
@@ -2438,7 +1931,7 @@
                     birth.items.forEach(item => {
                         if (item === '疗伤药') G.items['疗伤药'] = (G.items['疗伤药'] || 0) + 1;
                         else if (item === '渡劫丹') G.items['渡劫丹'] = (G.items['渡劫丹'] || 0) + 1;
-                        else if (['炼丹术', '御风术', '飞剑', '法天象地', '不死之身'].includes(item)) {
+                        else if (CONFIG.allAbilities.includes(item)) {
                             if (!G.abilities.includes(item)) G.abilities.push(item);
                         }
                     });
@@ -2456,7 +1949,6 @@
                     G._winArena = false;
                     G._winTourney = false;
                     G._poisonAge = 0;
-                    G._flagBreakInBuff = false;
                     G._gangKill = 0;
                     G._sectContribution = 0;
                     G._sectHero = false;
@@ -2464,7 +1956,6 @@
                     G._deathCause = '';
                     G._powerBuff = 0;
                     G.logs = [];
-                    G.worldBuffs = [];
                     G.achievements = {};
                     CONFIG.achievements.forEach(a => G.achievements[a.id] = false);
 
@@ -2472,6 +1963,14 @@
                     resultEl.textContent = `✨ ${finalDisplay} ✨`;
                     if (q.name === '极品') resultEl.style.color = '#ffd700';
                     else resultEl.style.color = '#f5d080';
+
+                    // ★ 添加灵根故事到日志
+                    let spiritStory = '';
+                    if (q.name === '极品') spiritStory = '天资卓越，修行之路一片坦途。';
+                    else if (q.name === '上品') spiritStory = '资质上佳，勤修苦练可成大器。';
+                    else if (q.name === '中品') spiritStory = '资质平平，唯有以勤补拙。';
+                    else spiritStory = '资质愚钝，但心怀坚韧，亦能逆天而行。';
+                    addLog(`🌱 波照的灵根为：${finalDisplay}，${spiritStory}`);
 
                     setTimeout(() => {
                         document.getElementById('spiritOverlay').classList.remove('show');
@@ -2512,7 +2011,7 @@
         initState();
         document.getElementById('mainMenu').style.display = 'none';
         document.getElementById('startOverlay').classList.add('show');
-        console.log('🧘 修仙转盘 · 波途 — 渡劫概率已修复（基于 baseProb 动态控制）');
+        console.log('🧘 修仙转盘 · 波途 — 天衍版：抽象事件、多能力、战力完善、日志回顾，且记录出生、灵根、宗门故事');
     </script>
 
 </body>
