@@ -390,7 +390,6 @@
             background-repeat: no-repeat;
             background-color: #3a3a3a;
         }
-        /* 回退文字样式 */
         .avatar.realm-0 {
             background-color: #6a7a7a;
         }
@@ -769,7 +768,7 @@
                     story: '波照在山中偶遇一只受伤的灵兽，救治之后竟引来万兽山之主，对方见波照与灵兽有缘，便引他入山修行。万兽山以御兽闻名，灵兽辅佐修炼事半功倍。',
                     special: '' }
             ],
-            // 抽象事件
+            // 抽象事件（新增保命道具事件）
             abstractEvents: [
                 { id: '天降流星', label: '天降流星', desc: '一颗流星坠落在波照面前，其中蕴含一块天外陨铁，蕴含着浓郁的星辰之力。', type: 'cult',
                     value: 80, story: (g) => `波照在夜观星象时，忽见一颗流星划破天际，落在不远处。他寻到陨石坑，从中挖出一块拳头大的星辰陨铁，其上星光流转，波照吸收其中精华，修为暴涨80点！` },
@@ -814,7 +813,14 @@
                 { id: '感悟·生死', label: '感悟·生死', desc: '波照目睹一只小兽死去，又见新芽破土，忽悟生死轮回。', type: 'law', value: '生命',
                     story: (g) => `波照在林中看到一只幼鹿被猛兽咬死，心中悲悯。却又见旁边一株枯木上冒出绿芽，他顿悟生死相依，生命法则+1。` },
                 { id: '奇遇·灵泉', label: '奇遇·灵泉', desc: '波照寻到一眼灵泉，泉水含有浓郁的生命力。', type: 'cult', value: 120,
-                    story: (g) => `波照在石缝中发现一眼灵泉，泉水呈乳白色，散发出草木清香。他饮下几口，只觉生机勃勃，修为暴涨120点。` }
+                    story: (g) => `波照在石缝中发现一眼灵泉，泉水呈乳白色，散发出草木清香。他饮下几口，只觉生机勃勃，修为暴涨120点。` },
+                // ===== 新增保命道具奇遇 =====
+                { id: '神秘护符', label: '神秘护符', desc: '波照在古庙中发现一枚护身符，上面刻有“替身”二字，可挡一次致命伤害。', type: 'item',
+                    item: '替身草人', story: (g) => `波照在一座荒废古庙的佛像下发现一个草人，上面缠着红线，灵气流动。他得知这是上古修士炼制的「替身草人」，可在生死之际代死一次。获得替身草人×1。` },
+                { id: '药王谷奇遇', label: '药王谷奇遇', desc: '波照误入药王谷，谷中灵药遍地，还得到了一件保命秘宝。', type: 'item',
+                    item: '替身草人', story: (g) => `波照在迷雾中迷失，误入药王谷，谷中老者赠他一株千年灵芝和一个替身草人，说“此谷缘尽，望君珍重”。获得替身草人×1，疗伤药×1。` },
+                { id: '上古传承', label: '上古传承', desc: '波照在某洞府中接受一位散仙的衣钵，除了功法还有一件保命法器。', type: 'item',
+                    item: '替身草人', story: (g) => `波照在一座残破洞府中发现散仙遗骸，旁边有一枚玉简和一只草人。玉简记载了功法，草人则是散仙炼制的替身傀儡。获得替身草人×1。` }
             ],
             allAbilities: ['飞剑', '御风术', '不死之身', '炼丹术', '法天象地', '剑心通明', '缩地成寸', '金刚不坏', '断念剑意', '天眼通', '元神出窍',
                 '撒豆成兵', '呼风唤雨', '点石成金', '隐身术', '定身术'
@@ -867,7 +873,6 @@
         //  游戏状态
         // ================================================================
         let G = {};
-        // 头像图片缓存：记录每个图片URL是否已成功加载
         const avatarImageCache = {};
 
         function initState() {
@@ -884,7 +889,7 @@
                 cult: 0,
                 basePower: 80,
                 abilities: [],
-                items: { '渡劫丹': 0, '疗伤药': 0, '解毒丹': 0 },
+                items: { '渡劫丹': 0, '疗伤药': 0, '解毒丹': 0, '替身草人': 0 },
                 laws: { '时间': 0, '空间': 0, '命运': 0, '毁灭': 0, '生命': 0 },
                 status: '健康',
                 logs: [],
@@ -912,7 +917,6 @@
                 _extraAbilities: []
             };
             CONFIG.achievements.forEach(a => G.achievements[a.id] = false);
-            // 头像缓存保留（图片文件不变，无需重置）
         }
 
         function rand(min, max) { return Math.random() * (max - min) + min; }
@@ -987,24 +991,15 @@
         }
 
         // ================================================================
-        //  头像更新（根据境界切换图片）
+        //  头像更新（金丹前 obstacle-sprite.png，金丹后 zhujue.jpg）
         // ================================================================
         function updateAvatar() {
             const avatarEl = document.getElementById('avatar');
             if (!avatarEl) return;
-
             const idx = G.realmIndex || 0;
             const chars = ['炼', '筑', '金', '婴', '化', '合', '渡', '仙'];
+            let imgSrc = (idx < 2) ? 'obstacle-sprite.png' : 'zhujue.jpg';
 
-            // 金丹前（index 0,1）使用 obstacle-sprite.png，金丹后（index >=2）使用 zhujue.jpg
-            let imgSrc;
-            if (idx < 2) {
-                imgSrc = 'obstacle-sprite.png';
-            } else {
-                imgSrc = 'zhujue.jpg';
-            }
-
-            // 检查缓存：已成功加载 -> 直接显示图片
             if (avatarImageCache[imgSrc] === true) {
                 avatarEl.style.backgroundImage = `url(${imgSrc})`;
                 avatarEl.style.backgroundSize = 'cover';
@@ -1014,14 +1009,10 @@
                 applyAvatarAnimations(avatarEl, idx);
                 return;
             }
-
-            // 缓存中明确加载失败 -> 回退到文字
             if (avatarImageCache[imgSrc] === false) {
                 showTextAvatar(avatarEl, idx, chars);
                 return;
             }
-
-            // 未缓存，尝试加载图片
             const img = new Image();
             img.onload = function() {
                 avatarImageCache[imgSrc] = true;
@@ -1039,39 +1030,27 @@
             img.src = imgSrc;
         }
 
-        // 应用头像动画（突破、脉动）
         function applyAvatarAnimations(avatarEl, idx) {
             if (G._avatarBreakthrough) {
                 avatarEl.classList.add('breakthrough');
-                setTimeout(() => {
-                    avatarEl.classList.remove('breakthrough');
-                    G._avatarBreakthrough = false;
-                }, 800);
+                setTimeout(() => { avatarEl.classList.remove('breakthrough');
+                    G._avatarBreakthrough = false; }, 800);
             }
-            if (idx === 7) {
-                avatarEl.classList.add('pulse');
-            } else {
-                avatarEl.classList.remove('pulse');
-            }
+            if (idx === 7) avatarEl.classList.add('pulse');
+            else avatarEl.classList.remove('pulse');
         }
 
-        // 回退到文字头像
         function showTextAvatar(avatarEl, idx, chars) {
             avatarEl.className = `avatar realm-${idx}`;
             avatarEl.innerHTML = `<span class="realm-char">${chars[idx]}</span>`;
             avatarEl.style.backgroundImage = '';
             if (G._avatarBreakthrough) {
                 avatarEl.classList.add('breakthrough');
-                setTimeout(() => {
-                    avatarEl.classList.remove('breakthrough');
-                    G._avatarBreakthrough = false;
-                }, 800);
+                setTimeout(() => { avatarEl.classList.remove('breakthrough');
+                    G._avatarBreakthrough = false; }, 800);
             }
-            if (idx === 7) {
-                avatarEl.classList.add('pulse');
-            } else {
-                avatarEl.classList.remove('pulse');
-            }
+            if (idx === 7) avatarEl.classList.add('pulse');
+            else avatarEl.classList.remove('pulse');
         }
 
         // ================================================================
@@ -1121,7 +1100,7 @@
         }
 
         // ================================================================
-        //  成就、状态、死亡
+        //  成就、状态、死亡（增加保命道具逻辑）
         // ================================================================
         function checkAchievements() {
             let unlocked = [];
@@ -1144,20 +1123,44 @@
                 addLog('伤势恢复，回到健康'); } else if (G.status === '重伤' && Math.random() < 0.15 + bonus) { G.status =
                     '轻伤';
                 setSubtitle('伤势好转，重伤→轻伤', 'good');
-                addLog('重伤缓解为轻伤'); } else if (G.status === '濒死' && Math.random() < 0.05 + (p > 500 ? 0.05 : 0)) { G
-                    .status = '重伤';
-                setSubtitle('吊住一口气，濒死→重伤', 'good');
-                addLog('从濒死中缓过来'); }
+                addLog('重伤缓解为轻伤'); } else if (G.status === '濒死') {
+                // 检查替身草人
+                if (G.items['替身草人'] > 0) {
+                    G.items['替身草人']--;
+                    G.status = '重伤';
+                    setSubtitle('替身草人发动！保下一命，重伤', 'special');
+                    addLog('🧵 替身草人替你挡下致命一击，状态恢复为重伤');
+                    updatePanel();
+                    return;
+                } else if (Math.random() < 0.05 + (p > 500 ? 0.05 : 0)) {
+                    G.status = '重伤';
+                    setSubtitle('吊住一口气，濒死→重伤', 'good');
+                    addLog('从濒死中缓过来');
+                } else {
+                    triggerDeath('濒死未能挺过');
+                    return;
+                }
+            }
             if (G.status && G.status.includes('中毒') && Math.random() < 0.20 + (p > 800 ? 0.15 : 0)) {
                 G.status = G.status.replace('中毒', '').trim() || '健康';
                 setSubtitle('毒素消退！', 'good');
                 addLog('解毒成功');
             }
-            if (G.status === '濒死' && Math.random() < 0.20) triggerDeath('濒死未能挺过');
+            updatePanel();
         }
 
         function triggerDeath(reason) {
             if (G._dead) return;
+            // 再次检查替身草人（防止其他流程调用）
+            if (G.items['替身草人'] > 0 && reason !== '寿元耗尽') {
+                G.items['替身草人']--;
+                G.status = '重伤';
+                G._dead = false;
+                setSubtitle('替身草人救你一命！', 'special');
+                addLog('🧵 替身草人代你应劫，重伤但生还');
+                updatePanel();
+                return;
+            }
             G._dead = true;
             G._deathCause = reason;
             const ending = pick(CONFIG.deathEndings);
@@ -1184,7 +1187,7 @@
         }
 
         // ================================================================
-        //  渡劫转盘（修复版）
+        //  渡劫转盘
         // ================================================================
         let tribResolve = null;
         let tribSuccess = false;
@@ -1274,7 +1277,7 @@
         });
 
         // ================================================================
-        //  渡劫逻辑
+        //  渡劫逻辑（降低直接死亡概率）
         // ================================================================
         async function attemptTribulation() {
             if (G.realmIndex >= 7) return;
@@ -1348,7 +1351,8 @@
                 checkAchievements();
                 checkRealmDrop();
             } else {
-                if (Math.random() < 0.70) {
+                // 降低直接死亡概率，从30%降至5%
+                if (Math.random() < 0.95) { // 95%进入重伤
                     G.cult *= 0.6;
                     G.age += 15;
                     G.status = '重伤';
@@ -1356,8 +1360,17 @@
                     addLog('渡劫失败，重伤');
                     checkRealmDrop();
                 } else {
-                    triggerDeath('渡劫失败，魂飞魄散');
-                    return;
+                    // 5%直接死亡，但会先尝试触发替身草人
+                    if (G.items['替身草人'] > 0) {
+                        G.items['替身草人']--;
+                        G.status = '重伤';
+                        setSubtitle('替身草人挡下天劫！', 'special');
+                        addLog('🧵 替身草人代你承受天劫之威，重伤但生还');
+                        checkRealmDrop();
+                    } else {
+                        triggerDeath('渡劫失败，魂飞魄散');
+                        return;
+                    }
                 }
                 G._consecutiveTrib = 0;
                 updatePanel();
@@ -1365,7 +1378,7 @@
         }
 
         // ================================================================
-        //  事件处理（包含抽象事件 + 修复隐世高手）
+        //  事件处理（调整隐世高手为重伤，减少濒死）
         // ================================================================
         function handleEvent(eventName) {
             const power = calcPower();
@@ -1463,7 +1476,7 @@
                 return;
             }
 
-            // ---- 战斗事件（含修复后的隐世高手） ----
+            // ---- 战斗事件 ----
             switch (eventName) {
                 case '波刚': {
                     let gangPower = G.cult < 300 ? 280 : (G.cult < 2000 ? 680 : 1600);
@@ -1511,7 +1524,7 @@
                     } else {
                         G.cult *= 0.7;
                         G.age += 3;
-                        G.status = '重伤';
+                        G.status = '重伤'; // 从濒死改为重伤
                         story = `波照被劫匪重创！（波照${power} VS 劫匪${opp}）`;
                         setSubtitle(`被劫匪重创`, 'bad');
                     }
@@ -1567,23 +1580,21 @@
                     checkRealmDrop();
                     break;
                 }
-                // ★★★ 修复隐世高手事件：加入胜利分支，显示战力对比 ★★★
+                // ★★★ 修改隐世高手：失败时直接重伤（而非濒死），去掉濒死风险 ★★★
                 case '隐世高手': {
-                    opp = 800 + Math.floor(Math.random() * 1200); // 对手战力 800~2000
+                    opp = 800 + Math.floor(Math.random() * 1200);
                     const storyTpl = {
                         win: (pwr, opp) =>
                             `波照与隐世高手对决（波照${pwr} VS 高手${opp}），波照以惊人实力反败为胜！高手惊叹不已，赠予波照一本上古秘籍，修为大增！`,
                         mid: (pwr, opp) =>
                             `波照冒犯隐世高手（波照${pwr} VS 高手${opp}），被教训一顿，身负重伤，但高手留了一线。`,
                         lose: (pwr, opp) =>
-                            `波照触怒隐世高手（波照${pwr} VS 高手${opp}），几乎丧命，修为大损。`
+                            `波照触怒隐世高手（波照${pwr} VS 高手${opp}），险些丧命，但高手手下留情，重伤逃过一劫。`
                     };
                     if (power >= opp * 1.2) {
-                        // 胜利
                         gain = applyCultGain(200 + Math.floor(Math.random() * 200));
                         G.cult += gain;
                         G._powerBuff = (G._powerBuff || 0) + 30;
-                        // 概率获得能力或法则
                         if (Math.random() < 0.3) {
                             let ab = pick(CONFIG.allAbilities.filter(a => !G.abilities.includes(a)));
                             if (ab) {
@@ -1599,8 +1610,7 @@
                             setSubtitle(`击败隐世高手！`, 'good');
                         }
                         addLog(story);
-                    } else if (power >= opp * 0.7) {
-                        // 平局/受伤
+                    } else if (power >= opp * 0.6) {
                         G.cult *= 0.85;
                         G.age += 5;
                         if (G.status === '健康') G.status = '轻伤';
@@ -1609,16 +1619,17 @@
                         setSubtitle(`被高手教训，重伤`, 'bad');
                         addLog(story);
                     } else {
-                        // 失败
-                        G.cult *= 0.5;
+                        // 失败：直接重伤，不再濒死
+                        G.cult *= 0.6;
                         G.age += 10;
-                        G.status = '濒死';
+                        G.status = '重伤';
                         story = storyTpl.lose(power, opp);
-                        setSubtitle(`濒死！`, 'bad');
+                        setSubtitle(`重伤！`, 'bad');
                         addLog(story);
+                        // 小概率高手留情，恢复部分
                         if (Math.random() < 0.3) {
-                            G.status = '重伤';
-                            addLog('隐世高手手下留情，留你一命');
+                            G.status = '轻伤';
+                            addLog('隐世高手手下留情，伤情减轻');
                         }
                     }
                     checkRealmDrop();
@@ -2044,7 +2055,7 @@
                     G.cult = birth.cult;
                     G.basePower = birth.power;
                     G.age = 18;
-                    G.items = { '渡劫丹': 0, '疗伤药': 0, '解毒丹': 0 };
+                    G.items = { '渡劫丹': 0, '疗伤药': 0, '解毒丹': 0, '替身草人': 0 };
                     birth.items.forEach(item => {
                         if (item === '疗伤药') G.items['疗伤药'] = (G.items['疗伤药'] || 0) + 1;
                         else if (item === '渡劫丹') G.items['渡劫丹'] = (G.items['渡劫丹'] || 0) + 1;
@@ -2127,7 +2138,7 @@
         initState();
         document.getElementById('mainMenu').style.display = 'none';
         document.getElementById('startOverlay').classList.add('show');
-        console.log('🧘 修仙转盘 · 波途 — 金丹前 obstacle-sprite.png，金丹后 zhujue.jpg');
+        console.log('🧘 修仙转盘 · 波途 — 新增保命道具，降低濒死概率，隐世高手失败改为重伤');
     </script>
 
 </body>
