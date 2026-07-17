@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>修仙转盘 · 波途 · 修复版</title>
+<title>修仙转盘 · 波途 · 最终版</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;user-select:none;}
 body{background:#1a1410;color:#d4c9b0;font-family:'Georgia','宋体',serif;min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px;background-image:radial-gradient(ellipse at 20% 50%,#2a2018 0%,#0d0a08 100%);}
@@ -127,7 +127,7 @@ canvas#wheelCanvas{width:100%;max-width:440px;height:auto;aspect-ratio:1/1;backg
 
 <script>
 // ================================================================
-// CONFIG — 完整版（包含所有新增功能）
+// CONFIG — 包含所有新增功能，波刚改为女性，波刚之爱改为相遇10次
 // ================================================================
 const CONFIG = {
     realms: ['炼气','筑基','金丹','元婴','化神','合体','渡劫','大乘'],
@@ -161,8 +161,9 @@ const CONFIG = {
         {name:'避劫铜钱',story:'通体金黄的古铜钱，可抵挡一次天劫或杀劫。'},
         {name:'替身符箓',story:'记载着上古替身之术的符箓，危急时刻可化出一道分身代死。'}
     ],
+    // ===== 宗门专属事件（每个宗门4~5个，含正负面） =====
     abstractEvents: [
-        // ---- 正面事件 ----
+        // ---- 通用正面事件 ----
         {id:'天降流星',label:'天降流星',desc:'一颗流星坠落在波照面前，其中蕴含一块天外陨铁。',type:'cult',value:80,story:(g)=>`波照在夜观星象时，忽见一颗流星划破天际，落在不远处。他寻到陨石坑，从中挖出一块拳头大的星辰陨铁，其上星光流转，波照吸收其中精华，修为暴涨80点！`},
         {id:'古树悟道',label:'古树悟道',desc:'波照在一棵万年古树下打坐，忽听树心传来大道之音。',type:'cult',value:60,story:(g)=>`波照在深山中发现一棵遮天蔽日的古榕树，树干上隐隐有符文浮现。他盘坐树下，入定后听到树心传来阵阵道音，仿佛天地初开时的韵律。醒来后修为大增60点。`},
         // ---- 法则事件（化神以上） ----
@@ -179,7 +180,7 @@ const CONFIG = {
         {id:'论道·生死',label:'论道·生死',desc:'波照与一位高僧论生死，悟出生命真谛。',type:'cult',value:130,minRealm:5,story:(g)=>`波照在一座古寺中与一位高僧论生死，高僧的一番话让波照醍醐灌顶，修为暴涨130点。`},
         // ---- 寿元丹事件 ----
         {id:'寿元丹',label:'寿元丹',desc:'波照发现一枚上古寿元丹，服用后寿命大增。',type:'life',value:100,story:(g)=>`波照在一处上古丹房中寻得一枚晶莹的寿元丹，服下后只觉一股暖流涌入四肢百骸，寿元增加了100年！`},
-        // ---- 其他正面 ----
+        // ---- 其他通用正面 ----
         {id:'焚香祈愿',label:'焚香祈愿',desc:'波照在道观中点燃三炷香，虔诚祈愿，香火竟化作一道金光没入眉心。',type:'cult',value:50,story:(g)=>`波照路遇一座破败道观，观中香火已绝。他心生怜悯，点燃三炷香，祈愿众生平安。香火缭绕间，竟化作一道金光涌入他的识海，修为增长50点。`},
         {id:'石壁留影',label:'石壁留影',desc:'波照在山壁上看到一幅古仙人留下的剑痕，其中蕴含着无上剑意。',type:'ability',name:'剑心通明',story:(g)=>`波照在绝壁前看到一道数丈长的剑痕，深可见骨，剑意凛然。他凝神参悟三日，竟从剑痕中领悟了「剑心通明」的能力。`},
         {id:'波蝶引路',label:'波蝶引路',desc:'一只通体散发荧光的波蝶飞来，在波照面前盘旋，似要引他去某处。',type:'event',event:'波蝶奇遇',story:(g)=>`波照在林中遇到一只波蝶，它翩翩飞舞，似乎在指引方向。波照跟随波蝶来到一处隐秘的山谷，谷中波气浓郁，他趁机修炼，修为大增。`},
@@ -195,20 +196,19 @@ const CONFIG = {
         {id:'奇遇·波泉',label:'奇遇·波泉',desc:'波照寻到一眼波泉，泉水含有浓郁的生命力。',type:'cult',value:120,story:(g)=>`波照在石缝中发现一眼波泉，泉水呈乳白色，散发出草木清香。他饮下几口，只觉生机勃勃，修为暴涨120点。`},
         // ---- 丹药事件（百分比） ----
         {id:'波丹妙药',label:'波丹妙药',desc:'波照发现一枚上古波丹，服下后修为大增。',type:'cult_percent',value:0.10,story:(g)=>`波照在一处隐秘洞府中发现一枚通体晶莹的波丹，丹香扑鼻。他盘坐服下，一股精纯药力在体内化开，修为暴涨${Math.floor((G.cult||1)*0.1)}点（10%）！`},
-        // ---- 波兽神兽事件 ----
+        // ---- 波兽神兽通用事件 ----
         {id:'受伤波兽',label:'受伤波兽',desc:'波照在山中发现一只受伤的波兽，悉心照料后获得其感激。',type:'cult',value:60,story:(g)=>`波照在山中遇到一只浑身是伤的波兽，它警惕地瞪着波照，但已无力逃离。波照心生怜悯，用疗伤药为它包扎，又寻来波草喂食。波兽伤势渐愈，临走前将一缕波气渡入波照体内，修为暴涨60点。`},
         {id:'波兽蛋',label:'波兽蛋',desc:'波照在秘境中发现一枚上古波兽蛋，蛋壳上流转着七彩光芒。',type:'ability',name:'神兽伙伴',story:(g)=>`波照在一处被遗忘的秘境中发现一枚巨大的波兽蛋，蛋身温热，隐隐有生命脉动。他将蛋带回悉心孵化，最终破壳而出的竟是一头幼年麒麟！麒麟认波照为主，波照获得「神兽伙伴」的能力。`},
-        // ---- 万兽山专属 ----
-        {id:'万兽朝宗',label:'万兽朝宗',desc:'波照在万兽山深处看到万兽齐聚，朝拜一头远古神兽，他领悟了兽王之意。',type:'sect_event',value:300,story:(g)=>`波照在万兽山深处偶遇百年一遇的“万兽朝宗”盛景，成千上万的波兽、妖兽、神兽齐聚一堂，朝拜一头金色的麒麟神兽。波照感受到磅礴的兽王之气，修为暴涨300点！`},
-        {id:'神兽契约',label:'神兽契约',desc:'波照与一头远古神兽签订契约，获得强大的战力加成。',type:'sect_event_ability',name:'神兽契约',story:(g)=>`波照在万兽山的禁地中遇到一头被封印的远古神兽——九尾天狐。神兽感受到他纯净的波根，主动与他签订契约，从此波照获得「神兽契约」能力，战力大增。`},
-        {id:'兽王传承',label:'兽王传承',desc:'波照获得万兽山历代兽王的传承之力，修为大幅提升。',type:'sect_event_percent',value:0.15,story:(g)=>`波照在万兽山的祖地中接受了历代兽王的传承洗礼，一股狂野的兽王之力涌入体内，修为暴涨${Math.floor((G.cult||1)*0.15)}点（15%）！`},
-        // ---- 负面事件 ----
+        // ---- 通用负面事件 ----
         {id:'血月当空',label:'血月当空',desc:'天现血月，波照体内气血翻涌，心魔蠢蠢欲动。',type:'event',event:'血月心魔',story:(g)=>`血月之夜，天空挂着一轮妖异的红月，波照感到一股无名邪火在体内燃烧，心魔趁机入侵。他盘坐凝神，以剑心通明斩断幻象，最终击退心魔，但修为略有损耗。`},
         {id:'古墓惊魂',label:'古墓惊魂',desc:'波照误入一座古墓，墓中机关重重，他历经生死考验。',type:'event',event:'古墓探险',story:(g)=>`波照在一处荒山发现古墓入口，好奇心驱使下进入。墓中暗箭、毒雾、傀儡轮番来袭，他拼尽全力才逃出生天，虽身受轻伤，但捡到了一些陪葬的波玉，修为增加50点。`},
         {id:'险境·断崖',label:'险境·断崖',desc:'波照在断崖边行走，不慎失足，险些丧命。',type:'event',event:'断崖惊魂',story:(g)=>`波照在悬崖边采摘草药，脚下岩石松动，整个人跌落下去。他拼命抓住崖壁上的藤蔓，这才保住了性命，但手臂被藤蔓割伤，轻伤。`},
         {id:'心魔作祟',label:'心魔作祟',desc:'修炼时心魔入侵，道心不稳。',type:'event',event:'心魔反噬',story:(g)=>`波照闭关修炼时，心魔突然爆发，幻象丛生，他险些走火入魔。拼尽全力才稳住心神，但修为折损不少。`},
         {id:'波气暴动',label:'波气暴动',desc:'天地波气突然狂暴，波照遭受反噬。',type:'cult',value:-40,story:(g)=>`波照修炼之际，天地波气骤然暴动，如刀割般冲击经脉。他强运功法抵御，却仍被震伤，修为倒退40点。`},
         {id:'雷劫余波',label:'雷劫余波',desc:'他人渡劫引来的天雷波及波照。',type:'cult',value:-60,story:(g)=>`不远处有修士渡劫，一道漏网的天雷劈向波照！他仓促应对，仍被雷光扫中，修为大损60点。`},
+        // ---- ★★★ 新增“男采波贼”事件（通用） ★★★ ----
+        {id:'采阳修士',label:'采阳修士',desc:'一个修炼采补邪术的男修盯上了波照的元阳。',type:'event',event:'男采补',story:(g)=>`波照在荒郊野外遇到一个面色苍白的男修，对方淫笑着靠近，声称要采补波照的元阳。波照被迫应战。`},
+        // ---- 原有采补事件（通用） ----
         {id:'采阴补阳',label:'采阴补阳',desc:'被邪修偷袭，元阳被夺。',type:'event',event:'采补',story:(g)=>`波照在客栈休息时，被一个修炼采补邪术的男修盯上。对方趁其不备，以迷香将他迷晕，强行采补，波照醒来后元气大伤。`},
         {id:'桃花劫',label:'桃花劫',desc:'波照误入桃花庵，被一群女修缠住。',type:'event',event:'桃花劫',story:(g)=>`波照在深山中发现一座桃花庵，庵中女修个个妖娆妩媚，将他团团围住。波照被灌下迷情酒，险些失身，最终凭借意志力逃脱，但已是精疲力竭。`},
         {id:'合欢酒宴',label:'合欢酒宴',desc:'被邀请参加合欢宗的酒宴，席间暗藏玄机。',type:'event',event:'合欢酒宴',story:(g)=>`波照受邀参加合欢宗的酒宴，席间香艳无比，众女修频频敬酒。波照察觉到酒中有催情之效，巧妙避过，但为了脱身，不得不假装醉倒，狼狈而逃。`},
@@ -216,7 +216,39 @@ const CONFIG = {
         // 保命道具奇遇
         {id:'神秘护符',label:'神秘护符',desc:'波照在古庙中发现一枚护身符，上面刻有“替身”二字。',type:'item',item:'保命道具',story:(g)=>`波照在一座荒废古庙的佛像下发现一个草人，上面缠着红线，波气流动。他得知这是上古修士炼制的「替身草人」，可在生死之际代死一次。获得保命道具×1。`},
         {id:'药王谷奇遇',label:'药王谷奇遇',desc:'波照误入药王谷，谷中波药遍地，还得到了一件保命秘宝。',type:'item',item:'保命道具',story:(g)=>`波照在迷雾中迷失，误入药王谷，谷中老者赠他一株千年波芝和一个替身草人。获得保命道具×1，疗伤药×1。`},
-        {id:'上古传承',label:'上古传承',desc:'波照在某洞府中接受一位散仙的衣钵，除了功法还有一件保命法器。',type:'item',item:'保命道具',story:(g)=>`波照在一座残破洞府中发现散仙遗骸，旁边有一枚玉简和一只草人。玉简记载了功法，草人则是散仙炼制的替身傀儡。获得保命道具×1。`}
+        {id:'上古传承',label:'上古传承',desc:'波照在某洞府中接受一位散仙的衣钵，除了功法还有一件保命法器。',type:'item',item:'保命道具',story:(g)=>`波照在一座残破洞府中发现散仙遗骸，旁边有一枚玉简和一只草人。玉简记载了功法，草人则是散仙炼制的替身傀儡。获得保命道具×1。`},
+        // ===== ★★★ 新增宗门专属事件（每个宗门4~5个） ★★★ =====
+        // ---- 青云宗（新增3个，已有1个） ----
+        {id:'青云剑诀',label:'青云剑诀',desc:'波照在青云宗秘传剑碑前参悟，意外领悟了失传的剑诀。',type:'sect_ability',sect:'青云宗',name:'天罡剑意',story:(g)=>`波照在青云宗后山的剑碑林中，发现一块布满苔藓的古碑，碑上刻有「天罡剑意」四字。他盘坐参悟七日，终于领悟了这门失传的剑诀，剑气纵横，可破万法。`},
+        {id:'心魔侵扰',label:'心魔侵扰',desc:'修炼青云心法时被心魔入侵，道心不稳。',type:'sect_event',sect:'青云宗',event:'心魔反噬',story:(g)=>`波照在修炼青云心法时，心魔突然爆发，幻象丛生，他险些走火入魔。拼尽全力才稳住心神，但修为折损不少。`},
+        {id:'正道围剿',label:'正道围剿',desc:'波照被其他正道宗门误会，遭到围攻。',type:'sect_event',sect:'青云宗',event:'被挑衅',story:(g)=>`波照在外历练时，被一群其他宗门的修士围住，他们污蔑波照勾结魔道，群起而攻之。波照寡不敌众，身受重伤，修为大损。`},
+        {id:'剑冢参悟',label:'剑冢参悟',desc:'波照在青云宗剑冢中感应到古剑意，获得剑道感悟。',type:'sect_cult',sect:'青云宗',value:80,story:(g)=>`波照在青云宗的剑冢中，面对无数上古残剑，突然感应到一股苍茫的剑意，他盘坐参悟，修为大涨80点。`},
+        // ---- 合欢宗（新增2个，已有2个） ----
+        {id:'合欢秘术',label:'合欢秘术',desc:'波照在合欢宗密室中发现了一卷上古双修秘术，可采补阴阳。',type:'sect_cult',sect:'合欢宗',value:150,story:(g)=>`波照在合欢宗的密室中发现了一卷泛黄的竹简，记载着上古双修秘术。他尝试修炼，竟成功采补了一丝阴阳之气，修为大增150点。`},
+        {id:'采补反噬',label:'采补反噬',desc:'波照采补时遭遇反噬，自身精气被反吸。',type:'sect_event',sect:'合欢宗',event:'采补反噬',story:(g)=>`波照在采补一名修士时，对方体质特殊，竟反过来吸走了波照的精气。波照偷鸡不成蚀把米，修为大损。`},
+        {id:'情劫缠身',label:'情劫缠身',desc:'波照被一名女修痴缠，道心动摇。',type:'sect_event',sect:'合欢宗',event:'桃花劫',story:(g)=>`波照在合欢宗修炼时，被一名同门女修纠缠，对方日日痴缠，波照心力交瘁，修为不进反退。`},
+        {id:'双修顿悟',label:'双修顿悟',desc:'波照与道侣双修时意外顿悟，修为大增。',type:'sect_cult',sect:'合欢宗',value:120,story:(g)=>`波照与一名道侣双修时，阴阳交汇之际，突然波光一闪，领悟了双修之道的真谛，修为暴涨120点。`},
+        // ---- 魔道宗（新增3个，已有1个） ----
+        {id:'血煞炼体',label:'血煞炼体',desc:'波照在魔道宗的试炼场中吸收血煞之气，强化肉身。',type:'sect_cult',sect:'魔道宗',value:200,story:(g)=>`波照在魔道宗的血煞试炼场中，沐浴着浓郁的血煞之气，以魔道秘法炼体。他忍受着万蚁噬骨之痛，最终肉身强度大增，修为暴涨200点。`},
+        {id:'魔功反噬',label:'魔功反噬',desc:'修炼魔功时走火入魔，经脉错乱。',type:'sect_event',sect:'魔道宗',event:'心魔反噬',story:(g)=>`波照修炼魔道功法时，急于求成，导致真气暴走，经脉逆乱。他痛苦地倒在地上，修为折损大半。`},
+        {id:'正道通缉',label:'正道通缉',desc:'波照被正道宗门通缉，四处躲藏。',type:'sect_event',sect:'魔道宗',event:'被抢劫',story:(g)=>`波照的身份暴露，被正道宗门联合通缉，他一路逃亡，途中屡遭截杀，修为大损。`},
+        {id:'血魔传承',label:'血魔传承',desc:'波照在魔道宗禁地获得血魔老祖的传承，修为大增。',type:'sect_cult',sect:'魔道宗',value:250,story:(g)=>`波照在魔道宗禁地中发现血魔老祖的遗骸，旁边一枚玉简记载了血魔大法。他依法修炼，修为暴涨250点。`},
+        // ---- 丹霞谷（新增3个，已有1个） ----
+        {id:'丹霞仙草',label:'丹霞仙草',desc:'波照在丹霞谷的药园中采得一株万年仙草，炼成丹药。',type:'sect_cult',sect:'丹霞谷',value:250,story:(g)=>`波照在丹霞谷的药园深处发现一株通体火红的万年仙草，谷主特准他采摘。他以仙草炼成「九转火波丹」，服下后修为暴涨250点。`},
+        {id:'丹毒反噬',label:'丹毒反噬',desc:'波照炼丹时误入毒草，丹毒侵入五脏。',type:'sect_event',sect:'丹霞谷',event:'古墓探险',story:(g)=>`波照在炼丹时误用了一株毒草，丹炉炸裂，毒烟弥漫。他吸入毒烟，丹毒侵入五脏，身受重伤，修为大损。`},
+        {id:'百草秘境',label:'百草秘境',desc:'波照在丹霞谷秘境中发现一片上古药田，收获颇丰。',type:'sect_cult',sect:'丹霞谷',value:180,story:(g)=>`波照在丹霞谷后山发现一处隐秘的上古药田，田中的波草皆是万年以上的珍品。他小心翼翼地采摘了一批，炼成丹药，修为暴涨180点。`},
+        {id:'丹道论剑',label:'丹道论剑',desc:'波照在丹道大会上与同门切磋丹术，获益良多。',type:'sect_cult',sect:'丹霞谷',value:100,story:(g)=>`波照在丹霞谷的丹道大会上，与同门切磋炼丹术，互相交流心得。他从中领悟了新的丹方，修为增长100点。`},
+        // ---- 天机阁（新增3个，已有1个） ----
+        {id:'天机推演',label:'天机推演',desc:'波照在天机阁的星盘前推演天机，窥见一丝未来。',type:'sect_law',sect:'天机阁',law:'命运',story:(g)=>`波照在天机阁的星盘前，以自身精血为引，推演天机。他窥见未来的一角，命运法则+1，但也因此损耗了不少精气。`},
+        {id:'天机反噬',label:'天机反噬',desc:'波照窥探天机遭天道反噬，双目流血。',type:'sect_event',sect:'天机阁',event:'反噬',story:(g)=>`波照强行推演天机，触怒了天道，一道无形的力量将他击飞，双目流血不止，修为大损。`},
+        {id:'星辰感应',label:'星辰感应',desc:'波照在星盘前感应到星辰之力，获得修为。',type:'sect_cult',sect:'天机阁',value:120,story:(g)=>`波照在天机阁的观星台上，感应到星辰之力涌入体内，他顺势炼化，修为暴涨120点。`},
+        {id:'古阵秘藏',label:'古阵秘藏',desc:'波照在天机阁发现一座上古阵法，从中获得机缘。',type:'sect_cult',sect:'天机阁',value:140,story:(g)=>`波照在天机阁地下发现一座上古传送阵，阵中残留着精纯的波气。他盘坐吸收，修为增长140点。`},
+        // ---- 万兽山（新增1个负面，原有4个正面） ----
+        {id:'万兽朝宗',label:'万兽朝宗',desc:'波照在万兽山深处看到万兽齐聚，朝拜一头远古神兽，他领悟了兽王之意。',type:'sect_cult',sect:'万兽山',value:300,story:(g)=>`波照在万兽山深处偶遇百年一遇的“万兽朝宗”盛景，成千上万的波兽、妖兽、神兽齐聚一堂，朝拜一头金色的麒麟神兽。波照感受到磅礴的兽王之气，修为暴涨300点！`},
+        {id:'神兽契约',label:'神兽契约',desc:'波照与一头远古神兽签订契约，获得强大的战力加成。',type:'sect_ability',sect:'万兽山',name:'神兽契约',story:(g)=>`波照在万兽山的禁地中遇到一头被封印的远古神兽——九尾天狐。神兽感受到他纯净的波根，主动与他签订契约，从此波照获得「神兽契约」能力，战力大增。`},
+        {id:'兽王传承',label:'兽王传承',desc:'波照获得万兽山历代兽王的传承之力，修为大幅提升。',type:'sect_percent',sect:'万兽山',value:0.15,story:(g)=>`波照在万兽山的祖地中接受了历代兽王的传承洗礼，一股狂野的兽王之力涌入体内，修为暴涨${Math.floor((G.cult||1)*0.15)}点（15%）！`},
+        {id:'波兽认主',label:'波兽认主',desc:'波照在万兽山驯服了一头远古波兽幼崽，结下契约。',type:'sect_ability',sect:'万兽山',name:'驭兽通波',story:(g)=>`波照在万兽山的禁地中发现一枚巨卵，他日夜守护，最终破壳而出，竟是一头远古麒麟幼崽。麒麟认他为主，波照获得「驭兽通波」的能力。`},
+        {id:'兽潮暴动',label:'兽潮暴动',desc:'万兽山兽潮失控，波照被发狂的波兽围攻。',type:'sect_event',sect:'万兽山',event:'被抢劫',story:(g)=>`万兽山突然爆发兽潮，无数波兽发狂攻击波照。他奋力抵抗，最终虽击退兽潮，但身受重伤，修为大损。`}
     ],
     allAbilities: ['飞剑','御风术','不死之身','炼丹术','法天象地','剑心通明','缩地成寸','金刚不坏','断念剑意','天眼通','元神出窍','撒豆成兵','呼风唤雨','点石成金','隐身术','定身术','天罡剑意','驭兽通波','波刚之爱','神兽契约','神兽伙伴'],
     deathEndings: [
@@ -235,7 +267,6 @@ const CONFIG = {
         '「瘴气侵体」：中毒太深，无药可救。',
         '「寒毒入骨」：修炼冰系功法走火入魔。'
     ],
-    // ★★★ 修复成就：屠刚勇士与波刚之爱互斥 ★★★
     achievements: [
         {id:'fate_reversal',name:'逆天改命',check:g=>g.birthland==='紫府圣地'&&g.spiritQ.name==='极品'},
         {id:'chosen_one',name:'天选之人',check:g=>g.spiritQ.name==='极品'&&Object.values(g.laws).some(v=>v>=3)},
@@ -252,10 +283,8 @@ const CONFIG = {
         {id:'five_elements',name:'五行俱全',check:g=>['飞剑','御风术','不死之身','炼丹术','法天象地'].every(a=>g.abilities.includes(a))},
         {id:'prodigy',name:'天才修士',check:g=>g.spiritQ.name==='极品'&&g.spiritCount>=2},
         {id:'attribute_master',name:'属性大师',check:g=>{let m=0;for(let el of g.spiritElements)if(g.abilities.includes(CONFIG.elementAbility[el]))m++;return m>=3;}},
-        // 屠刚勇士：必须斩杀且从未失败
         {id:'gang_slayer',name:'屠刚勇士',check:g=>g._gangKill===1 && g._gangLosses===0},
-        // 波刚之爱：失败10次获得
-        {id:'gang_lover',name:'波刚之爱',check:g=>g._gangLosses>=10},
+        {id:'gang_lover',name:'波刚之爱',check:g=>g._gangEncounters>=10},
         {id:'beast_tamer',name:'百兽之王',check:g=>g.abilities.includes('驭兽通波')||g.abilities.includes('神兽契约')}
     ]
 };
@@ -277,8 +306,7 @@ function initState(){
         _flagNearDeath:false,_flagTribPass:false,_flagCaibup:false,_flagRealmUpAfterCaibup:false,
         _consecutiveTrib:0,_winVillage:false,_winArena:false,_winTourney:false,
         _villageFails:0,_arenaFails:0,_tourneyFails:0,
-        _gangEncounters:0,_gangKill:0,
-        _gangLosses:0,  // ★ 开局严格为0
+        _gangEncounters:0,_gangKill:0,_gangLosses:0,
         _deathCause:'',_dead:false,_bonusLife:0,_powerBuff:0,
         _spinLock:false,_avatarBreakthrough:false,_pendingTrib:false,_sectSpecial:''
     };
@@ -420,7 +448,7 @@ function generateLifeSummary(){
     let cultSentence=`凭借坚韧不拔的意志，波照一路修炼至「${finalRealm}」境界，享寿 ${age} 岁。`;
     let abilitySentence=abilities!=='无'?`他苦修多年，精通多种神通：「${abilities}」；在法则感悟上也颇有建树，触及「${laws}」之真谛。`:`虽无惊人神通，但波照一直勤勉修行，不曾懈怠。`;
     let deeds=[];
-    if(gangKill>0)deeds.push('曾与恶徒波刚数次交锋，最终将其斩杀，为一方百姓除害');
+    if(gangKill>0)deeds.push('曾与采阳女贼波刚数次交锋，最终将其斩杀，为一方除害');
     if(tribPass==='成功渡过天劫')deeds.push('成功渡过天劫，修为大进');
     if(achievements!=='无')deeds.push(`一生荣获诸多成就：${achievements}`);
     let deedSentence=deeds.length>0?`波照的一生充满传奇：${deeds.join('；')}。`:'';
@@ -583,7 +611,7 @@ async function attemptTribulation(){
 }
 
 // ================================================================
-// 事件处理（包含波刚之爱修复）
+// 事件处理（包含所有新增宗门事件）
 // ================================================================
 function handleEvent(eventName){
     const power=calcPower();let story,gain,opp;
@@ -660,102 +688,127 @@ function handleEvent(eventName){
             addLog(story);
             checkAchievements();checkRealmDrop();updatePanel();return;
         }
-        // ---- 万兽山专属 ----
-        if(abstract.id==='万兽朝宗'){
-            if(G.sect==='万兽山'){
-                gain=applyCultGain(abstract.value||300);
+        // ===== ★★★ 宗门专属事件处理 ★★★ =====
+        // ---- sect_cult：宗门专属修为 ----
+        if(abstract.type==='sect_cult'){
+            if(abstract.sect && G.sect===abstract.sect){
+                gain=applyCultGain(abstract.value||50);
                 G.cult+=gain;
                 story=abstract.story(G);
-                setSubtitle(`万兽朝宗，修为+${gain}！`,'special');
+                setSubtitle(`宗门机缘，修为+${gain}！`,'special');
                 addLog(story);
             }else{
-                gain=applyCultGain(30);
+                gain=applyCultGain(15);
                 G.cult+=gain;
-                story=`波照在深山中看到一群野兽聚集，虽非万兽朝宗，但也增长了见识，修为+${gain}。`;
+                story=`波照在探索中发现了一些零散机缘，修为+${gain}。`;
                 setSubtitle(`修为+${gain}`,'good');
                 addLog(story);
             }
             checkAchievements();checkRealmDrop();updatePanel();return;
         }
-        if(abstract.id==='神兽契约'){
-            if(G.sect==='万兽山'){
-                if(!G.abilities.includes('神兽契约')){
-                    G.abilities.push('神兽契约');
+        // ---- sect_ability：宗门专属能力 ----
+        if(abstract.type==='sect_ability'){
+            if(abstract.sect && G.sect===abstract.sect){
+                const abName=abstract.name;
+                if(!G.abilities.includes(abName)){
+                    G.abilities.push(abName);
                     story=abstract.story(G);
-                    setSubtitle('获得能力：神兽契约！','special');
+                    setSubtitle(`获得能力：${abName}！`,'special');
                     addLog(story);
                 }else{
-                    gain=applyCultGain(50);
+                    gain=applyCultGain(30);
                     G.cult+=gain;
-                    story=`波照再次与神兽沟通，默契加深，修为+${gain}。`;
+                    story=`波照再次感悟${abName}，略有精进，修为+${gain}。`;
                     setSubtitle(`修为+${gain}`,'good');
                     addLog(story);
                 }
             }else{
-                if(!G.abilities.includes('驭兽通波')){
-                    G.abilities.push('驭兽通波');
-                    story=`波照在一处遗迹中学会了驭兽通波之术。`;
-                    setSubtitle('获得能力：驭兽通波','good');
-                    addLog(story);
-                }else{
-                    gain=applyCultGain(20);
-                    G.cult+=gain;
-                    story=`波照观察野兽习性，略有心得，修为+${gain}。`;
-                    setSubtitle(`修为+${gain}`,'good');
-                    addLog(story);
-                }
+                gain=applyCultGain(15);
+                G.cult+=gain;
+                story=`波照在外历练时获得一些杂学感悟，修为+${gain}。`;
+                setSubtitle(`修为+${gain}`,'good');
+                addLog(story);
             }
             checkAchievements();checkRealmDrop();updatePanel();return;
         }
-        if(abstract.id==='兽王传承'){
-            if(G.sect==='万兽山'){
+        // ---- sect_law：宗门专属法则 ----
+        if(abstract.type==='sect_law'){
+            if(abstract.sect && G.sect===abstract.sect){
+                let lawName=abstract.law||'命运';
+                if(G.realmIndex>=4){
+                    if(G.laws[lawName]>=3){
+                        gain=applyCultGain(80);
+                        G.cult+=gain;
+                        story=`${lawName}法则已圆满，波照将其化为精纯修为，+${gain}。`;
+                        setSubtitle(`${lawName}法则圆满，修为+${gain}`,'good');
+                        addLog(story);
+                    }else{
+                        G.laws[lawName]=(G.laws[lawName]||0)+1;
+                        story=abstract.story(G);
+                        setSubtitle(`${lawName}法则+1（${G.laws[lawName]}/3）`,'special');
+                        addLog(story);
+                    }
+                }else{
+                    gain=applyCultGain(30);
+                    G.cult+=gain;
+                    story=`波照试图推演天机，但境界不足，仅得些许感悟，修为+${gain}。`;
+                    setSubtitle(`修为+${gain}`,'good');
+                    addLog(story);
+                }
+            }else{
+                gain=applyCultGain(15);
+                G.cult+=gain;
+                story=`波照在星盘前随意观看，未能领悟天机，修为+${gain}。`;
+                setSubtitle(`修为+${gain}`,'good');
+                addLog(story);
+            }
+            checkAchievements();checkRealmDrop();updatePanel();return;
+        }
+        // ---- sect_percent：宗门专属百分比修为 ----
+        if(abstract.type==='sect_percent'){
+            if(abstract.sect && G.sect===abstract.sect){
                 let percent=abstract.value||0.15;
                 let gainAmount=Math.floor(G.cult*percent);
                 G.cult+=gainAmount;
                 story=abstract.story(G);
-                setSubtitle(`兽王传承，修为+${gainAmount}（${Math.round(percent*100)}%）`,'special');
+                setSubtitle(`宗门传承，修为+${gainAmount}（${Math.round(percent*100)}%）`,'special');
                 addLog(story);
             }else{
-                gain=applyCultGain(30);
+                gain=applyCultGain(20);
                 G.cult+=gain;
-                story=`波照在野外获得一些兽王残留气息，修为+${gain}。`;
+                story=`波照在外感受到一些传承气息，略有收获，修为+${gain}。`;
                 setSubtitle(`修为+${gain}`,'good');
                 addLog(story);
             }
             checkAchievements();checkRealmDrop();updatePanel();return;
         }
-        // ---- 其他宗门专属 ----
-        if(abstract.id==='合欢秘术'){
-            if(G.sectSpecial==='caibup'){gain=applyCultGain(150);G.cult+=gain;story=`波照在合欢宗密室中发现了上古双修秘术，他依法修炼，采补阴阳，修为暴涨${gain}点！`;setSubtitle(`合欢秘术，修为+${gain}`,'special');addLog(story);}
-            else{if(!G.abilities.includes('缩地成寸')){G.abilities.push('缩地成寸');story='波照在密室中发现了一卷普通功法，虽非合欢秘术，但也让他领悟了「缩地成寸」的能力。';setSubtitle('获得能力：缩地成寸','good');addLog(story);}else{gain=applyCultGain(30);G.cult+=gain;story=`波照在密室中只找到一些杂物，但聊胜于无，修为+${gain}。`;setSubtitle(`修为+${gain}`,'good');addLog(story);}}
+        // ---- sect_event：宗门专属负面事件 ----
+        if(abstract.type==='sect_event'){
+            if(abstract.sect && G.sect===abstract.sect){
+                // 直接触发对应的通用事件
+                if(abstract.event){
+                    // 调用通用事件处理（但注意避免递归）
+                    // 这里直接根据event执行对应逻辑
+                    handleEvent(abstract.event);
+                }else{
+                    // 默认负面效果
+                    G.cult*=0.85;
+                    G.status='轻伤';
+                    story=abstract.story(G);
+                    setSubtitle(`宗门劫难，修为受损！`,'bad');
+                    addLog(story);
+                }
+            }else{
+                gain=applyCultGain(10);
+                G.cult+=gain;
+                story=`波照在外历练，略有收获，修为+${gain}。`;
+                setSubtitle(`修为+${gain}`,'good');
+                addLog(story);
+            }
             checkAchievements();checkRealmDrop();updatePanel();return;
         }
-        if(abstract.id==='青云剑诀'){
-            if(G.sect==='青云宗'){if(!G.abilities.includes('天罡剑意')){G.abilities.push('天罡剑意');story=abstract.story(G);setSubtitle('领悟天罡剑意！','special');addLog(story);}else{gain=applyCultGain(60);G.cult+=gain;story=`波照再次参悟剑碑，略有心得，修为+${gain}。`;setSubtitle(`修为+${gain}`,'good');addLog(story);}}
-            else{gain=applyCultGain(40);G.cult+=gain;story=`波照在剑碑前参悟，虽不得要领，但也略有收获，修为+${gain}。`;setSubtitle(`修为+${gain}`,'good');addLog(story);}
-            checkAchievements();checkRealmDrop();updatePanel();return;
-        }
-        if(abstract.id==='血煞炼体'){
-            if(G.sect==='魔道宗'){gain=applyCultGain(abstract.value||200);G.cult+=gain;story=abstract.story(G);setSubtitle(`血煞炼体，修为+${gain}`,'good');addLog(story);}
-            else{gain=applyCultGain(50);G.cult+=gain;story=`波照尝试血煞炼体，但体质不合，勉强吸收了一些血气，修为+${gain}。`;setSubtitle(`修为+${gain}`,'good');addLog(story);}
-            checkAchievements();checkRealmDrop();updatePanel();return;
-        }
-        if(abstract.id==='丹霞仙草'){
-            if(G.sect==='丹霞谷'){gain=applyCultGain(abstract.value||250);G.cult+=gain;story=abstract.story(G);setSubtitle(`丹霞仙草，修为+${gain}`,'good');addLog(story);}
-            else{gain=applyCultGain(60);G.cult+=gain;story=`波照采到一株普通波草，炼成丹药，修为+${gain}。`;setSubtitle(`修为+${gain}`,'good');addLog(story);}
-            checkAchievements();checkRealmDrop();updatePanel();return;
-        }
-        if(abstract.id==='天机推演'){
-            if(G.sect==='天机阁'){let lawName='命运';if(G.laws[lawName]>=3){gain=applyCultGain(100);G.cult+=gain;story=`命运法则已圆满，天机推演化为精纯修为，+${gain}。`;setSubtitle(`修为+${gain}`,'good');addLog(story);}else{G.laws[lawName]=(G.laws[lawName]||0)+1;story=abstract.story(G);setSubtitle(`命运法则+1（${G.laws[lawName]}/3)`,'special');addLog(story);}}
-            else{gain=applyCultGain(30);G.cult+=gain;story=`波照试图推演天机，但不得其法，只获得些许感悟，修为+${gain}。`;setSubtitle(`修为+${gain}`,'good');addLog(story);}
-            checkAchievements();checkRealmDrop();updatePanel();return;
-        }
-        if(abstract.id==='波兽认主'){
-            if(G.sect==='万兽山'){if(!G.abilities.includes('驭兽通波')){G.abilities.push('驭兽通波');story=abstract.story(G);setSubtitle('获得驭兽通波！','special');addLog(story);}else{gain=applyCultGain(50);G.cult+=gain;story=`波照再次与波兽沟通，默契加深，修为+${gain}。`;setSubtitle(`修为+${gain}`,'good');addLog(story);}}
-            else{gain=applyCultGain(30);G.cult+=gain;story=`波照偶遇一只普通野兽，并未认主，但得了些皮毛，修为+${gain}。`;setSubtitle(`修为+${gain}`,'good');addLog(story);}
-            checkAchievements();checkRealmDrop();updatePanel();return;
-        }
-        // ---- 通用 ----
+
+        // ---- 其他通用事件处理 ----
         switch(abstract.type){
             case'cult':{
                 if(abstract.minRealm && G.realmIndex<abstract.minRealm){
@@ -812,6 +865,41 @@ function handleEvent(eventName){
                 break;
             }
             case'event':{
+                // 处理通用事件（男采补等）
+                if(eventName==='男采补' || abstract.id==='采阳修士'){
+                    // 男采补逻辑
+                    if(power>500){
+                        gain=applyCultGain(40);
+                        G.cult+=gain;
+                        story=`波照遇到采阳修士，对方试图偷袭，但波照修为深厚，反手将其制伏，并从其身上搜出一些波药，修为+${gain}。`;
+                        setSubtitle(`击退采阳修士，修为+${gain}`,'good');
+                        addLog(story);
+                    }else if(power>200){
+                        G.cult*=0.9;
+                        G.status='轻伤';
+                        story=`波照与采阳修士缠斗，虽将其击退，但自己也受了轻伤，修为略有损耗。`;
+                        setSubtitle('勉强击退，轻伤','bad');
+                        addLog(story);
+                    }else{
+                        if(G.items['疗伤药']>0){
+                            G.items['疗伤药']--;
+                            G.cult*=0.8;
+                            G.age+=5;
+                            G.status='轻伤';
+                            story=`波照被采阳修士偷袭得手，但凭借疗伤药保住了元气，轻伤。`;
+                            setSubtitle('被采补，疗伤药保命','bad');
+                            addLog(story);
+                        }else{
+                            G.cult*=0.6;
+                            G.age+=10;
+                            G.status='重伤';
+                            story=`波照被采阳修士强行采补，元阳流失，身受重伤。`;
+                            setSubtitle('被采补，重伤','bad');
+                            addLog(story);
+                        }
+                    }
+                    checkAchievements();checkRealmDrop();updatePanel();return;
+                }
                 if(abstract.id==='波蝶奇遇'){gain=applyCultGain(80);G.cult+=gain;story=abstract.story(G);setSubtitle(`波蝶引路，修为+${gain}`,'good');addLog(story);}
                 else if(abstract.id==='血月心魔'||abstract.id==='心魔反噬'){
                     if(G.abilities.includes('不死之身')||G.abilities.includes('金刚不坏')){gain=applyCultGain(40);G.cult+=gain;story=`心魔来袭，但波照凭不死之身硬抗，反获修为+${gain}`;setSubtitle('心魔不侵，反获修为','good');addLog(story);}
@@ -867,18 +955,17 @@ function handleEvent(eventName){
         return;
     }
 
-    // ---- 战斗事件 ----
+    // ---- 战斗事件（波刚、村斗等） ----
     switch(eventName){
-        // ===== ★★★ 波刚事件（修复版） ★★★ =====
+        // ===== 波刚事件（女性，波刚之爱改为相遇10次） =====
         case '波刚': {
-            // 如果已经处理过（斩杀或爱），则不再出现
             if (G._gangKill === 1 || G._gangKill === 2) {
                 gain = applyCultGain(20);
                 G.cult += gain;
                 if (G._gangKill === 1) {
-                    story = `波照已斩杀波刚，再无恶徒骚扰，安心修炼，修为+${gain}。`;
+                    story = `波照已斩杀采阳女贼波刚，再无恶徒骚扰，安心修炼，修为+${gain}。`;
                 } else {
-                    story = `波刚已被波照的魅力折服，主动离去，再无纷扰，安心修炼，修为+${gain}。`;
+                    story = `波刚被波照的坚韧打动，主动离去，再无纷扰，安心修炼，修为+${gain}。`;
                 }
                 setSubtitle(`修为+${gain}`, 'good');
                 addLog(story);
@@ -898,6 +985,17 @@ function handleEvent(eventName){
             }
 
             G._gangEncounters = (G._gangEncounters || 0) + 1;
+            addLog(`💕 波照与采阳女贼波刚相遇（第${G._gangEncounters}次）。`);
+            
+            if (G._gangEncounters >= 10 && !G.abilities.includes('波刚之爱')) {
+                G.abilities.push('波刚之爱');
+                G._gangKill = 2;
+                addLog('💘 波刚被波照的坚韧与魅力深深折服，从此消失于江湖！波照获得能力“波刚之爱”！');
+                setSubtitle('💘 波刚之爱！波刚主动离去，获得能力！', 'special');
+                checkAchievements();
+                updatePanel();
+            }
+
             let rawNaked = (G.birthlandData ? (G.birthlandData.power + (G.birthlandData.extraPower || 0)) : 80) + CONFIG.realmCoeff[G.realmIndex] * 50;
             let nakedPower = Math.floor(rawNaked * (1 + G.spiritQ.power));
             let gangPower = Math.floor(nakedPower * (0.8 + Math.random() * 0.4) + calcPower() * 0.2);
@@ -905,38 +1003,25 @@ function handleEvent(eventName){
             
             let detail = '';
             if (power < gangPower) {
-                // 失败（被采补）
                 let lossDesc = [
-                    `波刚一把抓住波照，狞笑着撕开他的衣衫，露出白皙的胸膛，波刚伸出猩红的舌头舔舐他的脖颈，波照浑身战栗，却无力反抗。波刚吸吮着他精纯的元阳，波照的精气如泉涌般流失，最终瘫软在地，气息奄奄。`,
-                    `波刚将波照压在身下，邪笑着在他耳边吹气，双手在他身上游走，贪婪地吸取他的阳元。波照愤怒地挣扎，却被波刚死死按住，只能感受着自己的修为一点点被抽走，最后连抬手的力气都没有了。`,
-                    `波刚祭出邪器"摄魂铃"，铃声一响，波照便觉神魂颠倒，身体不受控制地跪伏在波刚面前。波刚捏着他的下巴，逼他吞下一颗催情丹，随后开始采补，波照在迷乱中元阳尽失，几乎被榨干。`
+                    `波刚一把抓住波照，冷笑着将他按在石壁上，俯身在他耳边轻语：“你的元阳，我收下了。”波照挣扎不得，只能感觉自己的修为如流水般被她吸走，最终瘫软在地。`,
+                    `波刚妩媚一笑，指尖划过波照的胸膛，波照只觉浑身燥热，修为竟不受控制地涌向波刚。待他回过神来，已是元气大伤。`,
+                    `波刚祭出一条红绫，缠住波照的腰身，将他拽入怀中。波照奋力抵抗，却被她死死制住，一身修为被她采补殆尽。`
                 ];
                 detail = pick(lossDesc);
                 G.cult *= 0.7;
                 G.age += 8;
                 if (G.status === '健康') G.status = '轻伤';
                 else if (G.status === '轻伤') G.status = '重伤';
-                story = `波照遭遇采阳大盗波刚（波照${power} VS 波刚${gangPower}），${detail} 波照勉强逃脱，但修为大损，身心受创。`;
+                story = `波照遭遇采阳女贼波刚（波照${power} VS 波刚${gangPower}），${detail} 波照勉强逃脱，但修为大损，身心受创。`;
                 setSubtitle(`被波刚采补，修为大损`, 'bad');
-                
-                // ★ 只有在这里增加失败计数
                 G._gangLosses = (G._gangLosses || 0) + 1;
                 addLog(`💔 波照已被波刚采补 ${G._gangLosses} 次。`);
-                // 当失败达到10次，触发“波刚之爱”（但必须尚未触发过）
-                if (G._gangLosses >= 10 && !G.abilities.includes('波刚之爱')) {
-                    G.abilities.push('波刚之爱');
-                    G._gangKill = 2; // 标记为“爱”结束
-                    addLog('💘 波刚被波照的魅力深深折服，从此消失于江湖！波照获得能力“波刚之爱”！');
-                    setSubtitle('💘 波刚之爱！波刚主动离去，获得能力！', 'special');
-                    checkAchievements();
-                    updatePanel();
-                }
             } else if (power >= gangPower && power < gangPower * 1.5) {
-                // 击退
                 let winDesc = [
-                    `波照一脚踹翻波刚，骑在他身上，挥拳猛击他的脸颊，波刚惨叫求饶。波照恨意未消，又撕碎了他的邪服，在他胸口画了一道羞辱的符文，波刚羞愤交加，捂着胸口逃窜。`,
-                    `波照以御风术凌空跃起，一脚踏在波刚头上，将他踩入泥中。波刚挣扎着抬起头，波照却在他脸上啐了一口唾沫，冷笑道："你的采补术，不过如此。"波刚羞恼地化作黑烟散去。`,
-                    `波照祭出飞剑，剑光一闪削去了波刚的半截头发，波刚惊恐地抱住头顶，波照又顺手扯下他的裤子，露出白花花的屁股，波刚尖叫着捂裆逃走，狼狈不堪。`
+                    `波照一把抓住波刚的手腕，反手一扭，将她制住。波刚惊呼一声，挣扎中衣衫凌乱，波照趁机在她脸颊上画了一道羞辱的符文，波刚羞愤交加，化作一团黑烟遁走。`,
+                    `波照以御风术闪到波刚身后，一脚踹在她臀部，将她踢飞数丈。波刚翻滚着爬起来，狼狈地整理衣裙，恨恨地瞪了波照一眼，转身逃走。`,
+                    `波照祭出飞剑，剑光一闪削断了波刚的发带，她长发披散，羞恼地捂着脸逃离现场。`
                 ];
                 detail = pick(winDesc);
                 gain = applyCultGain(60);
@@ -945,12 +1030,11 @@ function handleEvent(eventName){
                 story = `波照再遇波刚（波照${power} VS 波刚${gangPower}），${detail} 波照击退波刚，修为+${gain}。`;
                 setSubtitle(`击退波刚，恶趣味反杀`, 'good');
             } else {
-                // 斩杀（必须之前从未失败过）
                 if (G._gangLosses === 0) {
                     let killDesc = [
-                        `波照一把抓住波刚的命根子，狞笑着用力一捏，波刚发出凄厉的惨叫，爆碎成血雾。波照拍拍手，啐道："从此世间再无采阳贼！"`,
-                        `波照以法天象地化身为巨人，将波刚攥在手心，像捏臭虫一样将他捏爆，波刚的邪魂被炼化，只留下一摊恶臭的黑血。`,
-                        `波照引动天雷，一道紫电将波刚从头到脚劈成焦炭，随即一脚踏碎，灰烬中飞出一缕黑烟，被波照张口吸入，炼化为修为。`
+                        `波照一剑贯穿波刚的心口，她瞪大了眼睛，难以置信地看着波照，口中呢喃：“你……你竟舍得……”随即化作飞灰消散。`,
+                        `波照以法天象地化身为巨人，一巴掌将波刚拍入地下，波刚闷哼一声，再无声息。`,
+                        `波照引动天雷，一道紫电将波刚从头到脚劈成焦炭，她的波魂在雷光中尖叫着消散。`
                     ];
                     detail = pick(killDesc);
                     gain = applyCultGain(300);
@@ -958,17 +1042,16 @@ function handleEvent(eventName){
                     let keys = Object.keys(G.laws);
                     let lawKey = pick(keys);
                     G.laws[lawKey] = (G.laws[lawKey] || 0) + 1;
-                    G._gangKill = 1; // 斩杀
+                    G._gangKill = 1;
                     G._powerBuff = (G._powerBuff || 0) + 30;
-                    story = `波照终遇波刚（波照${power} VS 波刚${gangPower}），${detail} 波照彻底斩杀波刚，为民除害！修为+${gain}，${lawKey}法则+1。`;
+                    story = `波照终遇波刚（波照${power} VS 波刚${gangPower}），${detail} 波照彻底斩杀采阳女贼波刚，为民除害！修为+${gain}，${lawKey}法则+1。`;
                     setSubtitle(`斩杀波刚！`, 'special');
                     checkAchievements();
                 } else {
-                    // 之前失败过，只能击退
                     let winDesc2 = [
-                        `波照一脚踹翻波刚，骑在他身上，挥拳猛击他的脸颊，波刚惨叫求饶。波照恨意未消，又撕碎了他的邪服，在他胸口画了一道羞辱的符文，波刚羞愤交加，捂着胸口逃窜。`,
-                        `波照以御风术凌空跃起，一脚踏在波刚头上，将他踩入泥中。波刚挣扎着抬起头，波照却在他脸上啐了一口唾沫，冷笑道："你的采补术，不过如此。"波刚羞恼地化作黑烟散去。`,
-                        `波照祭出飞剑，剑光一闪削去了波刚的半截头发，波刚惊恐地抱住头顶，波照又顺手扯下他的裤子，露出白花花的屁股，波刚尖叫着捂裆逃走，狼狈不堪。`
+                        `波照一把抓住波刚的手腕，反手一扭，将她制住。波刚惊呼一声，挣扎中衣衫凌乱，波照趁机在她脸颊上画了一道羞辱的符文，波刚羞愤交加，化作一团黑烟遁走。`,
+                        `波照以御风术闪到波刚身后，一脚踹在她臀部，将她踢飞数丈。波刚翻滚着爬起来，狼狈地整理衣裙，恨恨地瞪了波照一眼，转身逃走。`,
+                        `波照祭出飞剑，剑光一闪削断了波刚的发带，她长发披散，羞恼地捂着脸逃离现场。`
                     ];
                     detail = pick(winDesc2);
                     gain = applyCultGain(60);
@@ -982,7 +1065,7 @@ function handleEvent(eventName){
             checkRealmDrop();
             break;
         }
-        // ---- 其他战斗事件（保持原样） ----
+        // ---- 其他战斗事件 ----
         case'村斗':{
             if(G._winVillage){gain=applyCultGain(15);G.cult+=gain;story=`波照已称霸村中擂台，无人敢挑战，安心修炼，修为+${gain}。`;setSubtitle(`修为+${gain}`,'good');addLog(story);checkRealmDrop();updatePanel();return;}
             if(G._villageFails>=2){gain=applyCultGain(10);G.cult+=gain;story=`波照在村中擂台连败两次，不再有人邀他比试，他默默修炼，修为+${gain}。`;setSubtitle(`修为+${gain}`,'good');addLog(story);checkRealmDrop();updatePanel();return;}
@@ -1092,6 +1175,7 @@ let currentSegments=[],spinAngle=0,isSpinning=false;const PI=Math.PI;
 
 function getSegments(){
     let segs=[],isModao=(G._sectSpecial==='modao'),isCaibup=(G._sectSpecial==='caibup'),pool=[];
+    // 过滤掉宗门专属事件中的保命道具（保命道具单独处理）
     let allAbstracts=CONFIG.abstractEvents.filter(e=>!(e.type==='item'&&e.item==='保命道具'));
     let shuffled=[...allAbstracts];
     for(let i=shuffled.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]];}
@@ -1107,7 +1191,7 @@ function getSegments(){
     if(!G._winVillage&&G._villageFails<2){pool.push({label:'村斗',type:'event',event:'村斗',color:'#7a8a6a'});pool.push({label:'村斗',type:'event',event:'村斗',color:'#7a8a6a'});}
     if(G._winVillage&&!G._winArena&&G._arenaFails<2){pool.push({label:'擂台',type:'event',event:'擂台',color:'#6a8a7a'});pool.push({label:'擂台',type:'event',event:'擂台',color:'#6a8a7a'});}
     if(G._winArena&&!G._winTourney&&G._tourneyFails<2){pool.push({label:'仙道大会',type:'event',event:'仙道大会',color:'#d4a06a'});pool.push({label:'仙道大会',type:'event',event:'仙道大会',color:'#d4a06a'});}
-    // 波刚：仅在未处理时出现
+    // 波刚
     if(G._gangKill===0 && !G.abilities.includes('波刚之爱')){
         let count=1+(G._gangEncounters||0);
         for(let i=0;i<Math.min(count,4);i++){
@@ -1190,7 +1274,7 @@ function handleSpinResult(seg){
 }
 
 // ================================================================
-// 宗门抽取、出生地、波根测试
+// 宗门抽取、出生地、波根测试（不变）
 // ================================================================
 let sectTimer=null,pendingSect=null;
 function initSectOverlay(){
@@ -1275,8 +1359,8 @@ document.getElementById('testSpiritBtn').addEventListener('click',function(){
             if(birth.name==='紫府圣地'){let keys=Object.keys(G.laws);G.laws[pick(keys)]=1;}
             G._bonusLife=birth.bonusLife||0;G._flagNearDeath=false;G._flagTribPass=false;G._flagCaibup=false;G._flagRealmUpAfterCaibup=false;
             G._consecutiveTrib=0;G._winVillage=false;G._winArena=false;G._winTourney=false;
-            G._villageFails=0;G._arenaFails=0;G._tourneyFails=0;G._gangEncounters=0;G._gangKill=0;
-            G._gangLosses=0;  // ★ 严格初始化为0
+            G._villageFails=0;G._arenaFails=0;G._tourneyFails=0;
+            G._gangEncounters=0;G._gangKill=0;G._gangLosses=0;
             G._dead=false;G._deathCause='';G._powerBuff=0;G.logs=[];G.achievements={};
             CONFIG.achievements.forEach(a=>G.achievements[a.id]=false);
             let finalDisplay=getSpiritDisplay();resultEl.textContent=`✨ ${finalDisplay} ✨`;
@@ -1307,7 +1391,7 @@ document.getElementById('spinBtn').addEventListener('click',function(){spinWheel
 initState();
 document.getElementById('mainMenu').style.display='none';
 document.getElementById('startOverlay').classList.add('show');
-console.log('🧘 修仙转盘 · 波途 — 修复版：开局不再获得波刚之爱，所有功能完整');
+console.log('🧘 修仙转盘 · 波途 — 所有宗门已平衡（4~5个事件，含正负面）');
 </script>
 </body>
 </html>
