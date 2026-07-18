@@ -127,12 +127,13 @@ canvas#wheelCanvas{width:100%;max-width:440px;height:auto;aspect-ratio:1/1;backg
 
 <script>
 // ================================================================
-// CONFIG — 包含所有新增功能，波刚改为女性，波刚之爱改为相遇10次
+// CONFIG — 包含所有新增功能
 // ================================================================
 const CONFIG = {
     realms: ['炼气','筑基','金丹','元婴','化神','合体','渡劫','大乘'],
     realmCult: [0,100,300,800,2000,5000,12000,25000],
-    realmLifespan: [100,150,250,400,600,900,1300,Infinity],
+    // ★★★ 寿命数组修改：合体1350，渡劫1950 ★★★
+    realmLifespan: [100,150,250,400,600,1350,1950,Infinity],
     realmCoeff: [1,2,3,4,5,6,7,8],
     spiritQuality: [{name:'下品',prob:0.40,speed:0.05,power:0.03},{name:'中品',prob:0.35,speed:0.20,power:0.12},{name:'上品',prob:0.20,speed:0.50,power:0.25},{name:'极品',prob:0.05,speed:1.00,power:0.45}],
     spiritCount: [{count:1,prob:0.30,bonus:0},{count:2,prob:0.35,bonus:0.05},{count:3,prob:0.25,bonus:0.08},{count:4,prob:0.08,bonus:0.12},{count:5,prob:0.02,bonus:0.15}],
@@ -195,7 +196,7 @@ const CONFIG = {
         {id:'奇遇·丹炉',label:'奇遇·丹炉',desc:'波照在一处废墟中发现一座完好的炼丹炉，炉中尚有余温。',type:'ability',name:'炼丹术',story:(g)=>`波照在废墟中发现一座古朴丹炉，炉上刻有「九转还魂」四字。他尝试生火，竟成功炼出一枚丹药，从此掌握了炼丹术。`},
         {id:'奇遇·波泉',label:'奇遇·波泉',desc:'波照寻到一眼波泉，泉水含有浓郁的生命力。',type:'cult',value:120,story:(g)=>`波照在石缝中发现一眼波泉，泉水呈乳白色，散发出草木清香。他饮下几口，只觉生机勃勃，修为暴涨120点。`},
         // ---- 丹药事件（百分比） ----
-        {id:'波丹妙药',label:'波丹妙药',desc:'波照发现一枚上古波丹，服下后修为大增。',type:'cult_percent',value:0.10,story:(g)=>`波照在一处隐秘洞府中发现一枚通体晶莹的波丹，丹香扑鼻。他盘坐服下，一股精纯药力在体内化开，修为暴涨${Math.floor((G.cult||1)*0.1)}点（10%）！`},
+        {id:'波丹妙药',label:'波丹妙药',desc:'波照发现一枚上古波丹，服下后修为大增。',type:'cult_percent',value:0.10,story:(g)=>`波照在一处隐秘洞府中发现一枚通体晶莹的波丹，丹香扑鼻。他盘坐服下，一股精纯药力在体内化开，修为暴涨${Math.floor((g.cult||1)*0.1)}点（10%）！`},
         // ---- 波兽神兽通用事件 ----
         {id:'受伤波兽',label:'受伤波兽',desc:'波照在山中发现一只受伤的波兽，悉心照料后获得其感激。',type:'cult',value:60,story:(g)=>`波照在山中遇到一只浑身是伤的波兽，它警惕地瞪着波照，但已无力逃离。波照心生怜悯，用疗伤药为它包扎，又寻来波草喂食。波兽伤势渐愈，临走前将一缕波气渡入波照体内，修为暴涨60点。`},
         {id:'波兽蛋',label:'波兽蛋',desc:'波照在秘境中发现一枚上古波兽蛋，蛋壳上流转着七彩光芒。',type:'ability',name:'神兽伙伴',story:(g)=>`波照在一处被遗忘的秘境中发现一枚巨大的波兽蛋，蛋身温热，隐隐有生命脉动。他将蛋带回悉心孵化，最终破壳而出的竟是一头幼年麒麟！麒麟认波照为主，波照获得「神兽伙伴」的能力。`},
@@ -218,37 +219,41 @@ const CONFIG = {
         {id:'药王谷奇遇',label:'药王谷奇遇',desc:'波照误入药王谷，谷中波药遍地，还得到了一件保命秘宝。',type:'item',item:'保命道具',story:(g)=>`波照在迷雾中迷失，误入药王谷，谷中老者赠他一株千年波芝和一个替身草人。获得保命道具×1，疗伤药×1。`},
         {id:'上古传承',label:'上古传承',desc:'波照在某洞府中接受一位散仙的衣钵，除了功法还有一件保命法器。',type:'item',item:'保命道具',story:(g)=>`波照在一座残破洞府中发现散仙遗骸，旁边有一枚玉简和一只草人。玉简记载了功法，草人则是散仙炼制的替身傀儡。获得保命道具×1。`},
         // ===== ★★★ 新增宗门专属事件（每个宗门4~5个） ★★★ =====
-        // ---- 青云宗（新增3个，已有1个） ----
+        // ---- 青云宗 ----
         {id:'青云剑诀',label:'青云剑诀',desc:'波照在青云宗秘传剑碑前参悟，意外领悟了失传的剑诀。',type:'sect_ability',sect:'青云宗',name:'天罡剑意',story:(g)=>`波照在青云宗后山的剑碑林中，发现一块布满苔藓的古碑，碑上刻有「天罡剑意」四字。他盘坐参悟七日，终于领悟了这门失传的剑诀，剑气纵横，可破万法。`},
         {id:'心魔侵扰',label:'心魔侵扰',desc:'修炼青云心法时被心魔入侵，道心不稳。',type:'sect_event',sect:'青云宗',event:'心魔反噬',story:(g)=>`波照在修炼青云心法时，心魔突然爆发，幻象丛生，他险些走火入魔。拼尽全力才稳住心神，但修为折损不少。`},
         {id:'正道围剿',label:'正道围剿',desc:'波照被其他正道宗门误会，遭到围攻。',type:'sect_event',sect:'青云宗',event:'被挑衅',story:(g)=>`波照在外历练时，被一群其他宗门的修士围住，他们污蔑波照勾结魔道，群起而攻之。波照寡不敌众，身受重伤，修为大损。`},
         {id:'剑冢参悟',label:'剑冢参悟',desc:'波照在青云宗剑冢中感应到古剑意，获得剑道感悟。',type:'sect_cult',sect:'青云宗',value:80,story:(g)=>`波照在青云宗的剑冢中，面对无数上古残剑，突然感应到一股苍茫的剑意，他盘坐参悟，修为大涨80点。`},
-        // ---- 合欢宗（新增2个，已有2个） ----
+        // ---- 合欢宗 ----
         {id:'合欢秘术',label:'合欢秘术',desc:'波照在合欢宗密室中发现了一卷上古双修秘术，可采补阴阳。',type:'sect_cult',sect:'合欢宗',value:150,story:(g)=>`波照在合欢宗的密室中发现了一卷泛黄的竹简，记载着上古双修秘术。他尝试修炼，竟成功采补了一丝阴阳之气，修为大增150点。`},
         {id:'采补反噬',label:'采补反噬',desc:'波照采补时遭遇反噬，自身精气被反吸。',type:'sect_event',sect:'合欢宗',event:'采补反噬',story:(g)=>`波照在采补一名修士时，对方体质特殊，竟反过来吸走了波照的精气。波照偷鸡不成蚀把米，修为大损。`},
         {id:'情劫缠身',label:'情劫缠身',desc:'波照被一名女修痴缠，道心动摇。',type:'sect_event',sect:'合欢宗',event:'桃花劫',story:(g)=>`波照在合欢宗修炼时，被一名同门女修纠缠，对方日日痴缠，波照心力交瘁，修为不进反退。`},
         {id:'双修顿悟',label:'双修顿悟',desc:'波照与道侣双修时意外顿悟，修为大增。',type:'sect_cult',sect:'合欢宗',value:120,story:(g)=>`波照与一名道侣双修时，阴阳交汇之际，突然波光一闪，领悟了双修之道的真谛，修为暴涨120点。`},
-        // ---- 魔道宗（新增3个，已有1个） ----
+        // ---- 魔道宗 ----
         {id:'血煞炼体',label:'血煞炼体',desc:'波照在魔道宗的试炼场中吸收血煞之气，强化肉身。',type:'sect_cult',sect:'魔道宗',value:200,story:(g)=>`波照在魔道宗的血煞试炼场中，沐浴着浓郁的血煞之气，以魔道秘法炼体。他忍受着万蚁噬骨之痛，最终肉身强度大增，修为暴涨200点。`},
         {id:'魔功反噬',label:'魔功反噬',desc:'修炼魔功时走火入魔，经脉错乱。',type:'sect_event',sect:'魔道宗',event:'心魔反噬',story:(g)=>`波照修炼魔道功法时，急于求成，导致真气暴走，经脉逆乱。他痛苦地倒在地上，修为折损大半。`},
         {id:'正道通缉',label:'正道通缉',desc:'波照被正道宗门通缉，四处躲藏。',type:'sect_event',sect:'魔道宗',event:'被抢劫',story:(g)=>`波照的身份暴露，被正道宗门联合通缉，他一路逃亡，途中屡遭截杀，修为大损。`},
         {id:'血魔传承',label:'血魔传承',desc:'波照在魔道宗禁地获得血魔老祖的传承，修为大增。',type:'sect_cult',sect:'魔道宗',value:250,story:(g)=>`波照在魔道宗禁地中发现血魔老祖的遗骸，旁边一枚玉简记载了血魔大法。他依法修炼，修为暴涨250点。`},
-        // ---- 丹霞谷（新增3个，已有1个） ----
+        // ---- 丹霞谷 ----
         {id:'丹霞仙草',label:'丹霞仙草',desc:'波照在丹霞谷的药园中采得一株万年仙草，炼成丹药。',type:'sect_cult',sect:'丹霞谷',value:250,story:(g)=>`波照在丹霞谷的药园深处发现一株通体火红的万年仙草，谷主特准他采摘。他以仙草炼成「九转火波丹」，服下后修为暴涨250点。`},
         {id:'丹毒反噬',label:'丹毒反噬',desc:'波照炼丹时误入毒草，丹毒侵入五脏。',type:'sect_event',sect:'丹霞谷',event:'古墓探险',story:(g)=>`波照在炼丹时误用了一株毒草，丹炉炸裂，毒烟弥漫。他吸入毒烟，丹毒侵入五脏，身受重伤，修为大损。`},
         {id:'百草秘境',label:'百草秘境',desc:'波照在丹霞谷秘境中发现一片上古药田，收获颇丰。',type:'sect_cult',sect:'丹霞谷',value:180,story:(g)=>`波照在丹霞谷后山发现一处隐秘的上古药田，田中的波草皆是万年以上的珍品。他小心翼翼地采摘了一批，炼成丹药，修为暴涨180点。`},
         {id:'丹道论剑',label:'丹道论剑',desc:'波照在丹道大会上与同门切磋丹术，获益良多。',type:'sect_cult',sect:'丹霞谷',value:100,story:(g)=>`波照在丹霞谷的丹道大会上，与同门切磋炼丹术，互相交流心得。他从中领悟了新的丹方，修为增长100点。`},
-        // ---- 天机阁（新增3个，已有1个） ----
+        // ---- 天机阁 ----
         {id:'天机推演',label:'天机推演',desc:'波照在天机阁的星盘前推演天机，窥见一丝未来。',type:'sect_law',sect:'天机阁',law:'命运',story:(g)=>`波照在天机阁的星盘前，以自身精血为引，推演天机。他窥见未来的一角，命运法则+1，但也因此损耗了不少精气。`},
         {id:'天机反噬',label:'天机反噬',desc:'波照窥探天机遭天道反噬，双目流血。',type:'sect_event',sect:'天机阁',event:'反噬',story:(g)=>`波照强行推演天机，触怒了天道，一道无形的力量将他击飞，双目流血不止，修为大损。`},
         {id:'星辰感应',label:'星辰感应',desc:'波照在星盘前感应到星辰之力，获得修为。',type:'sect_cult',sect:'天机阁',value:120,story:(g)=>`波照在天机阁的观星台上，感应到星辰之力涌入体内，他顺势炼化，修为暴涨120点。`},
         {id:'古阵秘藏',label:'古阵秘藏',desc:'波照在天机阁发现一座上古阵法，从中获得机缘。',type:'sect_cult',sect:'天机阁',value:140,story:(g)=>`波照在天机阁地下发现一座上古传送阵，阵中残留着精纯的波气。他盘坐吸收，修为增长140点。`},
-        // ---- 万兽山（新增1个负面，原有4个正面） ----
+        // ---- 万兽山 ----
         {id:'万兽朝宗',label:'万兽朝宗',desc:'波照在万兽山深处看到万兽齐聚，朝拜一头远古神兽，他领悟了兽王之意。',type:'sect_cult',sect:'万兽山',value:300,story:(g)=>`波照在万兽山深处偶遇百年一遇的“万兽朝宗”盛景，成千上万的波兽、妖兽、神兽齐聚一堂，朝拜一头金色的麒麟神兽。波照感受到磅礴的兽王之气，修为暴涨300点！`},
         {id:'神兽契约',label:'神兽契约',desc:'波照与一头远古神兽签订契约，获得强大的战力加成。',type:'sect_ability',sect:'万兽山',name:'神兽契约',story:(g)=>`波照在万兽山的禁地中遇到一头被封印的远古神兽——九尾天狐。神兽感受到他纯净的波根，主动与他签订契约，从此波照获得「神兽契约」能力，战力大增。`},
-        {id:'兽王传承',label:'兽王传承',desc:'波照获得万兽山历代兽王的传承之力，修为大幅提升。',type:'sect_percent',sect:'万兽山',value:0.15,story:(g)=>`波照在万兽山的祖地中接受了历代兽王的传承洗礼，一股狂野的兽王之力涌入体内，修为暴涨${Math.floor((G.cult||1)*0.15)}点（15%）！`},
+        {id:'兽王传承',label:'兽王传承',desc:'波照获得万兽山历代兽王的传承之力，修为大幅提升。',type:'sect_percent',sect:'万兽山',value:0.15,story:(g)=>`波照在万兽山的祖地中接受了历代兽王的传承洗礼，一股狂野的兽王之力涌入体内，修为暴涨${Math.floor((g.cult||1)*0.15)}点（15%）！`},
         {id:'波兽认主',label:'波兽认主',desc:'波照在万兽山驯服了一头远古波兽幼崽，结下契约。',type:'sect_ability',sect:'万兽山',name:'驭兽通波',story:(g)=>`波照在万兽山的禁地中发现一枚巨卵，他日夜守护，最终破壳而出，竟是一头远古麒麟幼崽。麒麟认他为主，波照获得「驭兽通波」的能力。`},
-        {id:'兽潮暴动',label:'兽潮暴动',desc:'万兽山兽潮失控，波照被发狂的波兽围攻。',type:'sect_event',sect:'万兽山',event:'被抢劫',story:(g)=>`万兽山突然爆发兽潮，无数波兽发狂攻击波照。他奋力抵抗，最终虽击退兽潮，但身受重伤，修为大损。`}
+        {id:'兽潮暴动',label:'兽潮暴动',desc:'万兽山兽潮失控，波照被发狂的波兽围攻。',type:'sect_event',sect:'万兽山',event:'被抢劫',story:(g)=>`万兽山突然爆发兽潮，无数波兽发狂攻击波照。他奋力抵抗，最终虽击退兽潮，但身受重伤，修为大损。`},
+        // ===== ★★★ 新增三个事件：old割蛋、emo暴揍、春秋蝉 ★★★ =====
+        {id:'old_cut', label:'神秘老者', desc:'一位自称old的神秘老者出现在波照面前。', type:'event', event:'old_cut', story:(g)=>''},
+        {id:'emo_beat', label:'emo修士', desc:'一个全身笼罩在黑袍中的修士拦住了波照的去路。', type:'event', event:'emo_beat', story:(g)=>''},
+        {id:'chunqiu_chan', label:'春秋蝉', desc:'波照在一处古墓中发现了一只晶莹剔透的玉蝉。', type:'event', event:'chunqiu_chan', story:(g)=>''}
     ],
     allAbilities: ['飞剑','御风术','不死之身','炼丹术','法天象地','剑心通明','缩地成寸','金刚不坏','断念剑意','天眼通','元神出窍','撒豆成兵','呼风唤雨','点石成金','隐身术','定身术','天罡剑意','驭兽通波','波刚之爱','神兽契约','神兽伙伴'],
     deathEndings: [
@@ -267,6 +272,7 @@ const CONFIG = {
         '「瘴气侵体」：中毒太深，无药可救。',
         '「寒毒入骨」：修炼冰系功法走火入魔。'
     ],
+    // ★★★ 新增成就（孤睾战士、任督二脉、春秋蝉） ★★★
     achievements: [
         {id:'fate_reversal',name:'逆天改命',check:g=>g.birthland==='紫府圣地'&&g.spiritQ.name==='极品'},
         {id:'chosen_one',name:'天选之人',check:g=>g.spiritQ.name==='极品'&&Object.values(g.laws).some(v=>v>=3)},
@@ -285,7 +291,11 @@ const CONFIG = {
         {id:'attribute_master',name:'属性大师',check:g=>{let m=0;for(let el of g.spiritElements)if(g.abilities.includes(CONFIG.elementAbility[el]))m++;return m>=3;}},
         {id:'gang_slayer',name:'屠刚勇士',check:g=>g._gangKill===1 && g._gangLosses===0},
         {id:'gang_lover',name:'波刚之爱',check:g=>g._gangEncounters>=10},
-        {id:'beast_tamer',name:'百兽之王',check:g=>g.abilities.includes('驭兽通波')||g.abilities.includes('神兽契约')}
+        {id:'beast_tamer',name:'百兽之王',check:g=>g.abilities.includes('驭兽通波')||g.abilities.includes('神兽契约')},
+        // ★★★ 新增 ★★★
+        {id:'lonely_warrior', name:'孤睾战士', check:g=>g.achievements['孤睾战士']===true},
+        {id:'ren_du', name:'任督二脉', check:g=>g.achievements['任督二脉']===true},
+        {id:'chunqiu_chan', name:'春秋蝉', check:g=>g._hasChunqiuChan===true}
     ]
 };
 
@@ -308,7 +318,9 @@ function initState(){
         _villageFails:0,_arenaFails:0,_tourneyFails:0,
         _gangEncounters:0,_gangKill:0,_gangLosses:0,
         _deathCause:'',_dead:false,_bonusLife:0,_powerBuff:0,
-        _spinLock:false,_avatarBreakthrough:false,_pendingTrib:false,_sectSpecial:''
+        _spinLock:false,_avatarBreakthrough:false,_pendingTrib:false,_sectSpecial:'',
+        // ★★★ 新增状态 ★★★
+        _hasChunqiuChan: false
     };
     CONFIG.achievements.forEach(a=>G.achievements[a.id]=false);
 }
@@ -400,6 +412,8 @@ function updatePanel(){
         <div class="panel-item" style="flex-wrap:wrap;"><span class="label">⚖️ 法则</span><span>${Object.entries(G.laws||{}).map(([k,v])=>`<span class="law-tag ${v>=3?'complete':''}">${k} ${v}/3</span>`).join('')}</span></div>
         <div class="panel-item" style="flex-wrap:wrap;"><span class="label">🏆 成就</span><span>${CONFIG.achievements.map(a=>`<span class="achieve-tag ${G.achievements&&G.achievements[a.id]?'unlocked':'locked'}">${a.name}</span>`).join('')}</span></div>
         <div class="panel-item" style="flex-wrap:wrap;"><span class="label">🎒 道具</span><span>${Object.entries(G.items||{}).filter(([k,v])=>v>0&&k!=='保命道具').map(([k,v])=>`${k}×${v}`).join(' ')||'无'}</span></div>
+        <!-- ★★★ 新增：春秋蝉显示 ★★★ -->
+        <div class="panel-item"><span class="label">🦗 特殊</span><span class="value gold">${G._hasChunqiuChan ? '春秋蝉（寿元消耗减半）' : '无'}</span></div>
     `;
     p.innerHTML=html;updateAvatar();
 }
@@ -500,7 +514,26 @@ function checkRealmDrop(){
 }
 
 // ================================================================
-// 渡劫系统
+// ★★★ 年龄消耗函数（春秋蝉减半） ★★★
+// ================================================================
+function getAgeCost(){
+    let baseCost;
+    if(G.realmIndex===0) baseCost = 1;
+    else if(G.realmIndex<=2) baseCost = 5;
+    else baseCost = 5 * Math.pow(2, G.realmIndex - 2);
+    if(G.realmIndex >= 2){
+        baseCost = Math.floor(baseCost * 0.7);
+    }
+    // ★★★ 春秋蝉：再减半 ★★★
+    if(G._hasChunqiuChan){
+        baseCost = Math.floor(baseCost / 2);
+        if(baseCost < 1) baseCost = 1;
+    }
+    return baseCost;
+}
+
+// ================================================================
+// 渡劫系统（不变）
 // ================================================================
 let tribResolve=null,tribSuccess=false;
 function showTribWheel(baseProb,success){
@@ -544,7 +577,6 @@ document.getElementById('tribBtn').addEventListener('click',function(){
 async function attemptTribulation(){
     if(G.realmIndex>=7)return;
     if(G.cult<CONFIG.realmCult[G.realmIndex+1]){setSubtitle('修为不足，无法渡劫','bad');return;}
-    // 法则条件
     if(G.realmIndex===4 && !Object.values(G.laws).some(v=>v>=1)){
         setSubtitle('需要法则雏形才能突破合体！','bad');
         addLog('法则不足，无法突破合体');
@@ -611,7 +643,7 @@ async function attemptTribulation(){
 }
 
 // ================================================================
-// 事件处理（包含所有新增宗门事件）
+// 事件处理（包含所有新增事件和免疫逻辑）
 // ================================================================
 function handleEvent(eventName){
     const power=calcPower();let story,gain,opp;
@@ -688,8 +720,7 @@ function handleEvent(eventName){
             addLog(story);
             checkAchievements();checkRealmDrop();updatePanel();return;
         }
-        // ===== ★★★ 宗门专属事件处理 ★★★ =====
-        // ---- sect_cult：宗门专属修为 ----
+        // ---- 宗门专属事件 ----
         if(abstract.type==='sect_cult'){
             if(abstract.sect && G.sect===abstract.sect){
                 gain=applyCultGain(abstract.value||50);
@@ -706,7 +737,6 @@ function handleEvent(eventName){
             }
             checkAchievements();checkRealmDrop();updatePanel();return;
         }
-        // ---- sect_ability：宗门专属能力 ----
         if(abstract.type==='sect_ability'){
             if(abstract.sect && G.sect===abstract.sect){
                 const abName=abstract.name;
@@ -731,7 +761,6 @@ function handleEvent(eventName){
             }
             checkAchievements();checkRealmDrop();updatePanel();return;
         }
-        // ---- sect_law：宗门专属法则 ----
         if(abstract.type==='sect_law'){
             if(abstract.sect && G.sect===abstract.sect){
                 let lawName=abstract.law||'命运';
@@ -764,7 +793,6 @@ function handleEvent(eventName){
             }
             checkAchievements();checkRealmDrop();updatePanel();return;
         }
-        // ---- sect_percent：宗门专属百分比修为 ----
         if(abstract.type==='sect_percent'){
             if(abstract.sect && G.sect===abstract.sect){
                 let percent=abstract.value||0.15;
@@ -782,16 +810,11 @@ function handleEvent(eventName){
             }
             checkAchievements();checkRealmDrop();updatePanel();return;
         }
-        // ---- sect_event：宗门专属负面事件 ----
         if(abstract.type==='sect_event'){
             if(abstract.sect && G.sect===abstract.sect){
-                // 直接触发对应的通用事件
                 if(abstract.event){
-                    // 调用通用事件处理（但注意避免递归）
-                    // 这里直接根据event执行对应逻辑
                     handleEvent(abstract.event);
                 }else{
-                    // 默认负面效果
                     G.cult*=0.85;
                     G.status='轻伤';
                     story=abstract.story(G);
@@ -808,7 +831,7 @@ function handleEvent(eventName){
             checkAchievements();checkRealmDrop();updatePanel();return;
         }
 
-        // ---- 其他通用事件处理 ----
+        // ---- 通用事件（包括新增的三个） ----
         switch(abstract.type){
             case'cult':{
                 if(abstract.minRealm && G.realmIndex<abstract.minRealm){
@@ -865,47 +888,95 @@ function handleEvent(eventName){
                 break;
             }
             case'event':{
-                // 处理通用事件（男采补等）
-                if(eventName==='男采补' || abstract.id==='采阳修士'){
-                    // 男采补逻辑
-                    if(power>500){
-                        gain=applyCultGain(40);
-                        G.cult+=gain;
-                        story=`波照遇到采阳修士，对方试图偷袭，但波照修为深厚，反手将其制伏，并从其身上搜出一些波药，修为+${gain}。`;
-                        setSubtitle(`击退采阳修士，修为+${gain}`,'good');
-                        addLog(story);
-                    }else if(power>200){
-                        G.cult*=0.9;
-                        G.status='轻伤';
-                        story=`波照与采阳修士缠斗，虽将其击退，但自己也受了轻伤，修为略有损耗。`;
-                        setSubtitle('勉强击退，轻伤','bad');
+                // ★★★ 处理所有事件（包括新增的old_cut, emo_beat, chunqiu_chan） ★★★
+                
+                // ---------- old割蛋事件 ----------
+                if(abstract.id === 'old_cut' || eventName === 'old_cut'){
+                    if(G.achievements['孤睾战士']){
+                        gain = applyCultGain(20);
+                        G.cult += gain;
+                        story = `波照再次遇到old，old看了他一眼，淡淡道：“已割，勿念。”然后飘然离去。波照莫名其妙，但感觉修为略有增长，+${gain}。`;
+                        setSubtitle(`修为+${gain}`, 'good');
                         addLog(story);
                     }else{
-                        if(G.items['疗伤药']>0){
-                            G.items['疗伤药']--;
-                            G.cult*=0.8;
-                            G.age+=5;
-                            G.status='轻伤';
-                            story=`波照被采阳修士偷袭得手，但凭借疗伤药保住了元气，轻伤。`;
-                            setSubtitle('被采补，疗伤药保命','bad');
-                            addLog(story);
-                        }else{
-                            G.cult*=0.6;
-                            G.age+=10;
-                            G.status='重伤';
-                            story=`波照被采阳修士强行采补，元阳流失，身受重伤。`;
-                            setSubtitle('被采补，重伤','bad');
-                            addLog(story);
-                        }
+                        G.cult += 200;
+                        G.age += 10;
+                        G._powerBuff = (G._powerBuff || 0) - 10;
+                        G.achievements['孤睾战士'] = true;
+                        story = `波照在深山修行时，偶遇一位白发苍苍的神秘老者，老者自称“old”，已活了不知多少万年。old看了波照一眼，摇头叹息：“根骨尚可，但尘根未断，难成大器。”波照正要反驳，old却突然出手，一道寒光闪过，波照只觉得下身一凉，低头一看——自己的命根子已被old切下，装在了一个玉盒里。old将玉盒收好，淡淡道：“此物我替你保管，待你飞升之日，再还你。”波照痛得满地打滚，却发现体内真气竟然畅通无阻，原本堵塞的经脉被这股剧痛冲开了大半。old消失前留下一句：“割以永治，专心修仙。”波照捂着裆部，欲哭无泪。修为+200，年龄+10，战力-10，获得成就「孤睾战士」！`;
+                        setSubtitle('获得成就：孤睾战士！', 'special');
+                        addLog(story);
+                        checkAchievements();
                     }
-                    checkAchievements();checkRealmDrop();updatePanel();return;
+                    checkRealmDrop();
+                    updatePanel();
+                    return;
                 }
+                
+                // ---------- emo暴揍事件 ----------
+                if(abstract.id === 'emo_beat' || eventName === 'emo_beat'){
+                    if(G.achievements['任督二脉']){
+                        gain = applyCultGain(30);
+                        G.cult += gain;
+                        story = `波照再次遇到emo，emo正准备动手，却看到波照浑身的气势，满意地点了点头：“嗯，任督已通，不错。”然后转身离去。波照哭笑不得，修为+${gain}。`;
+                        setSubtitle(`修为+${gain}`, 'good');
+                        addLog(story);
+                    }else{
+                        G.cult += 300;
+                        G._powerBuff = (G._powerBuff || 0) + 50;
+                        G.status = '重伤';
+                        G.achievements['任督二脉'] = true;
+                        story = `波照在路上遇到一个全身笼罩在黑袍中的修士，对方自称“emo”。波照还没来得及开口，emo便突然暴起，一顿拳打脚踢将波照揍得鼻青脸肿。波照被打得几乎昏死过去，却在剧痛中感觉到体内的经脉发生了奇妙的震动——任督二脉竟然被这顿暴打打通了！波照吐出一口淤血，挣扎着站起来，发现自己的修为不降反增，而且浑身充满了力量。emo看了一眼波照，冷哼一声：“你天赋不错，可惜欠揍。”说完便化作黑烟消失。修为+300，战力+50，获得成就「任督二脉」！`;
+                        setSubtitle('获得成就：任督二脉！', 'special');
+                        addLog(story);
+                        checkAchievements();
+                    }
+                    checkRealmDrop();
+                    updatePanel();
+                    return;
+                }
+                
+                // ---------- 春秋蝉事件 ----------
+                if(abstract.id === 'chunqiu_chan' || eventName === 'chunqiu_chan'){
+                    if(G._hasChunqiuChan){
+                        gain = applyCultGain(40);
+                        G.cult += gain;
+                        story = `波照再次感应到春秋蝉的气息，但体内的春秋蝉已与他融为一体，只留下一些残留的灵气，修为+${gain}。`;
+                        setSubtitle(`修为+${gain}`, 'good');
+                        addLog(story);
+                    }else{
+                        G._hasChunqiuChan = true;
+                        story = `波照在一处古墓中发现了一只晶莹剔透的玉蝉，蝉翼上流转着“春秋”二字的光芒。就在他触碰玉蝉的瞬间，玉蝉化作一道流光融入他的体内，波照只觉得自己的生命气息变得悠长而凝滞——时间在他身上流逝的速度减慢了。从此，波照的寿元消耗只有常人的一半。获得春秋蝉之力！`;
+                        setSubtitle('获得春秋蝉！寿元消耗减半！', 'special');
+                        addLog(story);
+                        checkAchievements();
+                    }
+                    checkRealmDrop();
+                    updatePanel();
+                    return;
+                }
+                
+                // ---------- 原有通用事件（波蝶奇遇、心魔等） ----------
                 if(abstract.id==='波蝶奇遇'){gain=applyCultGain(80);G.cult+=gain;story=abstract.story(G);setSubtitle(`波蝶引路，修为+${gain}`,'good');addLog(story);}
                 else if(abstract.id==='血月心魔'||abstract.id==='心魔反噬'){
                     if(G.abilities.includes('不死之身')||G.abilities.includes('金刚不坏')){gain=applyCultGain(40);G.cult+=gain;story=`心魔来袭，但波照凭不死之身硬抗，反获修为+${gain}`;setSubtitle('心魔不侵，反获修为','good');addLog(story);}
                     else{G.cult*=0.9;G.status='轻伤';story=abstract.story(G);setSubtitle('心魔侵蚀，修为受损','bad');addLog(story);}
                 }
                 else if(abstract.id==='古墓探险'||abstract.id==='断崖惊魂'||abstract.id==='桃花劫'||abstract.id==='合欢酒宴'||abstract.id==='迷情香'){
+                    // ★★★ 桃花劫等：孤睾战士免疫 ★★★
+                    if(abstract.id==='桃花劫'||abstract.id==='合欢酒宴'||abstract.id==='迷情香'){
+                        if(G.achievements['孤睾战士']){
+                            gain = applyCultGain(25);
+                            G.cult += gain;
+                            story = abstract.story(G) + ' 但波照早已割以永治，女修们发现他毫无反应，大失所望，纷纷散去。波照趁机搜刮了一些灵物，修为+'+gain+'。';
+                            setSubtitle(`女修散去，修为+${gain}`, 'good');
+                            addLog(story);
+                            checkAchievements();
+                            checkRealmDrop();
+                            updatePanel();
+                            return;
+                        }
+                    }
                     if(power>1000){gain=applyCultGain(30);G.cult+=gain;story=abstract.story(G)+' 但波照修为深厚，化险为夷，反而有所收获。';setSubtitle(`化险为夷，修为+30`,'good');addLog(story);}
                     else if(power>500){G.status='轻伤';gain=applyCultGain(10);G.cult+=gain;story=abstract.story(G)+' 波照勉强脱险，受轻伤。';setSubtitle('勉强脱险，轻伤','bad');addLog(story);}
                     else{
@@ -916,13 +987,43 @@ function handleEvent(eventName){
                         else{G.status='重伤';story=abstract.story(G)+' 波照身受重伤，勉强逃生。';setSubtitle('身受重伤','bad');addLog(story);}
                     }
                 }
-                else if(abstract.id==='采补'||abstract.id==='采阴补阳'){
-                    if(G.sectSpecial==='caibup'){gain=applyCultGain(60);G.cult+=gain;story=`波照以合欢宗秘术采补对手，修为+${gain}。`;setSubtitle(`采补成功，修为+${gain}`,'special');addLog(story);}
-                    else{
+                else if(abstract.id==='采补'||abstract.id==='采阴补阳'||abstract.id==='男采补'){
+                    // ★★★ 采补事件：孤睾战士免疫 ★★★
+                    if(G.achievements['孤睾战士']){
+                        gain = applyCultGain(30);
+                        G.cult += gain;
+                        story = `一个采补修士悄悄靠近波照，伸手探向他的要害，却摸了个空。对方一脸惊愕，波照冷笑：“别找了，没了。”采补修士羞愤而逃，波照趁机搜刮了他的储物袋，修为+${gain}。`;
+                        setSubtitle(`采补修士落荒而逃，修为+${gain}`, 'good');
+                        addLog(story);
+                    }else if(G.sectSpecial==='caibup'){
+                        gain=applyCultGain(60);
+                        G.cult+=gain;
+                        story=`波照以合欢宗秘术采补对手，修为+${gain}。`;
+                        setSubtitle(`采补成功，修为+${gain}`,'special');
+                        addLog(story);
+                    }else{
                         if(Math.random()<0.3){
-                            if(G.items['疗伤药']>0){G.items['疗伤药']--;G.status='轻伤';story=`波照遭遇采补修士，但凭借疗伤药抵御了损伤，轻伤。`;setSubtitle('轻伤，疗伤药保命','bad');addLog(story);}
-                            else{G.cult*=0.8;G.age+=5;G.status='轻伤';story=abstract.story(G)+' 波照被迷得神魂颠倒，元气大伤。';setSubtitle('元气大伤','bad');addLog(story);}
-                        }else{gain=applyCultGain(15);G.cult+=gain;story=`波照遇到一个采补修士，对方见他修为不俗，不敢轻举妄动，波照趁机离开，修为+${gain}。`;setSubtitle(`虚惊一场，修为+15`,'good');addLog(story);}
+                            if(G.items['疗伤药']>0){
+                                G.items['疗伤药']--;
+                                G.status='轻伤';
+                                story=`波照遭遇采补修士，但凭借疗伤药抵御了损伤，轻伤。`;
+                                setSubtitle('轻伤，疗伤药保命','bad');
+                                addLog(story);
+                            }else{
+                                G.cult*=0.8;
+                                G.age+=5;
+                                G.status='轻伤';
+                                story=abstract.story(G)+' 波照被迷得神魂颠倒，元气大伤。';
+                                setSubtitle('元气大伤','bad');
+                                addLog(story);
+                            }
+                        }else{
+                            gain=applyCultGain(15);
+                            G.cult+=gain;
+                            story=`波照遇到一个采补修士，对方见他修为不俗，不敢轻举妄动，波照趁机离开，修为+${gain}。`;
+                            setSubtitle(`虚惊一场，修为+15`,'good');
+                            addLog(story);
+                        }
                     }
                 }
                 else{gain=applyCultGain(30);G.cult+=gain;story=abstract.story?abstract.story(G):`波照经历奇遇，修为+${gain}`;setSubtitle(`修为+${gain}`,'good');addLog(story);}
@@ -955,9 +1056,9 @@ function handleEvent(eventName){
         return;
     }
 
-    // ---- 战斗事件（波刚、村斗等） ----
+    // ---- 战斗事件（波刚等） ----
     switch(eventName){
-        // ===== 波刚事件（女性，波刚之爱改为相遇10次） =====
+        // ===== 波刚事件（女性，孤睾战士免疫采补） =====
         case '波刚': {
             if (G._gangKill === 1 || G._gangKill === 2) {
                 gain = applyCultGain(20);
@@ -1003,20 +1104,29 @@ function handleEvent(eventName){
             
             let detail = '';
             if (power < gangPower) {
-                let lossDesc = [
-                    `波刚一把抓住波照，冷笑着将他按在石壁上，俯身在他耳边轻语：“你的元阳，我收下了。”波照挣扎不得，只能感觉自己的修为如流水般被她吸走，最终瘫软在地。`,
-                    `波刚妩媚一笑，指尖划过波照的胸膛，波照只觉浑身燥热，修为竟不受控制地涌向波刚。待他回过神来，已是元气大伤。`,
-                    `波刚祭出一条红绫，缠住波照的腰身，将他拽入怀中。波照奋力抵抗，却被她死死制住，一身修为被她采补殆尽。`
-                ];
-                detail = pick(lossDesc);
-                G.cult *= 0.7;
-                G.age += 8;
-                if (G.status === '健康') G.status = '轻伤';
-                else if (G.status === '轻伤') G.status = '重伤';
-                story = `波照遭遇采阳女贼波刚（波照${power} VS 波刚${gangPower}），${detail} 波照勉强逃脱，但修为大损，身心受创。`;
-                setSubtitle(`被波刚采补，修为大损`, 'bad');
-                G._gangLosses = (G._gangLosses || 0) + 1;
-                addLog(`💔 波照已被波刚采补 ${G._gangLosses} 次。`);
+                // ★★★ 孤睾战士免疫采补 ★★★
+                if(G.achievements['孤睾战士']){
+                    G.cult *= 0.95;
+                    G.status = '轻伤';
+                    story = `波刚妩媚一笑，伸手探向波照的腰间，却摸了个空。她脸色大变：“你……你竟然……”波照冷笑：“我已割以永治，你采个屁！”波刚恼羞成怒，一掌拍在波照胸口，波照倒飞出去，受了轻伤。`;
+                    setSubtitle('波刚采补失败，轻伤', 'bad');
+                    addLog(story);
+                }else{
+                    let lossDesc = [
+                        `波刚一把抓住波照，冷笑着将他按在石壁上，俯身在他耳边轻语：“你的元阳，我收下了。”波照挣扎不得，只能感觉自己的修为如流水般被她吸走，最终瘫软在地。`,
+                        `波刚妩媚一笑，指尖划过波照的胸膛，波照只觉浑身燥热，修为竟不受控制地涌向波刚。待他回过神来，已是元气大伤。`,
+                        `波刚祭出一条红绫，缠住波照的腰身，将他拽入怀中。波照奋力抵抗，却被她死死制住，一身修为被她采补殆尽。`
+                    ];
+                    detail = pick(lossDesc);
+                    G.cult *= 0.7;
+                    G.age += 8;
+                    if (G.status === '健康') G.status = '轻伤';
+                    else if (G.status === '轻伤') G.status = '重伤';
+                    story = `波照遭遇采阳女贼波刚（波照${power} VS 波刚${gangPower}），${detail} 波照勉强逃脱，但修为大损，身心受创。`;
+                    setSubtitle(`被波刚采补，修为大损`, 'bad');
+                    G._gangLosses = (G._gangLosses || 0) + 1;
+                    addLog(`💔 波照已被波刚采补 ${G._gangLosses} 次。`);
+                }
             } else if (power >= gangPower && power < gangPower * 1.5) {
                 let winDesc = [
                     `波照一把抓住波刚的手腕，反手一扭，将她制住。波刚惊呼一声，挣扎中衣衫凌乱，波照趁机在她脸颊上画了一道羞辱的符文，波刚羞愤交加，化作一团黑烟遁走。`,
@@ -1154,20 +1264,6 @@ function handleEvent(eventName){
 }
 
 // ================================================================
-// 年龄消耗计算（金丹后×0.7）
-// ================================================================
-function getAgeCost(){
-    let baseCost;
-    if(G.realmIndex===0) baseCost = 1;
-    else if(G.realmIndex<=2) baseCost = 5;
-    else baseCost = 5 * Math.pow(2, G.realmIndex - 2);
-    if(G.realmIndex >= 2){
-        return Math.floor(baseCost * 0.7);
-    }
-    return baseCost;
-}
-
-// ================================================================
 // 转盘Canvas
 // ================================================================
 const canvas=document.getElementById('wheelCanvas'),ctx=canvas.getContext('2d');
@@ -1181,6 +1277,11 @@ function getSegments(){
     for(let i=shuffled.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]];}
     let chosen=shuffled.slice(0,10);
     chosen.forEach(ab=>{pool.push({label:ab.label,type:'abstract',event:ab.id,color:'#8a7a6a'});});
+
+    // ★★★ 春秋蝉：稀有出现（1.5%） ★★★
+    if(!G._hasChunqiuChan && Math.random() < 0.015){
+        pool.push({label:'春秋蝉', type:'abstract', event:'chunqiu_chan', color:'#4a9a8a'});
+    }
 
     let currentLifeCount=G.items['保命道具']||0;
     if(currentLifeCount<5&&Math.random()<0.03){
@@ -1215,6 +1316,33 @@ function getSegments(){
     chosenAb.forEach(ab=>{pool.push({label:ab,type:'ability',name:ab,color:'#6a9a7a'});});
     if(isModao){pool.push({label:'魔袭',type:'event',event:'魔道偷袭',color:'#5a3a5a'});pool.push({label:'反噬',type:'event',event:'反噬',color:'#6a3a3a'});}
     if(isCaibup){pool.push({label:'采补',type:'event',event:'采补',color:'#8a4a5a'});}
+
+    // ★★★ 缺法则时，增加法则事件出现概率 ★★★
+    function isLawEvent(ab) {
+        return ab.type === 'law' || (ab.id && ['镜花水月','梦回前世','感悟·生死','神兽渡劫','时光回溯','空间裂缝'].includes(ab.id));
+    }
+    let hasLaw = Object.values(G.laws).some(v => v >= 1);
+    let hasCompleteLaw = Object.values(G.laws).some(v => v >= 3);
+    let completeLawCount = Object.values(G.laws).filter(v => v >= 3).length;
+    let needMoreLaw = false;
+    if(G.realmIndex === 4 && !hasLaw) needMoreLaw = true;
+    if(G.realmIndex === 5 && !hasCompleteLaw) needMoreLaw = true;
+    if(G.realmIndex === 6 && completeLawCount < 3) needMoreLaw = true;
+    if(needMoreLaw){
+        let lawEvents = CONFIG.abstractEvents.filter(ab => isLawEvent(ab));
+        let addCount = 1 + Math.floor(Math.random() * 2);
+        let shuffledLaws = [...lawEvents];
+        for(let i=shuffledLaws.length-1; i>0; i--){
+            const j = Math.floor(Math.random()*(i+1));
+            [shuffledLaws[i], shuffledLaws[j]] = [shuffledLaws[j], shuffledLaws[i]];
+        }
+        let toAdd = shuffledLaws.slice(0, addCount);
+        toAdd.forEach(ab => {
+            pool.push({label: ab.label, type:'abstract', event: ab.id, color: '#8a6ad4'});
+        });
+        setSubtitle('⚡ 法则不足，天机指引...', 'special');
+    }
+
     for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}
     if(pool.length>18)pool=pool.slice(0,18);else if(pool.length<14){while(pool.length<14){pool.push({label:`+${baseCult}修`,type:'cult',value:baseCult,color:'#b89a6a'});}}
     segs=pool.map(item=>({label:item.label,type:item.type||'event',value:item.value||0,name:item.name||'',event:item.event||'',color:item.color||'#6a5a4a'}));
@@ -1363,6 +1491,8 @@ document.getElementById('testSpiritBtn').addEventListener('click',function(){
             G._gangEncounters=0;G._gangKill=0;G._gangLosses=0;
             G._dead=false;G._deathCause='';G._powerBuff=0;G.logs=[];G.achievements={};
             CONFIG.achievements.forEach(a=>G.achievements[a.id]=false);
+            // ★★★ 确保春秋蝉状态重置 ★★★
+            G._hasChunqiuChan = false;
             let finalDisplay=getSpiritDisplay();resultEl.textContent=`✨ ${finalDisplay} ✨`;
             if(q.name==='极品')resultEl.style.color='#ffd700';else resultEl.style.color='#f5d080';
             let spiritStory=q.name==='极品'?'天资卓越，修行之路一片坦途。':q.name==='上品'?'资质上佳，勤修苦练可成大器。':q.name==='中品'?'资质平平，唯有以勤补拙。':'资质愚钝，但心怀坚韧，亦能逆天而行。';
@@ -1391,7 +1521,7 @@ document.getElementById('spinBtn').addEventListener('click',function(){spinWheel
 initState();
 document.getElementById('mainMenu').style.display='none';
 document.getElementById('startOverlay').classList.add('show');
-console.log('🧘 修仙转盘 · 波途 — 所有宗门已平衡（4~5个事件，含正负面）');
+console.log('🧘 修仙转盘 · 波途 — 已集成孤睾战士、任督二脉、春秋蝉、法则补全');
 </script>
 </body>
 </html>
