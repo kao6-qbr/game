@@ -528,13 +528,51 @@ function checkAchievements(){let unlocked=[];for(let a of CONFIG.achievements){i
 function recoverStatus(){const p=calcPower(),bonus=(p>500?0.05:0)+(p>1000?0.05:0);if(G.items['疗伤药']>0){if(G.status==='重伤'){G.items['疗伤药']--;G.status='轻伤';setSubtitle('服用疗伤药，重伤→轻伤','good');addLog('💊 使用疗伤药，重伤减轻为轻伤');updatePanel();return;}else if(G.status==='轻伤'){G.items['疗伤药']--;G.status='健康';setSubtitle('服用疗伤药，轻伤痊愈！','good');addLog('💊 使用疗伤药，轻伤痊愈');updatePanel();return;}}if(G.status==='轻伤'&&Math.random()<0.30+bonus){G.status='健康';setSubtitle('伤势好转，轻伤已愈！','good');addLog('伤势恢复，回到健康');}else if(G.status==='重伤'&&Math.random()<0.15+bonus){G.status='轻伤';setSubtitle('伤势好转，重伤→轻伤','good');addLog('重伤缓解为轻伤');}else if(G.status==='濒死'){if(G.items['保命道具']>0){G.items['保命道具']--;G.status='重伤';setSubtitle('保命道具发动！保下一命，重伤','special');addLog('🛡️ 保命道具替你挡下致命一击，状态恢复为重伤');updatePanel();return;}else if(Math.random()<0.05+(p>500?0.05:0)){G.status='重伤';setSubtitle('吊住一口气，濒死→重伤','good');addLog('从濒死中缓过来');}else {triggerDeath('濒死未能挺过');return;}}if(G.status&&G.status.includes('中毒')&&Math.random()<0.20+(p>800?0.15:0)){G.status=G.status.replace('中毒','').trim()||'健康';setSubtitle('毒素消退！','good');addLog('解毒成功');}updatePanel();}
 function generateLifeSummary(){const birthName=G.birthland||'未知之地',birthDesc=G.birthlandData?G.birthlandData.desc:'',spiritDisplay=getSpiritDisplay();const finalRealm=CONFIG.realms[G.realmIndex]||'炼气',age=G.age,sect=G.sect||'无门无派';const abilities=G.abilities.length?G.abilities.join('、'):'无';const laws=Object.entries(G.laws).filter(([k,v])=>v>0).map(([k,v])=>k+'('+v+'/3)').join('、')||'无';const achievements=CONFIG.achievements.filter(a=>G.achievements[a.id]).map(a=>a.name).join('、')||'无';const gangKill=G._gangKill||0,tribPass=G._flagTribPass?'成功渡过天劫':'未渡劫';const isAscend=(G.realmIndex===7&&Object.values(G.laws).filter(v=>v>=3).length>=3),deathCause=G._deathCause||'未知';let birthSentence='波照，生于「'+birthName+'」——'+birthDesc+'之地。天生拥有「'+spiritDisplay+'」，根骨不凡，注定与仙道有缘。';let sectSentence=sect!=='无门无派'?'少年时偶遇机缘，拜入「'+sect+'」，从此踏上漫漫修仙路。':'少年时未遇名师，独自修行，在红尘中挣扎求索。';let cultSentence='凭借坚韧不拔的意志，波照一路修炼至「'+finalRealm+'」境界，享寿 '+age+' 岁。';let abilitySentence=abilities!=='无'?'他苦修多年，精通多种神通：「'+abilities+'」；在法则感悟上也颇有建树，触及「'+laws+'」之真谛。':'虽无惊人神通，但波照一直勤勉修行，不曾懈怠。';let deeds=[];if(gangKill>0)deeds.push('曾与采阳女贼波刚数次交锋，最终将其斩杀，为一方除害');if(tribPass==='成功渡过天劫')deeds.push('成功渡过天劫，修为大进');if(achievements!=='无')deeds.push('一生荣获诸多成就：'+achievements);let deedSentence=deeds.length>0?'波照的一生充满传奇：'+deeds.join('；')+'。':'';let endingSentence='';if(isAscend)endingSentence='最终，他在大乘之巅迎来天劫，以无上法力破开虚空，飞升成仙，证得永恒大道！';else if(deathCause==='lifespan'||deathCause.includes('寿元'))endingSentence='大限已至，波照于洞府中平静坐化，一生圆满，无憾而去。';else endingSentence='虽遭遇「'+deathCause+'」之劫，但他留下的传奇故事，依然在修仙界中流传。';return birthSentence+sectSentence+cultSentence+abilitySentence+deedSentence+endingSentence;}
 function triggerDeath(reason){
+    // 防止重复调用导致的界面不显示
     if(G._dead){
         document.getElementById('endOverlay').classList.add('show');
         document.getElementById('spinBtn').disabled=true;
         return;
     }
-    if(G.items['保命道具']>0&&reason!=='寿元耗尽'){G.items['保命道具']--;G.status='重伤';G._dead=false;setSubtitle('保命道具救你一命！','special');addLog('🛡️ 保命道具代你应劫，重伤但生还');updatePanel();return;}G._dead=true;G._deathCause=reason;let deathStory='';if(reason==='lifespan'||reason.includes('寿元'))deathStory='波照寿元已尽，于洞府中盘膝而坐，面带微笑，化作一道流光消散于天地间。';else if(reason.includes('天劫'))deathStory='雷劫之下，波照未能撑过，肉身化为齑粉，神魂亦被天雷彻底抹去。';else if(reason.includes('心魔'))deathStory='心魔爆发，波照陷入无尽幻境，最终道心崩溃，疯癫而亡。';else if(reason.includes('波刚'))deathStory='波照与波刚的恩怨最终以悲剧收场，他被波刚以邪术吸干精元，化为一具干尸。';else if(reason.includes('采补'))deathStory='波照沉迷于采补之术，最终反被他人采补，精气枯竭而亡。';else deathStory='波照遭遇了「'+reason+'」，不幸陨落，修仙之路就此终止。';const ending=pick(CONFIG.deathEndings);document.getElementById('endTitle').textContent='道陨 · '+ending.split('：')[0].replace(/[「」]/g,'');document.getElementById('endDesc').textContent=deathStory+'\n'+ending;document.getElementById('endSummary').textContent='寿元 '+G.age+' 岁 · 境界 '+CONFIG.realms[G.realmIndex]||'炼气'+' · 战力 '+Math.floor(calcPower())+' · 修为 '+Math.floor(G.cult);document.getElementById('lifeSummary').textContent=generateLifeSummary();const review=document.getElementById('endLogReview');review.innerHTML=G.logs.map(s=>'<p>'+s+'</p>').join('');document.getElementById('endOverlay').classList.add('show');document.getElementById('spinBtn').disabled=true;addLog('⚠️ 道陨：'+ending);}
-function checkRealmDrop(){while(G.realmIndex>0&&G.cult<CONFIG.realmCult[G.realmIndex]){G.realmIndex--;addLog('⚠️ 修为不足，境界跌落至 '+CONFIG.realms[G.realmIndex]);setSubtitle('修为不足，跌落至 '+CONFIG.realms[G.realmIndex]+'！','bad');let maxLife=CONFIG.realmLifespan[G.realmIndex]+(G._bonusLife||0);if(G.age>maxLife){triggerDeath('境界跌落导致寿元耗尽');return;}updatePanel();}}
+    // ★★★ 修复：补全出生地数据 ★★★
+    if(!G.birthland || G.birthland === ''){
+        if(pendingBirth2 && pendingBirth2.name){
+            G.birthland = pendingBirth2.name;
+            G.birthlandData = pendingBirth2;
+        } else {
+            G.birthland = '波途村';
+            G.birthlandData = {name:'波途村', desc:'无名之地', power:80, extraPower:0, bonusCult:0, bonusLife:0};
+        }
+    }
+    if(G.items['保命道具']>0&&reason!=='寿元耗尽'){
+        G.items['保命道具']--;
+        G.status='重伤';
+        G._dead=false;
+        setSubtitle('保命道具救你一命！','special');
+        addLog('🛡️ 保命道具代你应劫，重伤但生还');
+        updatePanel();
+        return;
+    }
+    G._dead=true;
+    G._deathCause=reason;
+    let deathStory='';
+    if(reason==='lifespan'||reason.includes('寿元'))deathStory='波照寿元已尽，于洞府中盘膝而坐，面带微笑，化作一道流光消散于天地间。';
+    else if(reason.includes('天劫'))deathStory='雷劫之下，波照未能撑过，肉身化为齑粉，神魂亦被天雷彻底抹去。';
+    else if(reason.includes('心魔'))deathStory='心魔爆发，波照陷入无尽幻境，最终道心崩溃，疯癫而亡。';
+    else if(reason.includes('波刚'))deathStory='波照与波刚的恩怨最终以悲剧收场，他被波刚以邪术吸干精元，化为一具干尸。';
+    else if(reason.includes('采补'))deathStory='波照沉迷于采补之术，最终反被他人采补，精气枯竭而亡。';
+    else deathStory='波照遭遇了「'+reason+'」，不幸陨落，修仙之路就此终止。';
+    const ending=pick(CONFIG.deathEndings);
+    document.getElementById('endTitle').textContent='道陨 · '+ending.split('：')[0].replace(/[「」]/g,'');
+    document.getElementById('endDesc').textContent=deathStory+'\n'+ending;
+    document.getElementById('endSummary').textContent='寿元 '+G.age+' 岁 · 境界 '+CONFIG.realms[G.realmIndex]||'炼气'+' · 战力 '+Math.floor(calcPower())+' · 修为 '+Math.floor(G.cult);
+    document.getElementById('lifeSummary').textContent=generateLifeSummary();
+    const review=document.getElementById('endLogReview');
+    review.innerHTML=G.logs.map(s=>'<p>'+s+'</p>').join('');
+    document.getElementById('endOverlay').classList.add('show');
+    document.getElementById('spinBtn').disabled=true;
+    addLog('⚠️ 道陨：'+ending);
+}function checkRealmDrop(){while(G.realmIndex>0&&G.cult<CONFIG.realmCult[G.realmIndex]){G.realmIndex--;addLog('⚠️ 修为不足，境界跌落至 '+CONFIG.realms[G.realmIndex]);setSubtitle('修为不足，跌落至 '+CONFIG.realms[G.realmIndex]+'！','bad');let maxLife=CONFIG.realmLifespan[G.realmIndex]+(G._bonusLife||0);if(G.age>maxLife){triggerDeath('境界跌落导致寿元耗尽');return;}updatePanel();}}
 
 // ----- 凡间渡劫 -----
 function showTribWheel(baseProb,success){return new Promise((resolve)=>{tribResolve=resolve;tribSuccess=success;const overlay=document.getElementById('tribOverlay'),wheel=document.getElementById('tribWheel');const resultEl=document.getElementById('tribResult'),probDisplay=document.getElementById('tribProbDisplay');const btn=document.getElementById('tribBtn');const pct=Math.round(baseProb);probDisplay.textContent='⚡ 当前渡劫成功率：'+pct+'%  · 点击「渡劫」旋转命运之轮';const totalSlots=8,successSlots=Math.round((baseProb/100)*totalSlots),failSlots=totalSlots-successSlots;let slots=[];for(let i=0;i<successSlots;i++)slots.push('success');for(let i=0;i<failSlots;i++)slots.push('fail');for(let i=slots.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[slots[i],slots[j]]=[slots[j],slots[i]];}if(successSlots===0)slots=['fail','fail','fail','fail','fail','fail','fail','fail'];if(failSlots===0)slots=['success','success','success','success','success','success','success','success'];wheel.innerHTML='';slots.forEach((type,idx)=>{const div=document.createElement('div');div.className='trib-item '+type;div.dataset.index=idx;div.dataset.type=type;div.textContent=type==='success'?'✅ 成功':'❌ 失败';wheel.appendChild(div);});resultEl.textContent='?';resultEl.className='trib-result';btn.disabled=false;overlay.classList.add('show');});}
