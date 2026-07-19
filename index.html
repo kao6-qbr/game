@@ -1386,7 +1386,15 @@ function xianHandleSpinResult(seg){
             if(ev.isPositive){xianAddLog('⭐ 名场面·正面事件！');}
             else{xianAddLog('💀 名场面·负面事件...');}
             xianUpdatePanel();
-            if(XG.life<=0){xianTriggerDeath('天人五衰');return;}
+                if (isNaN(XG.life) || XG.life <= 0) {
+        if (isNaN(XG.life)) {
+            XG.life = XG._isXianBorn ? 5000 : 10000;
+            xianAddLog('⚠️ 寿元数据异常，已重置');
+        } else {
+            xianTriggerDeath('天人五衰');
+            return;
+        }
+    }
             xianRecoverStatus();xianCheckAchievements();xianUpdatePanel();
             setTimeout(()=>{xianCheckBreakthrough();},100);
             return;
@@ -1410,7 +1418,15 @@ function xianHandleSpinResult(seg){
         }
     }catch(e){console.error('xianHandleSpinResult error:',e);xianSetSubtitle('⚠️ 事件处理出错','bad');xianAddLog('⚠️ 事件处理出错');}
     if(XG.xianqi.includes('混沌钟')&&XG.turnCount%100===0){XG.chaos+=1;xianAddLog('🌀 混沌钟自动产生1缕混沌之气');}
-    if(XG.life<=0){xianTriggerDeath('天人五衰');return;}
+        if (isNaN(XG.life) || XG.life <= 0) {
+        if (isNaN(XG.life)) {
+            XG.life = XG._isXianBorn ? 5000 : 10000;
+            xianAddLog('⚠️ 寿元数据异常，已重置');
+        } else {
+            xianTriggerDeath('天人五衰');
+            return;
+        }
+    }
     xianRecoverStatus();xianUpdatePanel();xianCheckAchievements();setTimeout(()=>{xianCheckBreakthrough();},100);
 }
 function xianHandleEvent(eventId){if(XG.dead)return;let story='';let maxLevel=XG.xianqi.includes('造化玉碟')?6:5;let evConfig=xianGetEventPool().find(e=>e.id===eventId);if(!evConfig){XG.xianYuan+=500;xianAddLog('未知事件，+500仙元');return;}    // 处理死劫事件（绝对死劫）
@@ -1453,101 +1469,132 @@ function xianShowTribWheel(rate){return new Promise((resolve)=>{xianTribResolve=
 document.getElementById('xianTribBtn').addEventListener('click',function(){const btn=this;if(btn.disabled)return;btn.disabled=true;const wheel=document.getElementById('xianTribWheel'),items=wheel.querySelectorAll('.trib-item');const resultEl=document.getElementById('xianTribResult');const rate=xianGetTribSuccessRate();const successSlots=Math.round((rate/100)*8),failSlots=8-successSlots;let slots=[];for(let i=0;i<successSlots;i++)slots.push('success');for(let i=0;i<failSlots;i++)slots.push('fail');for(let i=slots.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[slots[i],slots[j]]=[slots[j],slots[i]];}if(successSlots===0)slots=['fail','fail','fail','fail','fail','fail','fail','fail'];if(failSlots===0)slots=['success','success','success','success','success','success','success','success'];const targetType=slots[Math.floor(Math.random()*slots.length)];xianTribSuccess=targetType==='success';let count=0,maxCount=20+Math.floor(Math.random()*10),interval=80;const timer=setInterval(()=>{items.forEach(el=>el.classList.remove('active'));const showIdx=Math.floor(Math.random()*items.length);items[showIdx].classList.add('active');count++;if(count>=maxCount){clearInterval(timer);items.forEach(el=>el.classList.remove('active'));let targetEl=null;for(let el of items){if(el.dataset.type===targetType){targetEl=el;break;}}if(targetEl)targetEl.classList.add('active');else items[0].classList.add('active');resultEl.textContent=xianTribSuccess?'✅ 渡劫成功！':'❌ 渡劫失败…';resultEl.className='trib-result '+(xianTribSuccess?'success':'fail');setTimeout(()=>{document.getElementById('xianTribOverlay').classList.remove('show');if(xianTribResolve){xianTribResolve(xianTribSuccess);xianTribResolve=null;}btn.disabled=false;xianHandleTribResult(xianTribSuccess);},1200);}},interval);});
 function xianHandleTribResult(success){if(XG.dead)return;const nextIdx=XG.realmIndex+1,nextRealm=XIAN_CONFIG.realms[nextIdx];if(success){XG.realmIndex=nextIdx;XG.status='健康';XG._weaknessTurns=0;if(XG.xianqi.includes('东皇钟')){XG.gongDe+=500;xianAddLog('🔔 东皇钟：+500功德！');}if(XG.xianqi.includes('轩辕剑')){let bonus=Math.floor(XG.xianYuan*0.2);XG.xianYuan+=bonus;xianAddLog('⚔️ 轩辕剑：+'+bonus+'仙元');}let realmName=getXianRealm();xianSetSubtitle('🎉 渡劫成功！晋升 '+realmName+'！','good');xianAddLog('🎉 晋升 '+realmName+'，寿元 '+getXianMaxLife()+' 年');xianCheckAchievements();if(XG.realmIndex===6){xianTriggerEnding('victory');return;}xianUpdatePanel();setTimeout(()=>{xianCheckBreakthrough();},300);}else{let penalty=Math.floor(XG.xianYuan*0.3);XG.xianYuan=Math.max(0,XG.xianYuan-penalty);XG.life-=500;if(XG.xianqi.includes('八卦仙衣')){penalty=Math.floor(penalty*0.5);XG.xianYuan=Math.max(0,XG.xianYuan+penalty);xianAddLog('🛡️ 八卦仙衣：损失减半！');}if(XG.realmIndex>0){XG.realmIndex--;xianSetSubtitle('渡劫失败，跌落至 '+getXianRealm()+'，损失'+penalty+'仙元，寿元-500','bad');xianAddLog('跌落至 '+getXianRealm());XG._weaknessTurns=3;XG.status='重伤';}else{xianSetSubtitle('渡劫失败，损失'+penalty+'仙元，寿元-500','bad');xianAddLog('人仙受创');XG.status='重伤';XG._weaknessTurns=3;}xianUpdatePanel();if(XG.life<=0){xianTriggerDeath('天人五衰');return;}}}
 function xianTriggerDeath(reason){
-    if(XG.dead)return;
-    XG.dead=true;
-    XG.deathCount++;
+    if(XG.dead) return;
+    XG.dead = true;
+    XG.deathCount = (XG.deathCount || 0) + 1;
     XG.xianReincarnationCount = (XG.xianReincarnationCount || 0) + 1;
-    if(XG.gongDe<0){XG.gongDe-=500;xianAddLog('💀 功德为负，死亡后业力加重，功德-500（当前'+XG.gongDe+'）');}
-    else{XG.gongDe=-1000;xianAddLog('💀 功德归零，死亡后业力缠身，功德变为-1000');}
+    
+    // 功德处理
+    if(XG.gongDe < 0){
+        XG.gongDe -= 500;
+        xianAddLog('💀 功德为负，死亡后业力加重，功德-500（当前'+XG.gongDe+'）');
+    } else {
+        XG.gongDe = -1000;
+        xianAddLog('💀 功德归零，死亡后业力缠身，功德变为-1000');
+    }
+    
     xianCheckAchievements();
-    let title='💀 道陨',desc='';
-    const deathTexts={'嘲讽天道':'波照嘲讽天道，紫电天罚劈中天灵盖，形神俱灭。','偷窥圣人':'偷窥圣人，被拍进混沌海深处，永世不得超生。','闯禁区':'误入陨仙渊，被毁灭法则绞碎。','吞服毒丹':'误服毒丹，万毒噬心而亡。','挑战仙帝':'酒后挑战仙帝，被一指点碎仙体。','窥探天机':'窥探天机，因果业火焚身。','混沌反噬':'炼化混沌之气失控，仙体破碎。','天人五衰':'天人五衰，化作星尘消散。'};
-    if(reason==='天人五衰'||reason.includes('天人五衰')){title='🌅 天人五衰';desc=deathTexts['天人五衰'];}
-    else if(deathTexts[reason]){title='💀 '+reason;desc=deathTexts[reason];}
-    else{desc='仙体崩碎，重铸归来。';}
-    let extraInfo='\n\n死亡次数：'+XG.deathCount+' · 境界：'+getXianRealm()+' · 功德：'+XG.gongDe;
-    document.getElementById('xianDeathIcon').textContent='💀';
-    document.getElementById('xianEndTitle').textContent=title;
-    document.getElementById('xianEndDesc').innerHTML=(desc+extraInfo).replace(/\n/g,'<br>');
-    document.getElementById('xianEndSummary').textContent='死亡次数：'+XG.deathCount+' · 功德：'+XG.gongDe+' · 轮回：'+XG.xianReincarnationCount+'/10';
-    if(XG.xianReincarnationCount>=10){
-        document.getElementById('xianEndBtn').textContent='⛔ 轮回终结';
-        document.getElementById('xianEndBtn').style.borderColor='#d66';
-        document.getElementById('xianEndBtn').style.color='#d66';
-        document.getElementById('xianEndBtn').style.background='#2a1010';
+    
+    // 死亡文本
+    let title = '💀 道陨', desc = '';
+    const deathTexts = {
+        '嘲讽天道':'波照嘲讽天道，紫电天罚劈中天灵盖，形神俱灭。',
+        '偷窥圣人':'偷窥圣人，被拍进混沌海深处，永世不得超生。',
+        '闯禁区':'误入陨仙渊，被毁灭法则绞碎。',
+        '吞服毒丹':'误服毒丹，万毒噬心而亡。',
+        '挑战仙帝':'酒后挑战仙帝，被一指点碎仙体。',
+        '窥探天机':'窥探天机，因果业火焚身。',
+        '混沌反噬':'炼化混沌之气失控，仙体破碎。',
+        '天人五衰':'天人五衰，化作星尘消散。'
+    };
+    
+    if(reason === '天人五衰' || reason.includes('天人五衰')){
+        title = '🌅 天人五衰';
+        desc = deathTexts['天人五衰'];
+    } else if(deathTexts[reason]){
+        title = '💀 ' + reason;
+        desc = deathTexts[reason];
+    } else {
+        desc = '仙体崩碎，重铸归来。';
+    }
+    
+    let extraInfo = '\n\n死亡次数：' + XG.deathCount + ' · 境界：' + getXianRealm() + ' · 功德：' + XG.gongDe;
+    document.getElementById('xianDeathIcon').textContent = '💀';
+    document.getElementById('xianEndTitle').textContent = title;
+    document.getElementById('xianEndDesc').innerHTML = (desc + extraInfo).replace(/\n/g, '<br>');
+    document.getElementById('xianEndSummary').textContent = '死亡次数：' + XG.deathCount + ' · 功德：' + XG.gongDe + ' · 轮回：' + XG.xianReincarnationCount + '/10';
+    
+    // 检查是否达到轮回上限
+    if(XG.xianReincarnationCount >= 10){
+        document.getElementById('xianEndBtn').textContent = '⛔ 轮回终结';
+        document.getElementById('xianEndBtn').style.borderColor = '#d66';
+        document.getElementById('xianEndBtn').style.color = '#d66';
+        document.getElementById('xianEndBtn').style.background = '#2a1010';
         document.getElementById('xianEndBtn').onclick = function(){
             document.getElementById('xianEndOverlay').classList.remove('show');
-            document.getElementById('gameWrapper').style.display='none';
+            document.getElementById('gameWrapper').style.display = 'none';
             document.getElementById('startOverlay').classList.add('show');
-            document.getElementById('spinBtn').disabled=false;
-            XG.xianReincarnationCount=0;
-            phase='fan';
-            G._flying=false;
-            G._dead=false;
+            document.getElementById('spinBtn').disabled = false;
+            // 重置所有状态
+            XG.xianReincarnationCount = 0;
+            phase = 'fan';
+            G._flying = false;
+            G._dead = false;
             if(birthTimer2){clearInterval(birthTimer2);birthTimer2=null;}
             if(sectTimer){clearInterval(sectTimer);sectTimer=null;}
             if(spiritTimer){clearInterval(spiritTimer);spiritTimer=null;}
             if(tribResolve){tribResolve=null;}
-            G._isXianBorn=false;
-            G._bornMode='fan';
+            G._isXianBorn = false;
+            G._bornMode = 'fan';
             initFanState();
-            document.getElementById('xianEndBtn').style.borderColor='';
-            document.getElementById('xianEndBtn').style.color='';
-            document.getElementById('xianEndBtn').style.background='';
-            document.getElementById('xianEndBtn').textContent='重返仙界';
+            // 重置按钮样式
+            document.getElementById('xianEndBtn').style.borderColor = '';
+            document.getElementById('xianEndBtn').style.color = '';
+            document.getElementById('xianEndBtn').style.background = '';
+            document.getElementById('xianEndBtn').textContent = '重返仙界';
             document.getElementById('xianEndBtn').onclick = null;
             document.getElementById('xianEndBtn').addEventListener('click', function(){
                 document.getElementById('xianEndOverlay').classList.remove('show');
-                XG.dead=false;
-                XG.realmIndex=0;
-                XG.xianYuan=0;
-                XG.xiangHuo=0;
-                XG.life=XG._isXianBorn?5000:10000;
-                XG.maxLife=XG._isXianBorn?5000:10000;
-                XG.status='健康';
-                XG._weaknessTurns=0;
-                XG._tribProtect=false;
-                XG._autoWinCount=0;
-                XG.equipped=[];
-                document.getElementById('spinBtn').disabled=false;
+                XG.dead = false;
+                XG.realmIndex = 0;
+                XG.xianYuan = 0;
+                XG.xiangHuo = 0;
+                XG.life = XG._isXianBorn ? 5000 : 10000;
+                XG.maxLife = XG._isXianBorn ? 5000 : 10000;
+                XG.status = '健康';
+                XG._weaknessTurns = 0;
+                XG._tribProtect = false;
+                XG._autoWinCount = 0;
+                XG.equipped = [];
+                document.getElementById('spinBtn').disabled = false;
                 showXianLocationDraw();
-                xianAddLog('♻️ 仙体重铸，重返仙界！当前功德：'+XG.gongDe);
+                xianAddLog('♻️ 仙体重铸，重返仙界！当前功德：' + XG.gongDe);
                 xianUpdatePanel();
                 xianCheckAchievements();
             });
         };
         document.getElementById('xianEndDesc').innerHTML += '<br><br><span style="color:#d66;font-weight:bold;">⚠️ 仙界轮回已达上限（10次），仙途到此为止。点击下方按钮返回开始界面。';
         xianAddLog('⛔ 仙界轮回已达10次上限，仙途终结！');
-    }else{
-        document.getElementById('xianEndBtn').textContent='♻️ 重返仙界';
-        document.getElementById('xianEndBtn').style.borderColor='';
-        document.getElementById('xianEndBtn').style.color='';
-        document.getElementById('xianEndBtn').style.background='';
+    } else {
+        document.getElementById('xianEndBtn').textContent = '♻️ 重返仙界';
+        document.getElementById('xianEndBtn').style.borderColor = '';
+        document.getElementById('xianEndBtn').style.color = '';
+        document.getElementById('xianEndBtn').style.background = '';
         document.getElementById('xianEndBtn').onclick = function(){
             document.getElementById('xianEndOverlay').classList.remove('show');
-            XG.dead=false;
-            XG.realmIndex=0;
-            XG.xianYuan=0;
-            XG.xiangHuo=0;
-            XG.life=XG._isXianBorn?5000:10000;
-            XG.maxLife=XG._isXianBorn?5000:10000;
-            XG.status='健康';
-            XG._weaknessTurns=0;
-            XG._tribProtect=false;
-            XG._autoWinCount=0;
-            XG.equipped=[];
-            document.getElementById('spinBtn').disabled=false;
+            XG.dead = false;
+            XG.realmIndex = 0;
+            XG.xianYuan = 0;
+            XG.xiangHuo = 0;
+            XG.life = XG._isXianBorn ? 5000 : 10000;
+            XG.maxLife = XG._isXianBorn ? 5000 : 10000;
+            XG.status = '健康';
+            XG._weaknessTurns = 0;
+            XG._tribProtect = false;
+            XG._autoWinCount = 0;
+            XG.equipped = [];
+            document.getElementById('spinBtn').disabled = false;
             showXianLocationDraw();
-            xianAddLog('♻️ 仙体重铸，重返仙界！当前功德：'+XG.gongDe+' （轮回 '+XG.xianReincarnationCount+'/10）');
+            xianAddLog('♻️ 仙体重铸，重返仙界！当前功德：' + XG.gongDe + ' （轮回 ' + XG.xianReincarnationCount + '/10）');
             xianUpdatePanel();
             xianCheckAchievements();
         };
     }
+    
     document.getElementById('xianEndOverlay').classList.add('show');
-    document.getElementById('spinBtn').disabled=true;
-    xianAddLog('💀 '+title+'（轮回 '+XG.xianReincarnationCount+'/10）');
-}
-function xianTriggerEnding(type){if(type==='victory'){document.getElementById('xianDeathIcon').textContent='🏆';document.getElementById('xianEndTitle').textContent='🏆 证道永恒';document.getElementById('xianEndDesc').innerHTML='你是亿中无一的仙波——<br><br>从凡间一介草莽，历经万劫，飞升仙界；<br>从人仙微末，步步为营，终证混元；<br>从五行大道中悟出天道真谛，化身天道圣人。<br><br>万仙朝拜，诸天共尊。<br>修仙之路，至此圆满。<br><br>—— 恭喜通关 ——';document.getElementById('xianEndSummary').textContent='战力：'+xianCalcPower()+' · 死亡：'+XG.deathCount+' · 功德：'+XG.gongDe;document.getElementById('xianEndBtn').textContent='🔄 轮回重修（重开）';document.getElementById('xianEndOverlay').classList.add('show');document.getElementById('spinBtn').disabled=true;xianAddLog('🏆 证道永恒！');document.getElementById('xianEndBtn').onclick=function(){location.reload();};}}
+    document.getElementById('spinBtn').disabled = true;
+    xianAddLog('💀 ' + title + '（轮回 ' + XG.xianReincarnationCount + '/10）');
+}function xianTriggerEnding(type){if(type==='victory'){document.getElementById('xianDeathIcon').textContent='🏆';document.getElementById('xianEndTitle').textContent='🏆 证道永恒';document.getElementById('xianEndDesc').innerHTML='你是亿中无一的仙波——<br><br>从凡间一介草莽，历经万劫，飞升仙界；<br>从人仙微末，步步为营，终证混元；<br>从五行大道中悟出天道真谛，化身天道圣人。<br><br>万仙朝拜，诸天共尊。<br>修仙之路，至此圆满。<br><br>—— 恭喜通关 ——';document.getElementById('xianEndSummary').textContent='战力：'+xianCalcPower()+' · 死亡：'+XG.deathCount+' · 功德：'+XG.gongDe;document.getElementById('xianEndBtn').textContent='🔄 轮回重修（重开）';document.getElementById('xianEndOverlay').classList.add('show');document.getElementById('spinBtn').disabled=true;xianAddLog('🏆 证道永恒！');document.getElementById('xianEndBtn').onclick=function(){location.reload();};}}
 function xianRecoverStatus(){if(XG.status==='轻伤'&&Math.random()<0.2){XG.status='健康';xianAddLog('伤势恢复');}else if(XG.status==='重伤'&&Math.random()<0.1){XG.status='轻伤';xianAddLog('重伤→轻伤');}if(XG._weaknessTurns>0)XG._weaknessTurns--;}
 let xianIsSpinning=false;
 let xianSpinAngle=0;
