@@ -1099,10 +1099,41 @@ function xianAddLog(msg){
 }
 function updateXianLogUI(){const area=document.getElementById('logArea');if(area)area.innerHTML=XG.logs.slice(-50).map(s=>'<p>'+s+'</p>').join('');}
 function xianSetSubtitle(text,cls=''){const el=document.getElementById('subtitle');if(el){el.textContent=text;el.className='subtitle '+(cls||'');}}
-function xianCalcPower(){let base=getXianBasePower();let yuanBonus=Math.floor(XG.xianYuan/100);let lawTotal=0;for(let l in XG.laws)lawTotal+=XG.laws[l];let lawBonus=lawTotal*500;let gongdeBonus=Math.min(Math.floor(Math.max(0,XG.gongDe)/10),100000);let xianfaBonus=XG.xianfa.length*800;let xianqiPower=0;let hasKunlunDing=XG.xianqi.includes('乾坤鼎');XG.equipped.forEach(name=>{const q=XIAN_CONFIG.xianqiList.find(x=>x.name===name);if(q){let p=q.power;if(hasKunlunDing)p*=1.5;xianqiPower+=p;}});if(hasKunlunDing)xianqiPower*=1.5;let locationMult=1+getXianLocationBonus('cult');let raw=(base+yuanBonus+lawBonus+gongdeBonus+xianfaBonus+xianqiPower)*locationMult;if(XG._weaknessTurns>0)raw*=0.5;return Math.floor(raw);}
-function xianGetAgeCost(){let base=getXianBaseCost();let lifeBonus=getXianLocationBonus('life')||0;let mult=1+lifeBonus;if(XG.xianqi.includes('玉净瓶'))mult*=0.8;if(XG._hasChunqiuChan)mult*=0.5;return Math.floor(base*mult);}
-function xianGetTribSuccessRate(){let power=xianCalcPower();let rate=50+Math.min(power/10000,30)+Math.min(Math.max(0,XG.gongDe)/500,20)+XG.equipped.length*2+(XG.xianfa.includes('大预言术')?5:0);if(XG._tribProtect)rate=Math.min(rate+20,95);return Math.min(Math.max(rate,5),95);}
-function xianUpgradeLaw(lawName,amount){if(!lawName||!XG.laws.hasOwnProperty(lawName))return 0;let maxLevel=XG.xianqi.includes('造化玉碟')?6:5;let oldLevel=XG.laws[lawName];let actualGain=Math.min(amount,maxLevel-oldLevel);if(actualGain<=0){XG.xianYuan+=2000;xianAddLog('大道「'+lawName+'」已满级，转化为2000仙元');return 0;}XG.laws[lawName]=Math.min(oldLevel+actualGain,maxLevel);if(XG.xianqi.includes('太极图')&&!XG._lawUpgradeBonusUsed){XG.laws[lawName]=Math.min(XG.laws[lawName]+1,maxLevel);XG._lawUpgradeBonusUsed=true;xianAddLog('⚡ 太极图额外+1！'+lawName+'→'+XG.laws[lawName]+'/5');}xianCheckAchievements();return XG.laws[lawName]-oldLevel;}
+function xianCalcPower() {
+    let base = getXianBasePower();
+    let yuanBonus = Math.floor(XG.xianYuan / 100);
+    let lawTotal = 0;
+    for (let l in XG.laws) lawTotal += XG.laws[l];
+    let lawBonus = lawTotal * 500;
+    let gongdeBonus = Math.min(Math.floor(Math.max(0, XG.gongDe) / 10), 100000);
+    let xianfaBonus = XG.xianfa.length * 800;
+    let fanAbilityBonus = (XG.fanAbilities ? XG.fanAbilities.length : 0) * 80;
+    let xianqiPower = 0;
+    let hasKunlunDing = XG.xianqi.includes('乾坤鼎');
+    XG.equipped.forEach(name => {
+        const q = XIAN_CONFIG.xianqiList.find(x => x.name === name);
+        if (q) {
+            let p = q.power;
+            if (hasKunlunDing) p *= 1.5;
+            xianqiPower += p;
+        }
+    });
+    if (hasKunlunDing) xianqiPower *= 1.5;
+    let locationMult = 1 + getXianLocationBonus('cult');
+    let raw = (base + yuanBonus + lawBonus + gongdeBonus + xianfaBonus + fanAbilityBonus + xianqiPower) * locationMult;
+    if (XG._weaknessTurns > 0) raw *= 0.5;
+    return Math.floor(raw);
+}function xianGetAgeCost(){let base=getXianBaseCost();let lifeBonus=getXianLocationBonus('life')||0;let mult=1+lifeBonus;if(XG.xianqi.includes('玉净瓶'))mult*=0.8;if(XG._hasChunqiuChan)mult*=0.5;return Math.floor(base*mult);}
+function xianGetTribSuccessRate() {
+    let power = xianCalcPower();
+    let rate = 15
+               + Math.min(power / 20000, 20)
+               + Math.min(Math.max(0, XG.gongDe) / 100, 40)
+               + XG.equipped.length * 5
+               + (XG.xianfa.includes('大预言术') ? 10 : 0);
+    if (XG._tribProtect) rate = Math.min(rate + 20, 95);
+    return Math.min(Math.max(rate, 5), 95);
+}function xianUpgradeLaw(lawName,amount){if(!lawName||!XG.laws.hasOwnProperty(lawName))return 0;let maxLevel=XG.xianqi.includes('造化玉碟')?6:5;let oldLevel=XG.laws[lawName];let actualGain=Math.min(amount,maxLevel-oldLevel);if(actualGain<=0){XG.xianYuan+=2000;xianAddLog('大道「'+lawName+'」已满级，转化为2000仙元');return 0;}XG.laws[lawName]=Math.min(oldLevel+actualGain,maxLevel);if(XG.xianqi.includes('太极图')&&!XG._lawUpgradeBonusUsed){XG.laws[lawName]=Math.min(XG.laws[lawName]+1,maxLevel);XG._lawUpgradeBonusUsed=true;xianAddLog('⚡ 太极图额外+1！'+lawName+'→'+XG.laws[lawName]+'/5');}xianCheckAchievements();return XG.laws[lawName]-oldLevel;}
 function xianUpgradeRandomLaw(amount){let maxLevel=XG.xianqi.includes('造化玉碟')?6:5;let available=XIAN_CONFIG.laws.filter(l=>XG.laws[l]<maxLevel);if(available.length===0){XG.xianYuan+=2000;xianAddLog('所有大道已满，转化为2000仙元');return null;}let target=pick(available);let gained=xianUpgradeLaw(target,amount);if(gained>0)xianAddLog('✨ '+target+'大道+'+gained+'（'+XG.laws[target]+'/5）');return target;}
 function xianUnlockAchievement(id){if(XG.achievements[id]===undefined||XG.achievements[id])return false;XG.achievements[id]=true;let bonus=500+Math.floor(Math.random()*500);XG.xianYuan+=bonus;xianAddLog('🏆 解锁仙界成就：'+id+'！奖励+'+bonus+'仙元');xianSetSubtitle('🏆 成就：'+id+'！','special');xianUpdatePanel();return true;}
 function xianCheckAchievements(){let realmMap=['人仙','地仙','天仙','金仙','大罗金仙','混元大罗金仙','天道圣人'];if(XG.realmIndex>=0)xianUnlockAchievement(realmMap[XG.realmIndex]);if(XG.xianqi.length>=1&&!XG._hasFirstXianqi){XG._hasFirstXianqi=true;xianUnlockAchievement('第一件仙器');}if(XG.xianqi.length>=5)xianUnlockAchievement('仙器收藏家');if(XG.xianfa.length>=1&&!XG._hasFirstXianfa){XG._hasFirstXianfa=true;xianUnlockAchievement('第一仙法');}if(XG.xianfa.length>=5)xianUnlockAchievement('仙法宗师');if(XG.chaos>=1&&!XG._hasFirstChaos){XG._hasFirstChaos=true;xianUnlockAchievement('混沌初开');}if(XG.deathCount>=1&&!XG._hasFirstDeath){XG._hasFirstDeath=true;xianUnlockAchievement('死过一次');}if(XG.deathCount>=5)xianUnlockAchievement('五衰轮回');if(XG.xiangHuo>=10000)xianUnlockAchievement('香火大户');if(XG.gongDe>=10000)xianUnlockAchievement('功德无量');if(XG.xianYuan>=1000000)xianUnlockAchievement('仙元千万');if(XIAN_CONFIG.laws.every(l=>XG.laws[l]>=1))xianUnlockAchievement('大道集齐');if(!XG._hasLawFull){for(let l in XG.laws){if(XG.laws[l]>=5){XG._hasLawFull=true;xianUnlockAchievement('大道圆满');break;}}}}
