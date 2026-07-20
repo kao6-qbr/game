@@ -1171,7 +1171,7 @@ const XIAN_CONFIG = {
     realmBasePower: [2000,5000,12000,30000,80000,250000,1000000],
     realmLawReq: [0,0,2,2,3,4,6],
     realmLawLevelReq: [0,0,1,2,3,4,5],
-    realmChaosReq: [0,0,0,0,1,3,250],
+    realmChaosReq: [0,0,0,0,1,3,30],
     laws: ['时间','空间','命运','毁灭','生命','金','木','水','火','土'],
     lawColors: {'金':'law-jin','木':'law-mu','水':'law-shui','火':'law-huo','土':'law-tu'},
     locations: [
@@ -2986,7 +2986,7 @@ const XIAN_BOSSES = [
         maxRealm: 2,
         power: 200000,
         cost: 200,
-        rewards: { yuan: 8000, xianghuo: 300, lawRandom: 1 },
+        rewards: { yuan: 8000, xianghuo: 300, lawRandom: 1, chaos: 3 },
         loseDesc: '无面的恐惧之力贯穿神魂，道心震颤！'
     },
     {
@@ -2997,7 +2997,7 @@ const XIAN_BOSSES = [
         maxRealm: 3,
         power: 600000,
         cost: 200,
-        rewards: { yuan: 20000, gongde: 500, lawSpecify: 1 },
+        rewards: { yuan: 20000, gongde: 500, lawSpecify: 1, chaos: 5 },
         loseDesc: '戮仙剑主一剑斩落，仙体崩裂！'
     },
     {
