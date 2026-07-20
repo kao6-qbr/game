@@ -141,6 +141,33 @@ canvas#wheelCanvas{width:100%;max-width:440px;height:auto;aspect-ratio:1/1;backg
 .fan-section{border-top:1px solid #3a2a4a;padding-top:6px;margin-top:4px;}
 .reincarnation-info{color:#b08ad4;font-size:0.8rem;background:rgba(100,80,160,0.15);padding:4px 12px;border-radius:12px;border:1px solid #6a5a8a;display:inline-block;}
 @media (max-width:800px){.game-wrapper{padding:12px;}.right-panel{max-height:380px;}.overlay-box{padding:25px 20px;margin:0 16px;}.birth-grid{grid-template-columns:repeat(2,1fr);}.sect-grid{grid-template-columns:repeat(2,1fr);}.trib-item{font-size:1rem;padding:8px 12px;min-width:50px;}.avatar{width:48px;height:48px;}.life-summary{font-size:0.85rem;padding:10px 14px;}.start-choice{gap:16px;}.start-choice .choice-btn{padding:14px 24px;font-size:1.2rem;min-width:140px;}}
+/* ===== 策略点商城新增样式 ===== */
+.strategy-bar{display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(0,0,0,0.4);border-radius:12px;border:1px solid #4a3f34;margin-bottom:10px;flex-wrap:wrap;}
+.strategy-bar .points{font-size:1.2rem;font-weight:bold;color:#f5d080;flex:1;}
+.strategy-bar .btn-strategy{background:#3d3228;border:2px solid #b89a6a;color:#e6d5b8;border-radius:50px;padding:4px 18px;cursor:pointer;font-size:0.85rem;transition:0.2s;}
+.strategy-bar .btn-strategy:hover{background:#5a4a3a;border-color:#d4b080;box-shadow:0 0 20px #b89a6a44;}
+.strategy-bar .btn-strategy:disabled{opacity:0.4;cursor:not-allowed;box-shadow:none;}
+
+.shop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin:16px 0;}
+.shop-item{padding:12px 10px;background:rgba(30,24,20,0.7);border:2px solid #3d3228;border-radius:12px;text-align:center;transition:all 0.15s;cursor:pointer;}
+.shop-item:hover:not(.sold):not(.locked){border-color:#b89a6a;background:rgba(60,50,40,0.5);}
+.shop-item .name{font-size:1rem;color:#ecd8c0;font-weight:bold;}
+.shop-item .price{font-size:0.85rem;color:#f5d080;margin:4px 0;}
+.shop-item .desc{font-size:0.75rem;color:#8a7a6a;}
+.shop-item .limit{font-size:0.7rem;color:#6a5a6a;margin-top:4px;}
+.shop-item.sold{opacity:0.4;cursor:not-allowed;border-color:#4a3a3a;}
+.shop-item.sold .name{color:#6a5a6a;}
+.shop-item.locked{border-color:#f5d080;background:rgba(245,208,128,0.1);}
+.shop-item.locked .name{color:#f5d080;}
+.shop-item .lock-btn{display:inline-block;margin-top:6px;padding:2px 10px;font-size:0.7rem;background:rgba(0,0,0,0.4);border:1px solid #6a5a4a;border-radius:10px;color:#a09080;cursor:pointer;}
+.shop-item .lock-btn:hover{background:rgba(245,208,128,0.15);border-color:#f5d080;color:#f5d080;}
+.shop-item .lock-btn.active{background:rgba(245,208,128,0.15);border-color:#f5d080;color:#f5d080;}
+.shop-refresh-info{font-size:0.8rem;color:#8a7a6a;margin-top:8px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;}
+.shop-refresh-info .highlight{color:#f5d080;}
+.shop-points-display{font-size:1.2rem;color:#f5d080;font-weight:bold;}
+.strategy-toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.9);color:#f5d080;padding:12px 28px;border-radius:16px;border:2px solid #f5d080;font-size:1.1rem;z-index:1000;pointer-events:none;opacity:0;transition:opacity 0.3s;text-align:center;}
+.strategy-toast.show{opacity:1;}
+.strategy-toast .num{font-size:1.4rem;font-weight:bold;}
 </style>
 </head>
 <body>
@@ -694,7 +721,16 @@ function handleEvent(eventName){const power=calcPower();let story,gain,opp;const
 
 // ----- 凡间转盘（★含名场面事件，只能触发一次） -----
 let currentSegments=[];
-function getSegments(){let segs=[],isModao=(G._sectSpecial==='modao'),isCaibup=(G._sectSpecial==='caibup'),pool=[];let allAbstracts=CONFIG.abstractEvents.filter(e=>!(e.type==='item'&&e.item==='保命道具'));let shuffled=[...allAbstracts];for(let i=shuffled.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]];}let chosen=shuffled.slice(0,8);chosen.forEach(ab=>{pool.push({label:ab.label,type:'abstract',event:ab.id,color:'#8a7a6a'});});if(!G._hasChunqiuChan && Math.random()<0.015){pool.push({label:'春秋蝉',type:'abstract',event:'chunqiu_chan',color:'#4a9a8a'});}let currentLifeCount=G.items['保命道具']||0;if(currentLifeCount<5&&Math.random()<0.03){pool.push({label:'保命道具',type:'abstract',event:'神秘护符',color:'#f5d080'});}if(!G._winVillage&&G._villageFails<2){pool.push({label:'村斗',type:'event',event:'村斗',color:'#7a8a6a'});pool.push({label:'村斗',type:'event',event:'村斗',color:'#7a8a6a'});}if(G._winVillage&&!G._winArena&&G._arenaFails<2){pool.push({label:'擂台',type:'event',event:'擂台',color:'#6a8a7a'});pool.push({label:'擂台',type:'event',event:'擂台',color:'#6a8a7a'});}if(G._winArena&&!G._winTourney&&G._tourneyFails<2){pool.push({label:'仙道大会',type:'event',event:'仙道大会',color:'#d4a06a'});pool.push({label:'仙道大会',type:'event',event:'仙道大会',color:'#d4a06a'});}if(G._gangKill===0 && !G.abilities.includes('波刚之爱')){let count=1+(G._gangEncounters||0);for(let i=0;i<Math.min(count,4);i++){pool.push({label:'波刚',type:'event',event:'波刚',color:'#8a4a3a'});}}const normalEvents=[{label:'抢劫',type:'event',event:'被抢劫',color:'#5a4a4a'},{label:'路见不平',type:'event',event:'路见不平',color:'#4a6a5a'},{label:'挑衅',type:'event',event:'被挑衅',color:'#6a4a5a'},{label:'隐世高手',type:'event',event:'隐世高手',color:'#3a3a5a'}];let shuffledNormal=[...normalEvents];for(let i=shuffledNormal.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[shuffledNormal[i],shuffledNormal[j]]=[shuffledNormal[j],shuffledNormal[i]];}let chosenNormal=shuffledNormal.slice(0,2+Math.floor(Math.random()*2));chosenNormal.forEach(ev=>{pool.push({label:ev.label,type:'event',event:ev.event,color:ev.color});});let baseCult=30+G.realmIndex*25;const cultItems=[{label:'+'+baseCult+'修',type:'cult',value:baseCult,color:'#b89a6a'},{label:'+'+baseCult*2+'修',type:'cult',value:baseCult*2,color:'#c8aa7a'},{label:'+'+baseCult*4+'修',type:'cult',value:baseCult*4,color:'#d4b08a'}];pool.push(...cultItems);const allAb=CONFIG.allAbilities.slice();let chosenAb=[];for(let i=0;i<3&&allAb.length>0;i++){let idx=Math.floor(Math.random()*allAb.length);chosenAb.push(allAb.splice(idx,1)[0]);}chosenAb.forEach(ab=>{pool.push({label:ab,type:'ability',name:ab,color:'#6a9a7a'});});if(isModao){pool.push({label:'魔袭',type:'event',event:'魔道偷袭',color:'#5a3a5a'});pool.push({label:'反噬',type:'event',event:'反噬',color:'#6a3a3a'});}if(isCaibup){pool.push({label:'采补',type:'event',event:'采补',color:'#8a4a5a'});}
+function getSegments(){let segs=[],isModao=(G._sectSpecial==='modao'),isCaibup=(G._sectSpecial==='caibup'),pool=[];let allAbstracts=CONFIG.abstractEvents.filter(e=>!(e.type==='item'&&e.item==='保命道具'));let shuffled=[...allAbstracts];for(let i=shuffled.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]];}let chosen=shuffled.slice(0,8);chosen.forEach(ab=>{pool.push({label:ab.label,type:'abstract',event:ab.id,color:'#8a7a6a'});});if(!G._hasChunqiuChan && Math.random()<0.015){pool.push({label:'春秋蝉',type:'abstract',event:'chunqiu_chan',color:'#4a9a8a'});}let currentLifeCount=G.items['保命道具']||0;if(currentLifeCount<5&&Math.random()<0.03){pool.push({label:'保命道具',type:'abstract',event:'神秘护符',color:'#f5d080'});}if(!G._winVillage&&G._villageFails<2){pool.push({label:'村斗',type:'event',event:'村斗',color:'#7a8a6a'});pool.push({label:'村斗',type:'event',event:'村斗',color:'#7a8a6a'});}if(G._winVillage&&!G._winArena&&G._arenaFails<2){pool.push({label:'擂台',type:'event',event:'擂台',color:'#6a8a7a'});pool.push({label:'擂台',type:'event',event:'擂台',color:'#6a8a7a'});}if(G._winArena&&!G._winTourney&&G._tourneyFails<2){pool.push({label:'仙道大会',type:'event',event:'仙道大会',color:'#d4a06a'});pool.push({label:'仙道大会',type:'event',event:'仙道大会',color:'#d4a06a'});}if(G._gangKill===0 && !G.abilities.includes('波刚之爱')){let count=1+(G._gangEncounters||0);for(let i=0;i<Math.min(count,4);i++){pool.push({label:'波刚',type:'event',event:'波刚',color:'#8a4a3a'});}}const normalEvents = [
+    {label:'抢劫',type:'event',event:'被抢劫',color:'#5a4a4a'},
+    {label:'路见不平',type:'event',event:'路见不平',color:'#4a6a5a'},
+    {label:'挑衅',type:'event',event:'被挑衅',color:'#6a4a5a'}
+    // 隐世高手单独处理
+];
+// 隐世高手以 30% 概率加入
+if (Math.random() < 0.30) {
+    normalEvents.push({label:'隐世高手',type:'event',event:'隐世高手',color:'#3a3a5a'});
+}let shuffledNormal=[...normalEvents];for(let i=shuffledNormal.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[shuffledNormal[i],shuffledNormal[j]]=[shuffledNormal[j],shuffledNormal[i]];}let chosenNormal=shuffledNormal.slice(0,2+Math.floor(Math.random()*2));chosenNormal.forEach(ev=>{pool.push({label:ev.label,type:'event',event:ev.event,color:ev.color});});let baseCult=30+G.realmIndex*25;const cultItems=[{label:'+'+baseCult+'修',type:'cult',value:baseCult,color:'#b89a6a'},{label:'+'+baseCult*2+'修',type:'cult',value:baseCult*2,color:'#c8aa7a'},{label:'+'+baseCult*4+'修',type:'cult',value:baseCult*4,color:'#d4b08a'}];pool.push(...cultItems);const allAb=CONFIG.allAbilities.slice();let chosenAb=[];for(let i=0;i<3&&allAb.length>0;i++){let idx=Math.floor(Math.random()*allAb.length);chosenAb.push(allAb.splice(idx,1)[0]);}chosenAb.forEach(ab=>{pool.push({label:ab,type:'ability',name:ab,color:'#6a9a7a'});});if(isModao){pool.push({label:'魔袭',type:'event',event:'魔道偷袭',color:'#5a3a5a'});pool.push({label:'反噬',type:'event',event:'反噬',color:'#6a3a3a'});}if(isCaibup){pool.push({label:'采补',type:'event',event:'采补',color:'#8a4a5a'});}
 
 // ★★★ 名场面事件（未触发的才加入） ★★★
 let availableMing = FAN_MING_EVENTS.filter(ev => !G._triggeredFanMing.includes(ev.id));
@@ -1794,6 +1830,7 @@ function xianHandleTribResult(success){
     const nextIdx=XG.realmIndex+1,nextRealm=XIAN_CONFIG.realms[nextIdx];
     if(success){
         XG.realmIndex=nextIdx;
+XG.maxLife = getXianMaxLife();
         XG.status='健康';
         XG._weaknessTurns=0;
         if(XG.xianqi.includes('东皇钟')){
@@ -1999,6 +2036,619 @@ console.log('🔄 仙界轮回上限10次，第10次死亡后仙途终结');
 console.log('⭐ 名场面事件：凡间11个，仙界14个，每个仅触发一次');
 console.log('✅ 凡间篇能力和成就已修复显示');
 console.log('✅ 仙界出生卡住问题已修复：波根测试后直接初始化仙界');
-</script>
+// ================================================================
+// ================================================================
+// ★★★ 新增：凡间策略点商城系统（纯增量，不改原函数） ★★★
+// ================================================================
+
+// ---- 策略点变量和初始化 ----
+G.strategyPoints = G.strategyPoints || 0;
+G._lastSnapshot = null;          // 用于状态变化检测
+G._shopRefreshCounter = 0;       // 转盘计数
+G._shopLockedItems = {};         // 锁定的商品id
+G._shopCurrentItems = [];        // 当前商品列表
+G._shopPurchased = {};           // 当前刷新周期已购商品id
+G._shopPermanentLimit = {};      // 永久限购计数
+G._strategyToastTimer = null;
+G._heavyRecoveryCooldown = 0;
+G._battleCooldown = {};
+G._lawFirstThree = {};
+
+// ---- 覆盖 handleSpinResult ----
+const _origHandleSpinResult = window.handleSpinResult;
+window.handleSpinResult = function(seg) {
+    _origHandleSpinResult(seg);
+    if (phase !== 'fan' || G._dead) return;
+    grantStrategyPoints(seg);
+    refreshShop(true);
+};
+
+// ---- 策略点结算核心 ----
+function grantStrategyPoints(seg) {
+    if (!G._lastSnapshot) {
+        G._lastSnapshot = takeSnapshot();
+        return;
+    }
+    const before = G._lastSnapshot;
+    const after = takeSnapshot();
+    let gained = 0;
+    let reasons = [];
+
+    if (after.realmIndex > before.realmIndex) {
+        if (!G._realmPointGiven) G._realmPointGiven = {};
+        if (!G._realmPointGiven[after.realmIndex]) {
+            G._realmPointGiven[after.realmIndex] = true;
+            gained += 3;
+            reasons.push('境界突破');
+        }
+    }
+
+    if (after.abilities.length > before.abilities.length) {
+        let newAb = after.abilities.filter(a => !before.abilities.includes(a));
+        if (newAb.length > 0) {
+            gained += newAb.length;
+            reasons.push('获得新能力×' + newAb.length);
+        }
+    }
+
+    for (let law in after.laws) {
+        if (after.laws[law] >= 3 && (before.laws[law] || 0) < 3 && !G._lawFirstThree[law]) {
+            G._lawFirstThree[law] = true;
+            gained += 2;
+            reasons.push(law + '法则3级');
+        }
+    }
+
+    if (before.status === '重伤' && after.status === '健康') {
+        if (G._heavyRecoveryCooldown <= 0) {
+            gained += 1;
+            reasons.push('重伤痊愈');
+            G._heavyRecoveryCooldown = 20;
+        }
+    }
+
+    const milestoneRealms = [2, 3, 4, 6];
+    for (let idx of milestoneRealms) {
+        if (after.realmIndex === idx && before.realmIndex < idx) {
+            if (!G._milestonePoints) G._milestonePoints = {};
+            if (!G._milestonePoints[idx]) {
+                G._milestonePoints[idx] = true;
+                gained += 2;
+                reasons.push('达到' + CONFIG.realms[idx]);
+            }
+        }
+    }
+
+    if (after._gangKill === 1 && (before._gangKill || 0) === 0) {
+        gained += 5;
+        reasons.push('斩杀波刚');
+    }
+
+    if (after._triggeredFanMing && after._triggeredFanMing.length > (before._triggeredFanMing || []).length) {
+        let newMings = after._triggeredFanMing.filter(id => !(before._triggeredFanMing || []).includes(id));
+        for (let id of newMings) {
+            let ev = FAN_MING_EVENTS.find(e => e.id === id);
+            if (ev && ev.isPositive) {
+                gained += 2;
+                reasons.push('名场面·' + ev.label);
+            }
+        }
+    }
+
+    if ((after.items['保命道具'] || 0) > (before.items['保命道具'] || 0)) {
+        let diff = after.items['保命道具'] - before.items['保命道具'];
+        gained += diff;
+        reasons.push('获得保命道具×' + diff);
+    }
+
+    const battleFlags = ['_winVillage', '_winArena', '_winTourney'];
+    for (let flag of battleFlags) {
+        if (after[flag] && !before[flag]) {
+            gained += 1;
+            reasons.push(flag.replace('_', '').replace('win', '获胜'));
+        }
+    }
+
+    if (gained > 0) {
+        G.strategyPoints = (G.strategyPoints || 0) + gained;
+        showStrategyToast(gained, reasons.join('、'));
+        updateStrategyUI();
+        G._lastSnapshot = takeSnapshot();
+    } else {
+        G._lastSnapshot = takeSnapshot();
+    }
+
+    if (G._heavyRecoveryCooldown > 0) G._heavyRecoveryCooldown--;
+    for (let key in G._battleCooldown) {
+        if (G._battleCooldown[key] > 0) G._battleCooldown[key]--;
+    }
+}
+
+// ---- 快照函数 ----
+function takeSnapshot() {
+    return {
+        realmIndex: G.realmIndex,
+        abilities: (G.abilities || []).slice(),
+        laws: JSON.parse(JSON.stringify(G.laws || {})),
+        status: G.status,
+        _gangKill: G._gangKill || 0,
+        _triggeredFanMing: (G._triggeredFanMing || []).slice(),
+        items: JSON.parse(JSON.stringify(G.items || {})),
+        _winVillage: G._winVillage || false,
+        _winArena: G._winArena || false,
+        _winTourney: G._winTourney || false
+    };
+}
+
+// ---- 策略点提示 ----
+function showStrategyToast(gained, reason) {
+    const toast = document.getElementById('strategyToast');
+    const num = document.getElementById('toastPoints');
+    if (!toast) return;
+    num.textContent = '+' + gained;
+    toast.innerHTML = '获得 <span class="num">+' + gained + '</span> 策略点！<br><span style="font-size:0.7rem;color:#8a7a6a;">' + reason + '</span>';
+    toast.className = 'strategy-toast show';
+    clearTimeout(G._strategyToastTimer);
+    G._strategyToastTimer = setTimeout(() => {
+        toast.className = 'strategy-toast';
+    }, 2500);
+}
+
+// ---- 更新策略UI ----
+function updateStrategyUI() {
+    let bar = document.getElementById('strategyBar');
+    if (!bar) {
+        const panel = document.getElementById('panelContent');
+        if (panel) {
+            const newBar = document.createElement('div');
+            newBar.id = 'strategyBar';
+            newBar.className = 'strategy-bar';
+            newBar.innerHTML = `
+                <span class="points">📊 策略点：${G.strategyPoints || 0}</span>
+                <button class="btn-strategy" id="openShopBtn">🏪 商城</button>
+            `;
+            panel.prepend(newBar);
+            const btn = document.getElementById('openShopBtn');
+            if (btn) btn.addEventListener('click', openStrategyShop);
+        }
+    } else {
+        const pts = bar.querySelector('.points');
+        if (pts) pts.textContent = '📊 策略点：' + (G.strategyPoints || 0);
+    }
+}
+
+// ---- 打开商城（修复版：含刷新按钮绑定） ----
+function openStrategyShop() {
+    if (phase !== 'fan' || G._dead) return;
+    const overlay = document.getElementById('strategyShopOverlay');
+    if (!overlay) return;
+    overlay.classList.add('show');
+    renderShop();
+    
+    const closeBtn = document.getElementById('shopCloseBtn');
+    if (closeBtn) {
+        closeBtn.onclick = function() {
+            overlay.classList.remove('show');
+        };
+    }
+    overlay.onclick = function(e) {
+        if (e.target === overlay) {
+            overlay.classList.remove('show');
+        }
+    };
+
+    // ★ 每次打开商城时重新绑定刷新按钮（确保它存在）
+    const refreshBtn = document.getElementById('shopRefreshBtn');
+    if (refreshBtn) {
+        refreshBtn.onclick = function() {
+            console.log('🔄 手动刷新按钮被点击');
+            if (G.strategyPoints < 1) {
+                const msg = document.getElementById('shopMessage');
+                if (msg) msg.textContent = '❌ 策略点不足，需要1点';
+                return;
+            }
+            G.strategyPoints -= 1;
+            G._shopLockedItems = {};
+            refreshShop(true);
+            updateStrategyUI();
+            renderShop();
+            const msg = document.getElementById('shopMessage');
+            if (msg) msg.textContent = '✅ 刷新成功！消耗1策略点';
+        };
+        console.log('✅ 手动刷新按钮已绑定（在openStrategyShop内）');
+    } else {
+        console.log('❌ 未找到 shopRefreshBtn 元素');
+    }
+}
+// ---- 刷新商城商品池（修复版：强制刷新 + 日志） ----
+function refreshShop(force) {
+    console.log('🔄 refreshShop 被调用，force=' + force + '，phase=' + phase);
+    if (phase !== 'fan') {
+        console.log('⏭️ 跳过刷新：不在凡间');
+        return;
+    }
+    G._shopRefreshCounter = (G._shopRefreshCounter || 0) + 1;
+    console.log('📦 当前商品数：' + (G._shopCurrentItems ? G._shopCurrentItems.length : 0) + '，force=' + force);
+    // 强制刷新：无论是否有商品，只要 force=true 就重新生成
+    if (force || !G._shopCurrentItems || G._shopCurrentItems.length === 0) {
+        console.log('🔄 重新生成商品池...');
+        const allItems = getFullShopItems();
+        const available = allItems.filter(item => {
+            if (!item) return false;
+            if (item.permanentLimit) {
+                let used = G._shopPermanentLimit[item.id] || 0;
+                return used < item.permanentLimit;
+            }
+            return true;
+        });
+        let shuffled = available.slice();
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        G._shopCurrentItems = shuffled.slice(0, Math.min(6, shuffled.length));
+        G._shopPurchased = {};
+        console.log('✅ 生成 ' + G._shopCurrentItems.length + ' 件商品');
+    } else {
+        console.log('⏭️ 使用现有商品，不重新生成');
+    }
+    const info = document.getElementById('shopTurnInfo');
+    if (info) info.textContent = '转盘 ' + G._shopRefreshCounter + ' 次';
+    updateLockCount();
+    // 如果商城当前是打开状态，重新渲染
+    const overlay = document.getElementById('strategyShopOverlay');
+    if (overlay && overlay.classList.contains('show')) {
+        renderShop();
+    }
+}
+// ---- 获取完整商品池 ----
+function getFullShopItems() {
+    return [
+        { id: 'heal', name: '疗伤药', price: 1, desc: '恢复伤势', type: 'heal' },
+        { id: 'cult_pill', name: '修为丹', price: 1, desc: '修为 +50', type: 'cult_pill' },
+        { id: 'basic_ability', name: '随机基础能力', price: 1, desc: '飞剑/御风术/炼丹术', type: 'basic_ability' },
+        { id: 'trib_pill', name: '渡劫丹', price: 3, desc: '提升渡劫成功率', type: 'trib_pill' },
+        { id: 'middle_ability', name: '随机中阶能力', price: 3, desc: '剑心通明/缩地成寸/金刚不坏', type: 'middle_ability' },
+        { id: 'life_plus', name: '寿元 +50 年', price: 3, desc: '直接增加寿元上限', type: 'life_plus' },
+        { id: 'random_law', name: '随机法则 +1', price: 5, desc: '五条法则随机一条 +1', type: 'random_law' },
+        { id: 'specify_law', name: '指定法则 +1', price: 5, desc: '自选一条法则 +1', type: 'specify_law', permanentLimit: 2 },
+        { id: 'high_ability', name: '随机高阶能力', price: 5, desc: '天罡剑意/断念剑意/神兽伙伴', type: 'high_ability' },
+        { id: 'trib_protect', name: '渡劫保护符', price: 5, desc: '本次渡劫失败不死亡', type: 'trib_protect' },
+        { id: 'specify_ability', name: '指定能力', price: 10, desc: '从所有能力中自选一个', type: 'specify_ability', permanentLimit: 1 },
+        { id: 'ancient_legacy', name: '上古传承', price: 12, desc: '随机2条法则+1，修为+500', type: 'ancient_legacy', permanentLimit: 1 },
+        { id: 'chunqiu_chan', name: '春秋蝉', price: 12, desc: '寿元消耗减半（已有则+200寿元）', type: 'chunqiu_chan', permanentLimit: 1 },
+        { id: 'life_item', name: '保命道具', price: 15, desc: '抵挡一次致命伤害', type: 'life_item' },
+        { id: 'chaos_root', name: '混沌五波根', price: 15, desc: '波根提升为混沌五波根', type: 'chaos_root', permanentLimit: 1 }
+    ];
+}
+
+// ---- 渲染商城 ----
+function renderShop() {
+    const grid = document.getElementById('shopGrid');
+    const total = document.getElementById('shopTotalPoints');
+    const msg = document.getElementById('shopMessage');
+    if (!grid) return;
+    total.textContent = G.strategyPoints || 0;
+    grid.innerHTML = '';
+    if (!G._shopCurrentItems || G._shopCurrentItems.length === 0) {
+        refreshShop(true);
+    }
+    G._shopCurrentItems.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'shop-item';
+        const purchased = G._shopPurchased[item.id] || false;
+        const locked = G._shopLockedItems[item.id] || false;
+        let permanentUsed = G._shopPermanentLimit[item.id] || 0;
+        let permLimit = item.permanentLimit || 0;
+        let canBuy = !purchased && (permLimit === 0 || permanentUsed < permLimit);
+        if (purchased) div.classList.add('sold');
+        if (locked) div.classList.add('locked');
+        let priceDisplay = item.price;
+        if (locked) priceDisplay = '🔒';
+        div.innerHTML = `
+            <div class="name">${item.name}</div>
+            <div class="price">${priceDisplay}</div>
+            <div class="desc">${item.desc}</div>
+            ${permLimit > 0 ? `<div class="limit">永久限购 ${permanentUsed}/${permLimit}</div>` : ''}
+            ${purchased ? '<div style="color:#6a5a6a;font-size:0.7rem;">已购买</div>' : ''}
+            ${!purchased && canBuy ? `<button class="lock-btn ${locked?'active':''}" data-id="${item.id}">${locked?'🔓已锁定':'🔒锁定'}</button>` : ''}
+        `;
+        if (!purchased && canBuy) {
+            div.style.cursor = 'pointer';
+            div.addEventListener('click', function(e) {
+                if (e.target.classList.contains('lock-btn')) return;
+                buyShopItem(item.id);
+            });
+            const lockBtn = div.querySelector('.lock-btn');
+            if (lockBtn) {
+                lockBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    toggleLock(item.id);
+                });
+            }
+        }
+        grid.appendChild(div);
+    });
+    updateLockCount();
+}
+
+// ---- 购买商品 ----
+function buyShopItem(itemId) {
+    if (phase !== 'fan' || G._dead) return;
+    const item = G._shopCurrentItems.find(i => i.id === itemId);
+    if (!item) return;
+    if (G._shopPurchased[itemId]) {
+        document.getElementById('shopMessage').textContent = '⚠️ 本周期已购买过此商品';
+        return;
+    }
+    let permUsed = G._shopPermanentLimit[itemId] || 0;
+    let permLimit = item.permanentLimit || 0;
+    if (permLimit > 0 && permUsed >= permLimit) {
+        document.getElementById('shopMessage').textContent = '⚠️ 永久限购已满';
+        return;
+    }
+    if ((G.strategyPoints || 0) < item.price) {
+        document.getElementById('shopMessage').textContent = '❌ 策略点不足！需要 ' + item.price;
+        return;
+    }
+    G.strategyPoints -= item.price;
+    G._shopPurchased[itemId] = true;
+    applyShopEffect(item);
+    if (permLimit > 0) {
+        G._shopPermanentLimit[itemId] = (G._shopPermanentLimit[itemId] || 0) + 1;
+    }
+    updateStrategyUI();
+    renderShop();
+    document.getElementById('shopMessage').textContent = '✅ 购买成功！';
+    updatePanel();
+    checkAchievements();
+    checkRealmDrop();
+    if (G._shopLockedItems[itemId]) {
+        delete G._shopLockedItems[itemId];
+    }
+}
+
+// ---- 应用商品效果 ----
+function applyShopEffect(item) {
+    const type = item.type;
+    switch(type) {
+        case 'heal': {
+            if (G.status === '重伤') G.status = '轻伤';
+            else if (G.status === '轻伤') G.status = '健康';
+            else G.status = '健康';
+            addLog('💊 使用疗伤药，状态恢复至 ' + G.status);
+            break;
+        }
+        case 'cult_pill': {
+            let gain = 50;
+            G.cult += gain;
+            addLog('💊 服用修为丹，修为 +50');
+            break;
+        }
+        case 'basic_ability': {
+            const pool = ['飞剑','御风术','炼丹术'];
+            const avail = pool.filter(a => !G.abilities.includes(a));
+            if (avail.length > 0) {
+                let ab = pick(avail);
+                G.abilities.push(ab);
+                addLog('获得基础能力：' + ab);
+            } else {
+                let gain = applyCultGain(30);
+                G.cult += gain;
+                addLog('基础能力已全，转化为修为 +' + gain);
+            }
+            break;
+        }
+        case 'trib_pill': {
+            G.items['渡劫丹'] = (G.items['渡劫丹'] || 0) + 1;
+            addLog('获得渡劫丹 ×1');
+            break;
+        }
+        case 'middle_ability': {
+            const pool = ['剑心通明','缩地成寸','金刚不坏'];
+            const avail = pool.filter(a => !G.abilities.includes(a));
+            if (avail.length > 0) {
+                let ab = pick(avail);
+                G.abilities.push(ab);
+                addLog('获得中阶能力：' + ab);
+            } else {
+                let gain = applyCultGain(60);
+                G.cult += gain;
+                addLog('中阶能力已全，转化为修为 +' + gain);
+            }
+            break;
+        }
+        case 'life_plus': {
+            G._bonusLife = (G._bonusLife || 0) + 50;
+            addLog('寿元上限 +50 年');
+            break;
+        }
+        case 'random_law': {
+            const keys = Object.keys(G.laws);
+            let law = pick(keys);
+            addFanLaw(law, 1);
+            break;
+        }
+        case 'specify_law': {
+            const keys = Object.keys(G.laws);
+            let input = prompt('请输入要提升的法则名称（' + keys.join('/') + '）：', keys[0]);
+            if (input && keys.includes(input)) {
+                addFanLaw(input, 1);
+            } else {
+                let law = pick(keys);
+                addFanLaw(law, 1);
+                addLog('输入无效，随机提升 ' + law);
+            }
+            break;
+        }
+        case 'high_ability': {
+            const pool = ['天罡剑意','断念剑意','神兽伙伴'];
+            const avail = pool.filter(a => !G.abilities.includes(a));
+            if (avail.length > 0) {
+                let ab = pick(avail);
+                G.abilities.push(ab);
+                addLog('获得高阶能力：' + ab);
+            } else {
+                let gain = applyCultGain(100);
+                G.cult += gain;
+                addLog('高阶能力已全，转化为修为 +' + gain);
+            }
+            break;
+        }
+        case 'trib_protect': {
+            G._tribProtect = true;
+            addLog('获得渡劫保护符（下次渡劫失败不死亡）');
+            break;
+        }
+        case 'specify_ability': {
+            const pool = CONFIG.allAbilities.filter(a => !G.abilities.includes(a));
+            if (pool.length > 0) {
+                let input = prompt('请输入要获得的能力名称（' + pool.join('/') + '）：', pool[0]);
+                if (input && pool.includes(input)) {
+                    G.abilities.push(input);
+                    addLog('获得指定能力：' + input);
+                } else {
+                    let ab = pick(pool);
+                    G.abilities.push(ab);
+                    addLog('输入无效，随机获得能力：' + ab);
+                }
+            } else {
+                let gain = applyCultGain(150);
+                G.cult += gain;
+                addLog('能力已全，转化为修为 +' + gain);
+            }
+            break;
+        }
+        case 'ancient_legacy': {
+            let count = 0;
+            const keys = Object.keys(G.laws);
+            for (let i=0; i<2; i++) {
+                let law = pick(keys);
+                addFanLaw(law, 1);
+            }
+            G.cult += 500;
+            addLog('上古传承：2条法则+1，修为+500');
+            break;
+        }
+        case 'chunqiu_chan': {
+            if (G._hasChunqiuChan) {
+                G._bonusLife = (G._bonusLife || 0) + 200;
+                addLog('已有春秋蝉，转化为寿元上限 +200 年');
+            } else {
+                G._hasChunqiuChan = true;
+                addLog('获得春秋蝉！寿元消耗减半');
+            }
+            break;
+        }
+        case 'life_item': {
+            G.items['保命道具'] = (G.items['保命道具'] || 0) + 1;
+            addLog('获得保命道具 ×1');
+            break;
+        }
+        case 'chaos_root': {
+            G.spiritQ = CONFIG.spiritQuality.find(q => q.name === '极品') || G.spiritQ;
+            G.spiritCount = 5;
+            G.spiritElements = CONFIG.elements.slice();
+            addLog('🌌 波根进化为混沌五波根！战力大幅提升！');
+            setSubtitle('🌌 混沌五波根！', 'special');
+            break;
+        }
+        default: {
+            addLog('未知商品效果');
+        }
+    }
+    updatePanel();
+    checkAchievements();
+    checkRealmDrop();
+}
+
+// ---- 锁定/解锁商品 ----
+function toggleLock(itemId) {
+    if (G._shopPurchased[itemId]) return;
+    if (G._shopLockedItems[itemId]) {
+        delete G._shopLockedItems[itemId];
+        document.getElementById('shopMessage').textContent = '🔓 已解锁';
+    } else {
+        if ((G.strategyPoints || 0) < 1) {
+            document.getElementById('shopMessage').textContent = '❌ 锁定需要1策略点';
+            return;
+        }
+        G.strategyPoints -= 1;
+        G._shopLockedItems[itemId] = true;
+        document.getElementById('shopMessage').textContent = '🔒 已锁定（下一轮保留）';
+        updateStrategyUI();
+    }
+    renderShop();
+}
+
+// ---- 更新锁定计数 ----
+function updateLockCount() {
+    const count = document.getElementById('shopLockCount');
+    if (count) {
+        let locked = Object.keys(G._shopLockedItems).length;
+        count.textContent = '🔒 已锁定: ' + locked + ' 件';
+    }
+}
+
+// ---- 补丁：在initFanState中增加策略点重置 ----
+const _origInitFanState = window.initFanState;
+window.initFanState = function() {
+    _origInitFanState();
+    G.strategyPoints = 0;
+    G._shopCurrentItems = [];
+    G._shopPurchased = {};
+    G._shopLockedItems = {};
+    G._shopPermanentLimit = {};
+    G._realmPointGiven = {};
+    G._milestonePoints = {};
+    G._lawFirstThree = {};
+    G._heavyRecoveryCooldown = 0;
+    G._lastSnapshot = null;
+    G._shopRefreshCounter = 0;
+};
+
+// ---- 覆盖updatePanel，在渲染后添加策略栏 ----
+const _origUpdatePanel = window.updatePanel;
+window.updatePanel = function() {
+    _origUpdatePanel();
+    if (phase === 'fan' && !G._dead) {
+        updateStrategyUI();
+    }
+};
+
+if (!G.strategyPoints) G.strategyPoints = 0;
+window.refreshShop = refreshShop;
+
+console.log('✅ 策略点商城已加载（凡间版·修复版）');
+console.log('📊 策略点获取方式：境界突破+3，新能力+1，法则3级+2，重伤痊愈+1，里程碑+2，斩杀波刚+5，名场面+2，保命道具+1，首次战斗胜利+1');
+console.log('🏪 商城含15种商品，每次刷新6件，刷新内限购，部分永久限购');</script>
+<!-- ===== 新增：策略点商城覆盖层 ===== -->
+<div class="overlay" id="strategyShopOverlay">
+<div class="overlay-box" style="max-width:900px;">
+<h1>🏪 策略商城</h1>
+<p style="color:#b89a6a;">用策略点换取成长机缘</p>
+<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin:12px 0 16px 0;padding:8px 16px;background:rgba(0,0,0,0.4);border-radius:12px;border:1px solid #4a3f34;">
+<span style="font-size:1rem;color:#a09080;">📊 当前策略点</span>
+<span id="shopTotalPoints" style="font-size:1.6rem;font-weight:bold;color:#f5d080;">0</span>
+<span style="font-size:0.8rem;color:#6a5a6a;" id="shopTurnInfo">转盘 0 次</span>
+</div>
+<div id="shopMessage" style="font-size:0.9rem;color:#8a7a6a;min-height:28px;margin-bottom:8px;">点击商品购买，点击🔒可锁定到下轮</div>
+<div class="shop-grid" id="shopGrid"></div>
+<div class="shop-refresh-info">
+<span>🔄 下次转盘后自动刷新</span>
+<span id="shopLockCount">🔒 已锁定: 0 件</span>
+</div>
+<div style="display:flex;gap:16px;justify-content:center;margin-top:16px;flex-wrap:wrap;">
+<button class="btn-restart" id="shopCloseBtn">关闭商城</button>
+<button class="btn-restart" id="shopRefreshBtn" style="background:#2a2840;border-color:#8a6aba;color:#d4b8e0;">🔄 手动刷新 (1点)</button>
+</div>
+</div>
+</div>
+
+<!-- ===== 新增：策略点获得提示 ===== -->
+<div class="strategy-toast" id="strategyToast">
+获得 <span class="num" id="toastPoints">+0</span> 策略点！
+</div>
+
 </body>
 </html>
