@@ -1171,7 +1171,7 @@ const XIAN_CONFIG = {
     realmBasePower: [2000,5000,12000,30000,80000,250000,1000000],
     realmLawReq: [0,0,2,2,3,4,6],
     realmLawLevelReq: [0,0,1,2,3,4,5],
-    realmChaosReq: [0,0,0,0,1,3,30],
+    realmChaosReq: [0,0,0,0,1,3,250],
     laws: ['时间','空间','命运','毁灭','生命','金','木','水','火','土'],
     lawColors: {'金':'law-jin','木':'law-mu','水':'law-shui','火':'law-huo','土':'law-tu'},
     locations: [
@@ -1421,13 +1421,38 @@ function xianCalcPower() {
 }function xianGetAgeCost(){let base=getXianBaseCost();let lifeBonus=getXianLocationBonus('life')||0;let mult=1+lifeBonus;if(XG.xianqi.includes('玉净瓶'))mult*=0.8;if(XG._hasChunqiuChan)mult*=0.5;return Math.floor(base*mult);}
 function xianGetTribSuccessRate() {
     let power = xianCalcPower();
-    let rate = 15
-               + Math.min(power / 20000, 20)
-               + Math.min(Math.max(0, XG.gongDe) / 100, 40)
-               + XG.equipped.length * 5
-               + (XG.xianfa.includes('大预言术') ? 10 : 0);
-    if (XG._tribProtect) rate = Math.min(rate + 20, 95);
-    return Math.min(Math.max(rate, 5), 95);
+    let gongDe = XG.gongDe || 0;
+    let currentIdx = XG.realmIndex;
+
+    // 普通境界（非混元、非圣人）使用原逻辑
+    if (currentIdx !== 4 && currentIdx !== 5) {
+        let rate = 15
+                 + Math.min(power / 20000, 20)
+                 + Math.min(Math.max(0, gongDe) / 100, 40)
+                 + XG.equipped.length * 5
+                 + (XG.xianfa.includes('大预言术') ? 10 : 0);
+        if (XG._tribProtect) rate = Math.min(rate + 20, 95);
+        return Math.min(Math.max(rate, 5), 95);
+    }
+
+    // 混元（4→5）和圣人（5→6）专用新逻辑
+    let rate = 15;
+    rate += Math.min(power / 20000, 20);
+    rate += XG.equipped.length * 5;
+    if (XG.xianfa.includes('大预言术')) rate += 10;
+
+    if (gongDe < 1000) {
+        rate -= 30;
+    } else if (gongDe > 10000) {
+        rate += 20;
+    } else {
+        rate += Math.min(gongDe / 200, 20);
+    }
+
+    if (XG._tribProtect) rate += 20;
+
+    rate = Math.min(80, Math.max(5, rate));
+    return Math.floor(rate);
 }function xianUpgradeLaw(lawName,amount){if(!lawName||!XG.laws.hasOwnProperty(lawName))return 0;let maxLevel=XG.xianqi.includes('造化玉碟')?6:5;let oldLevel=XG.laws[lawName];let actualGain=Math.min(amount,maxLevel-oldLevel);if(actualGain<=0){XG.xianYuan+=2000;xianAddLog('大道「'+lawName+'」已满级，转化为2000仙元');return 0;}XG.laws[lawName]=Math.min(oldLevel+actualGain,maxLevel);if(XG.xianqi.includes('太极图')&&!XG._lawUpgradeBonusUsed){XG.laws[lawName]=Math.min(XG.laws[lawName]+1,maxLevel);XG._lawUpgradeBonusUsed=true;xianAddLog('⚡ 太极图额外+1！'+lawName+'→'+XG.laws[lawName]+'/5');}xianCheckAchievements();return XG.laws[lawName]-oldLevel;}
 function xianUpgradeRandomLaw(amount){let maxLevel=XG.xianqi.includes('造化玉碟')?6:5;let available=XIAN_CONFIG.laws.filter(l=>XG.laws[l]<maxLevel);if(available.length===0){XG.xianYuan+=2000;xianAddLog('所有大道已满，转化为2000仙元');return null;}let target=pick(available);let gained=xianUpgradeLaw(target,amount);if(gained>0)xianAddLog('✨ '+target+'大道+'+gained+'（'+XG.laws[target]+'/5）');return target;}
 function xianUnlockAchievement(id){if(XG.achievements[id]===undefined||XG.achievements[id])return false;XG.achievements[id]=true;let bonus=500+Math.floor(Math.random()*500);XG.xianYuan+=bonus;xianAddLog('🏆 解锁仙界成就：'+id+'！奖励+'+bonus+'仙元');xianSetSubtitle('🏆 成就：'+id+'！','special');xianUpdatePanel();return true;}
@@ -2986,7 +3011,7 @@ const XIAN_BOSSES = [
         maxRealm: 2,
         power: 200000,
         cost: 200,
-        rewards: { yuan: 8000, xianghuo: 300, lawRandom: 1, chaos: 3 },
+        rewards: { yuan: 8000, xianghuo: 300, lawRandom: 1 },
         loseDesc: '无面的恐惧之力贯穿神魂，道心震颤！'
     },
     {
@@ -2997,7 +3022,7 @@ const XIAN_BOSSES = [
         maxRealm: 3,
         power: 600000,
         cost: 200,
-        rewards: { yuan: 20000, gongde: 500, lawSpecify: 1, chaos: 5 },
+        rewards: { yuan: 20000, gongde: 500, lawSpecify: 1 },
         loseDesc: '戮仙剑主一剑斩落，仙体崩裂！'
     },
     {
