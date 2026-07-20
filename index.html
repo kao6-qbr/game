@@ -1887,27 +1887,40 @@ function xianHandleEvent(eventId){if(XG.dead)return;let story='';let maxLevel=XG
     }switch(evConfig.type){case'gongde':{XG.gongDe+=evConfig.value;story='波照获得功德+'+evConfig.value+'！';if(XIAN_EVENT_STORIES[eventId]){story=XIAN_EVENT_STORIES[eventId];}xianSetSubtitle('✨ '+evConfig.label+'，功德+'+evConfig.value+'！','good');xianAddLog(story);break;}case'xianghuo':{XG.xiangHuo+=evConfig.value;story='波照获得香火+'+evConfig.value+'！';if(XIAN_EVENT_STORIES[eventId]){story=XIAN_EVENT_STORIES[eventId];}xianSetSubtitle('🏮 '+evConfig.label+'，香火+'+evConfig.value+'！','good');xianAddLog(story);break;}case'gongde_zero':{let old=XG.gongDe;XG.gongDe=0;story='🔥 因果业火降临！功德从 '+old+' 归零！波照摆脱因果束缚。';if(XIAN_EVENT_STORIES[eventId]){story=XIAN_EVENT_STORIES[eventId];}xianSetSubtitle('🔥 因果业火，功德归零！','special');xianAddLog(story);break;}case'law':{xianUpgradeLaw(evConfig.law,1);story=evConfig.law+'大道+1！';if(XIAN_EVENT_STORIES[eventId]){story=XIAN_EVENT_STORIES[eventId];}xianSetSubtitle('✨ '+evConfig.law+'大道+1！','special');xianAddLog(story);break;}case 'battle':{
     let storyKey = eventId;
     let storyText = XIAN_EVENT_STORIES[storyKey] || '';
-    if (storyText) {
-        xianAddLog('⚔️ '+evConfig.label+'：');
-        xianAddLog(storyText);
-    }
     let result = xianBattleResult(evConfig.range, evConfig.winGain, evConfig.loseGain, evConfig.chaosWin||0);
     if (result) {
+        // 取故事前半部分（胜利）
+        let winStory = storyText.split('/')[0] || '战斗胜利！';
+        xianAddLog('⚔️ '+evConfig.label+'：');
+        xianAddLog(winStory.trim());
         xianAddLog('✅ 战斗胜利！');
     } else {
+        // 取故事后半部分（失败）
+        let loseStory = storyText.split('/')[1] || '战斗落败...';
+        xianAddLog('⚔️ '+evConfig.label+'：');
+        xianAddLog(loseStory.trim());
         xianAddLog('❌ 战斗落败...');
     }
     break;
 }case 'battle_tieban':{
     let storyKey = eventId;
     let storyText = XIAN_EVENT_STORIES[storyKey] || '';
-    if (storyText) {
+    let win = xianBattleResult([1.5, 3.0], 0, 0, 1);
+    if (win) {
+        XG.chaos += 1;
+        XG.xianYuan += 3000;
+        let winStory = storyText.split('/')[0] || '击败隐世大佬！混沌之气+1，仙元+3000！';
         xianAddLog('⚔️ '+evConfig.label+'：');
-        xianAddLog(storyText);
+        xianAddLog(winStory.trim());
+        xianAddLog('✅ 击败隐世大佬！');
+    } else {
+        XG.xianYuan = Math.max(0, XG.xianYuan - 5000);
+        XG.status = '重伤';
+        let loseStory = storyText.split('/')[1] || '被大佬教训，仙元-5000，重伤';
+        xianAddLog('⚔️ '+evConfig.label+'：');
+        xianAddLog(loseStory.trim());
+        xianAddLog('❌ 被大佬教训...');
     }
-    let win=xianBattleResult([1.5,3.0],0,0,1);
-    if(win){XG.chaos+=1;XG.xianYuan+=3000;xianAddLog('✅ 击败隐世大佬！混沌之气+1，仙元+3000！');}
-    else{XG.xianYuan=Math.max(0,XG.xianYuan-5000);XG.status='重伤';xianAddLog('❌ 被大佬教训，仙元-5000，重伤');}
     break;
 }case'xianrentiao':{let loss=300+Math.floor(Math.random()*500);XG.gongDe=Math.max(-999999,XG.gongDe-loss);if(XG.equipped.length>0){let stolen=pick(XG.equipped);XG.equipped=XG.equipped.filter(n=>n!==stolen);XG.xianqi=XG.xianqi.filter(n=>n!==stolen);story='仙人跳！功德-'+loss+'，仙器「'+stolen+'」被抢！';}else{story='仙人跳！功德-'+loss+'。';}if(XIAN_EVENT_STORIES[eventId]){story=XIAN_EVENT_STORIES[eventId];}xianSetSubtitle('😱 仙人跳！','bad');xianAddLog(story);break;}case'chaoxi':{let loss=200+Math.floor(Math.random()*300);XG.gongDe=Math.max(-999999,XG.gongDe-loss);XG.status=XG.status==='健康'?'轻伤':(XG.status==='轻伤'?'重伤':'重伤');story='抄袭道法，功德-'+loss+'，身受'+XG.status+'。';if(XIAN_EVENT_STORIES[eventId]){story=XIAN_EVENT_STORIES[eventId];}xianSetSubtitle('😰 抄袭道法','bad');xianAddLog(story);break;}case'xinmo':{xianUpgradeRandomLaw(1);let loss=100+Math.floor(Math.random()*200);XG.gongDe=Math.max(-999999,XG.gongDe-loss);XG.status=XG.status==='健康'?'轻伤':(XG.status==='轻伤'?'重伤':'重伤');story='心魔入侵，大道精进但功德-'+loss+'，身受'+XG.status+'。';if(XIAN_EVENT_STORIES[eventId]){story=XIAN_EVENT_STORIES[eventId];}xianSetSubtitle('😈 心魔入侵','bad');xianAddLog(story);break;}case 'sanzai':{
     xianUpgradeRandomLaw(1);
@@ -1929,19 +1942,116 @@ function xianHandleEvent(eventId){if(XG.dead)return;let story='';let maxLevel=XG
     xianSetSubtitle('🍑 仙桃宴！','special');
     xianAddLog(story);
     break;
-}case'tianhe':{let items=XIAN_CONFIG.xianqiList.filter(x=>!XG.xianqi.includes(x.name));if(items.length>0&&Math.random()<0.3){let q=pick(items);XG.xianqi.push(q.name);if(XG.equipped.length<3)XG.equipped.push(q.name);story='天河垂钓获得「'+q.name+'」！';if(XIAN_EVENT_STORIES[eventId]){story=XIAN_EVENT_STORIES[eventId];}xianSetSubtitle('🎣 获得仙器！','special');xianCheckAchievements();}else{let gain=800+Math.floor(Math.random()*500);XG.xianYuan+=gain;story='天河垂钓，仙元+'+gain+'。';if(XIAN_EVENT_STORIES[eventId]){story=XIAN_EVENT_STORIES[eventId];}xianSetSubtitle('🎣 天河垂钓','good');}xianAddLog(story);break;}case'puti':{let avail=XIAN_CONFIG.laws.filter(l=>XG.laws[l]<maxLevel);if(avail.length>0){let target=pick(avail);xianUpgradeLaw(target,1);story='菩提讲道，'+target+'大道+1！';if(XIAN_EVENT_STORIES[eventId]){story=XIAN_EVENT_STORIES[eventId];}xianSetSubtitle('🧘 菩提讲道','special');}else{XG.xianYuan+=2000;story='菩提讲道，仙元+2000。';if(XIAN_EVENT_STORIES[eventId]){story=XIAN_EVENT_STORIES[eventId];}xianSetSubtitle('🧘 菩提讲道','good');}xianAddLog(story);break;}case'yaochi':{let gain=5000+Math.floor(Math.random()*3000);XG.xianYuan+=gain;XG.status='健康';story='瑶池沐浴，伤势全愈，仙元+'+gain+'。';xianSetSubtitle('🛁 瑶池沐浴！','special');xianAddLog(story);break;}case'tianshu':{let avail=XIAN_CONFIG.laws.filter(l=>XG.laws[l]<maxLevel);if(avail.length>0){let target=pick(avail);xianUpgradeLaw(target,2);story='天书降世，'+target+'大道+2！';xianSetSubtitle('📜 天书降世！','special');}else{XG.chaos+=1;story='天书降世，混沌之气+1。';xianSetSubtitle('📜 天书降世！','special');}xianAddLog(story);break;}case'hundun_spring':{let gc=1+Math.floor(Math.random()*2);XG.chaos+=gc;let ac=1000+Math.floor(Math.random()*1500);XG.xianYuan+=ac;story='混沌泉眼，混沌之气+'+gc+'，仙元+'+ac+'。';xianSetSubtitle('🌀 混沌泉眼！','special');xianAddLog(story);break;}case'xiantai':{let avail=XIAN_CONFIG.laws.filter(l=>XG.laws[l]<maxLevel);if(avail.length>0){let target=pick(avail);xianUpgradeLaw(target,1);let cg=Math.random()<0.3?1:0;if(cg)XG.chaos+=1;story='仙台悟道，'+target+'大道+1'+(cg?'，混沌之气+1':'')+'';xianSetSubtitle('🏔️ 仙台悟道','special');}else{XG.chaos+=1;story='仙台悟道，混沌之气+1。';xianSetSubtitle('🏔️ 仙台悟道','special');}xianAddLog(story);break;}case'daoguo_zheng':{let win=xianBattleResult([0.8,1.4],300,200,0);if(win)xianUpgradeRandomLaw(1);break;}case 'lun_dao':{
-    // ★ 改为增加年龄500（相当于消耗500年寿命）
+}case'tianhe':{
+    let items = XIAN_CONFIG.xianqiList.filter(x => !XG.xianqi.includes(x.name));
+    let storyText = XIAN_EVENT_STORIES[eventId] || '';
+    let parts = storyText.split('/').map(s => s.trim());
+    if (items.length > 0 && Math.random() < 0.3) {
+        let q = pick(items);
+        XG.xianqi.push(q.name);
+        if (XG.equipped.length < 3) XG.equipped.push(q.name);
+        story = parts[0] || '天河垂钓获得「' + q.name + '」！';
+        xianSetSubtitle('🎣 获得仙器！', 'special');
+        xianCheckAchievements();
+    } else {
+        let gain = 800 + Math.floor(Math.random() * 500);
+        XG.xianYuan += gain;
+        story = parts[1] || '天河垂钓，仙元+' + gain + '。';
+        xianSetSubtitle('🎣 天河垂钓', 'good');
+    }
+    xianAddLog(story);
+    break;
+}case'puti':{
+    let avail = XIAN_CONFIG.laws.filter(l => XG.laws[l] < maxLevel);
+    let storyText = XIAN_EVENT_STORIES[eventId] || '';
+    let parts = storyText.split('/').map(s => s.trim());
+    if (avail.length > 0) {
+        let target = pick(avail);
+        xianUpgradeLaw(target, 1);
+        story = parts[0] || '菩提讲道，' + target + '大道+1！';
+        xianSetSubtitle('🧘 菩提讲道', 'special');
+    } else {
+        XG.xianYuan += 2000;
+        story = parts[1] || '菩提讲道，仙元+2000。';
+        xianSetSubtitle('🧘 菩提讲道', 'good');
+    }
+    xianAddLog(story);
+    break;
+}case'yaochi':{let gain=5000+Math.floor(Math.random()*3000);XG.xianYuan+=gain;XG.status='健康';story='瑶池沐浴，伤势全愈，仙元+'+gain+'。';xianSetSubtitle('🛁 瑶池沐浴！','special');xianAddLog(story);break;}case'tianshu':{let avail=XIAN_CONFIG.laws.filter(l=>XG.laws[l]<maxLevel);if(avail.length>0){let target=pick(avail);xianUpgradeLaw(target,2);story='天书降世，'+target+'大道+2！';xianSetSubtitle('📜 天书降世！','special');}else{XG.chaos+=1;story='天书降世，混沌之气+1。';xianSetSubtitle('📜 天书降世！','special');}xianAddLog(story);break;}case'hundun_spring':{let gc=1+Math.floor(Math.random()*2);XG.chaos+=gc;let ac=1000+Math.floor(Math.random()*1500);XG.xianYuan+=ac;story='混沌泉眼，混沌之气+'+gc+'，仙元+'+ac+'。';xianSetSubtitle('🌀 混沌泉眼！','special');xianAddLog(story);break;}case'xiantai':{let avail=XIAN_CONFIG.laws.filter(l=>XG.laws[l]<maxLevel);if(avail.length>0){let target=pick(avail);xianUpgradeLaw(target,1);let cg=Math.random()<0.3?1:0;if(cg)XG.chaos+=1;story='仙台悟道，'+target+'大道+1'+(cg?'，混沌之气+1':'')+'';xianSetSubtitle('🏔️ 仙台悟道','special');}else{XG.chaos+=1;story='仙台悟道，混沌之气+1。';xianSetSubtitle('🏔️ 仙台悟道','special');}xianAddLog(story);break;}case'daoguo_zheng':{
+    let storyText = XIAN_EVENT_STORIES[eventId] || '';
+    let parts = storyText.split('/').map(s => s.trim());
+    let win = xianBattleResult([0.8, 1.4], 300, 200, 0);
+    if (win) {
+        xianUpgradeRandomLaw(1);
+        story = parts[0] || '道果之争获胜，大道精进！';
+        xianSetSubtitle('🏆 夺道果！', 'special');
+    } else {
+        story = parts[1] || '道果之争落败，与道果失之交臂。';
+        xianSetSubtitle('💔 道果被夺', 'bad');
+    }
+    xianAddLog(story);
+    break;
+}case 'lun_dao':{
     XG.age += 500;
-    if(XG.age > XG.maxLife){
+    if (XG.age > XG.maxLife) {
         xianTriggerDeath('天人五衰');
         return;
     }
     xianUpgradeRandomLaw(1);
-    story='论道三千年，大道精进！（消耗500年寿元）';
-    xianSetSubtitle('🧘 论道三千年','special');
+    let storyText = XIAN_EVENT_STORIES[eventId] || '论道三千年，大道精进！（消耗500年寿元）';
+    story = storyText.split('/')[0] || storyText; // 只有一种结果，取第一段
+    xianSetSubtitle('🧘 论道三千年', 'special');
     xianAddLog(story);
     break;
-}case'hundun_chukai':{XG.chaos+=3;let avail=XIAN_CONFIG.laws.filter(l=>XG.laws[l]<maxLevel);if(avail.length>0){let target=pick(avail);xianUpgradeLaw(target,2);story='混沌初开，'+target+'大道+2，混沌之气+3！';}else{XG.xianYuan+=10000;story='混沌初开，混沌之气+3，仙元+10000！';}xianSetSubtitle('🌌 混沌初开！','special');xianAddLog(story);break;}case'tiandao_juan':{let avail=XIAN_CONFIG.laws.filter(l=>XG.laws[l]<maxLevel);if(avail.length>0){let target=pick(avail);xianUpgradeLaw(target,maxLevel-XG.laws[target]);story='天道眷顾，'+target+'大道圆满至'+maxLevel+'级！';xianSetSubtitle('✨ 天道眷顾！','special');}else{XG.chaos+=2;XG.xianYuan+=10000;story='天道眷顾，混沌之气+2，仙元+10000！';xianSetSubtitle('✨ 天道眷顾！','special');}xianAddLog(story);break;}case'wanxian_laichao':{let gain=5000+Math.floor(Math.random()*5000);XG.xiangHuo+=gain;XG.gongDe+=3000;story='万仙来朝！香火+'+gain+'，功德+3000！';xianSetSubtitle('👑 万仙来朝！','special');xianAddLog(story);break;}case'yuluo_dadao':{let items=XIAN_CONFIG.xianqiList.filter(x=>x.quality==='混沌'&&!XG.xianqi.includes(x.name));if(items.length>0&&Math.random()<0.5){let q=pick(items);XG.xianqi.push(q.name);if(XG.equipped.length<3)XG.equipped.push(q.name);story='陨落的大道，获得混沌至宝「'+q.name+'」！';xianSetSubtitle('💀 陨落的大道！','special');xianCheckAchievements();}else{XG.chaos+=2;story='陨落的大道，悟出2缕混沌之气。';xianSetSubtitle('💀 陨落的大道','special');}xianAddLog(story);break;}case'hundun_hai':{let avail=XIAN_CONFIG.laws.filter(l=>XG.laws[l]<maxLevel);let cg=2+Math.floor(Math.random()*2);XG.chaos+=cg;if(avail.length>0){let target=pick(avail);xianUpgradeLaw(target,1);story='混沌海漂流，'+target+'大道+1，混沌之气+'+cg+'。';}else{story='混沌海漂流，混沌之气+'+cg+'。';}xianSetSubtitle('🌊 混沌海漂流','special');xianAddLog(story);break;}default:{XG.xianYuan+=1000;story='游历仙界，仙元+1000。';xianSetSubtitle('✨ 游历修炼','good');xianAddLog(story);}}xianRecoverStatus();xianUpdatePanel();xianCheckAchievements();setTimeout(()=>{xianCheckBreakthrough();},100);}
+}case'hundun_chukai':{
+    XG.chaos += 3;
+    let avail = XIAN_CONFIG.laws.filter(l => XG.laws[l] < maxLevel);
+    let storyText = XIAN_EVENT_STORIES[eventId] || '';
+    let parts = storyText.split('/').map(s => s.trim());
+    if (avail.length > 0) {
+        let target = pick(avail);
+        xianUpgradeLaw(target, 2);
+        story = parts[0] || '混沌初开，' + target + '大道+2，混沌之气+3！';
+    } else {
+        XG.xianYuan += 10000;
+        story = parts[1] || '混沌初开，混沌之气+3，仙元+10000！';
+    }
+    xianSetSubtitle('🌌 混沌初开！', 'special');
+    xianAddLog(story);
+    break;
+}case'tiandao_juan':{
+    let avail = XIAN_CONFIG.laws.filter(l => XG.laws[l] < maxLevel);
+    let storyText = XIAN_EVENT_STORIES[eventId] || '';
+    let parts = storyText.split('/').map(s => s.trim());
+    if (avail.length > 0) {
+        let target = pick(avail);
+        xianUpgradeLaw(target, maxLevel - XG.laws[target]);
+        story = parts[0] || '天道眷顾，' + target + '大道圆满至' + maxLevel + '级！';
+    } else {
+        XG.chaos += 2;
+        XG.xianYuan += 10000;
+        story = parts[1] || '天道眷顾，混沌之气+2，仙元+10000！';
+    }
+    xianSetSubtitle('✨ 天道眷顾！', 'special');
+    xianAddLog(story);
+    break;
+}case'wanxian_laichao':{let gain=5000+Math.floor(Math.random()*5000);XG.xiangHuo+=gain;XG.gongDe+=3000;story='万仙来朝！香火+'+gain+'，功德+3000！';xianSetSubtitle('👑 万仙来朝！','special');xianAddLog(story);break;}case'yuluo_dadao':{let items=XIAN_CONFIG.xianqiList.filter(x=>x.quality==='混沌'&&!XG.xianqi.includes(x.name));if(items.length>0&&Math.random()<0.5){let q=pick(items);XG.xianqi.push(q.name);if(XG.equipped.length<3)XG.equipped.push(q.name);story='陨落的大道，获得混沌至宝「'+q.name+'」！';xianSetSubtitle('💀 陨落的大道！','special');xianCheckAchievements();}else{XG.chaos+=2;story='陨落的大道，悟出2缕混沌之气。';xianSetSubtitle('💀 陨落的大道','special');}xianAddLog(story);break;}case'hundun_hai':{
+    let avail = XIAN_CONFIG.laws.filter(l => XG.laws[l] < maxLevel);
+    let cg = 2 + Math.floor(Math.random() * 2);
+    XG.chaos += cg;
+    let storyText = XIAN_EVENT_STORIES[eventId] || '';
+    let parts = storyText.split('/').map(s => s.trim());
+    if (avail.length > 0) {
+        let target = pick(avail);
+        xianUpgradeLaw(target, 1);
+        story = parts[0] || '混沌海漂流，' + target + '大道+1，混沌之气+' + cg + '。';
+    } else {
+        story = parts[1] || '混沌海漂流，混沌之气+' + cg + '。';
+    }
+    xianSetSubtitle('🌊 混沌海漂流', 'special');
+    xianAddLog(story);
+    break;
+}default:{XG.xianYuan+=1000;story='游历仙界，仙元+1000。';xianSetSubtitle('✨ 游历修炼','good');xianAddLog(story);}}xianRecoverStatus();xianUpdatePanel();xianCheckAchievements();setTimeout(()=>{xianCheckBreakthrough();},100);}
 function xianCheckBreakthrough(){if(XG.dead||XG.realmIndex>=6)return;const nextIdx=XG.realmIndex+1;const req=XIAN_CONFIG.realmCult[nextIdx];if(XG.xianYuan<req)return;let lawReq=XIAN_CONFIG.realmLawReq[nextIdx];let lawLevelReq=XIAN_CONFIG.realmLawLevelReq[nextIdx];let chaosReq=XIAN_CONFIG.realmChaosReq[nextIdx];if(countXianLawsAtLeast(lawLevelReq)<lawReq){xianSetSubtitle('⛔ 需'+lawReq+'条≥'+lawLevelReq+'级大道','bad');return;}if(XG.chaos<chaosReq){xianSetSubtitle('⛔ 需'+chaosReq+'混沌之气','bad');return;}xianTriggerTribulation();}
 function xianTriggerTribulation(){if(XG.dead)return;const nextRealm=XIAN_CONFIG.realms[XG.realmIndex+1];const rate=xianGetTribSuccessRate();xianSetSubtitle('⚡ 渡劫：'+getXianRealm()+'→'+nextRealm+'（'+Math.round(rate)+'%）','special');xianAddLog('⚡ 开始渡劫：'+getXianRealm()+'→'+nextRealm);xianShowTribWheel(rate);}
 let xianTribResolve=null,xianTribSuccess=false;
